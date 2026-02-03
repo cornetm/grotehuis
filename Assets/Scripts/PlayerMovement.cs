@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -6,26 +7,34 @@ public class PlayerMovement : MonoBehaviour
     public float moveSpeed = 5f;
     public float sprintMultiplier = 2f;
     public float jumpHeight = 2f;
+    public float gravity = -9.81f;
 
     [Header("Sprint Settings")]
     public float maxSprint = 5f;
     public float sprintDepletionRate = 1f;
     public float sprintRegenRate = 1f;
-
-    [Header("Gravity Settings")]
-    public float gravity = -9.81f;
-    private float verticalVelocity = 0f;
+    public float sprintCooldown = 3f;
+    public Slider sprintSlider;
 
     private CharacterController controller;
+    private float verticalVelocity = 0f;
+
     private float currentSprint;
+    private float cooldownTimer = 0f;
     private bool isSprinting = false;
+    private bool shiftHeldLastFrame = false;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
         currentSprint = maxSprint;
 
-        // Cursor verbergen en vergrendelen bij start
+        if (sprintSlider != null)
+        {
+            sprintSlider.maxValue = maxSprint;
+            sprintSlider.value = currentSprint;
+        }
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -34,6 +43,7 @@ public class PlayerMovement : MonoBehaviour
     {
         HandleMovement();
         HandleSprint();
+        UpdateSlider();
     }
 
     // ================= MOVEMENT =================
@@ -45,16 +55,13 @@ public class PlayerMovement : MonoBehaviour
         Vector3 move = transform.right * moveX + transform.forward * moveZ;
         float speed = isSprinting ? moveSpeed * sprintMultiplier : moveSpeed;
 
-        // Zwaartekracht
+        // Zwaartekracht & springen
         if (controller.isGrounded)
         {
             verticalVelocity = -1f;
 
-            // Springen
             if (Input.GetButtonDown("Jump"))
-            {
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            }
         }
         else
         {
@@ -70,6 +77,11 @@ public class PlayerMovement : MonoBehaviour
     {
         bool shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
+        if ((shiftHeld && currentSprint <= 0f) || (!shiftHeld && shiftHeldLastFrame))
+            cooldownTimer = sprintCooldown;
+
+        shiftHeldLastFrame = shiftHeld;
+
         if (shiftHeld && currentSprint > 0f)
         {
             isSprinting = true;
@@ -80,11 +92,20 @@ public class PlayerMovement : MonoBehaviour
         {
             isSprinting = false;
 
-            if (currentSprint < maxSprint)
+            if (cooldownTimer > 0f)
+                cooldownTimer -= Time.deltaTime;
+            else if (currentSprint < maxSprint)
             {
                 currentSprint += sprintRegenRate * Time.deltaTime;
                 currentSprint = Mathf.Min(currentSprint, maxSprint);
             }
         }
+    }
+
+    // ================= UI =================
+    private void UpdateSlider()
+    {
+        if (sprintSlider != null)
+            sprintSlider.value = currentSprint;
     }
 }

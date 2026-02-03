@@ -6,8 +6,14 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
     public float sprintMultiplier = 2f;
+    public float crouchMultiplier = 0.5f;
     public float jumpHeight = 2f;
     public float gravity = -9.81f;
+
+    [Header("Crouch Settings")]
+    public float crouchHeight = 1f;
+    private float standingHeight;
+    private bool isCrouching = false;
 
     [Header("Sprint Settings")]
     public float maxSprint = 5f;
@@ -15,8 +21,8 @@ public class PlayerMovement : MonoBehaviour
     public float sprintRegenRate = 1f;
     public float sprintCooldown = 3f;
 
-    public Slider sprintSlider1; // eerste slider
-    public Slider sprintSlider2; // tweede slider
+    public Slider sprintSlider1;
+    public Slider sprintSlider2;
 
     private CharacterController controller;
     private float verticalVelocity = 0f;
@@ -29,9 +35,9 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        standingHeight = controller.height;
         currentSprint = maxSprint;
 
-        // Stel beide sliders in
         if (sprintSlider1 != null)
         {
             sprintSlider1.maxValue = maxSprint;
@@ -49,9 +55,27 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        HandleCrouch();
         HandleMovement();
         HandleSprint();
         UpdateSliders();
+    }
+
+    // ================= CROUCH =================
+    private void HandleCrouch()
+    {
+        bool ctrlHeld = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+
+        if (ctrlHeld)
+        {
+            isCrouching = true;
+            controller.height = crouchHeight;
+        }
+        else
+        {
+            isCrouching = false;
+            controller.height = standingHeight;
+        }
     }
 
     // ================= MOVEMENT =================
@@ -61,14 +85,20 @@ public class PlayerMovement : MonoBehaviour
         float moveZ = Input.GetAxis("Vertical");
 
         Vector3 move = transform.right * moveX + transform.forward * moveZ;
-        float speed = isSprinting ? moveSpeed * sprintMultiplier : moveSpeed;
+
+        float speed = moveSpeed;
+
+        if (isCrouching)
+            speed *= crouchMultiplier;
+        else if (isSprinting)
+            speed *= sprintMultiplier;
 
         // Zwaartekracht & springen
         if (controller.isGrounded)
         {
             verticalVelocity = -1f;
 
-            if (Input.GetButtonDown("Jump"))
+            if (Input.GetButtonDown("Jump") && !isCrouching)
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
         else
@@ -84,6 +114,13 @@ public class PlayerMovement : MonoBehaviour
     private void HandleSprint()
     {
         bool shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+        // Niet sprinten tijdens crouch
+        if (isCrouching)
+        {
+            isSprinting = false;
+            return;
+        }
 
         if ((shiftHeld && currentSprint <= 0f) || (!shiftHeld && shiftHeldLastFrame))
             cooldownTimer = sprintCooldown;

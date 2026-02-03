@@ -1,59 +1,68 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class InventorySystem : MonoBehaviour
 {
     [Header("Inventory Slots")]
-    public RawImage[] inventorySlots; // alle RawImages van de inventory
+    public RawImage[] inventorySlots;
+
+    [Header("Items")]
+    public Item[] items;
+
+    private int activeSlot = -1; // -1 = niets geselecteerd
 
     void Start()
     {
-        // Zet alle slots uit bij start
-        foreach (RawImage slot in inventorySlots)
-        {
-            if (slot != null)
-            {
-                slot.enabled = false;
-                slot.texture = null;
-            }
-        }
-    }
-
-    // ================= INVENTORY FUNCTIES =================
-
-    // Activeer een slot en zet alle andere uit
-    public void ActivateSlot(int slotNumber)
-    {
-        int index = slotNumber - 1; // slotNumber 1 => index 0
-
+        // Alles uit bij start
         for (int i = 0; i < inventorySlots.Length; i++)
         {
             if (inventorySlots[i] != null)
-            {
-                inventorySlots[i].enabled = (i == index);
-            }
-        }
-    }
-
-    // Optioneel: Deactiveer een slot
-    public void DeactivateSlot(int slotNumber)
-    {
-        int index = slotNumber - 1;
-        if (index >= 0 && index < inventorySlots.Length && inventorySlots[index] != null)
-        {
-            inventorySlots[index].enabled = false;
+                inventorySlots[i].enabled = false;
         }
     }
 
     void Update()
     {
-        // Check toetsen 1 t/m 9 voor snel activeren
+        // Toetsen 1 t/m 9
         for (int i = 0; i < inventorySlots.Length && i < 9; i++)
         {
-            if (Input.GetKeyDown((i + 1).ToString()))
+            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
             {
-                ActivateSlot(i + 1); // activeer slot en zet de rest uit
+                // Alleen als item bestaat
+                if (items[i] != null && items[i].item)
+                {
+                    ToggleSlot(i);
+                }
             }
+        }
+    }
+
+    private void ToggleSlot(int index)
+    {
+        // Als dit slot al actief is → alles uit (deselect)
+        if (activeSlot == index)
+        {
+            DeactivateAll();
+            activeSlot = -1;
+            return;
+        }
+
+        // Anders → dit slot selecteren
+        for (int i = 0; i < inventorySlots.Length; i++)
+        {
+            if (inventorySlots[i] != null)
+                inventorySlots[i].enabled = (i == index);
+        }
+
+        activeSlot = index;
+    }
+
+    private void DeactivateAll()
+    {
+        for (int i = 0; i < inventorySlots.Length; i++)
+        {
+            if (inventorySlots[i] != null)
+                inventorySlots[i].enabled = false;
         }
     }
 }

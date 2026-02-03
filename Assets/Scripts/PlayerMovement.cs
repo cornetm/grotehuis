@@ -14,7 +14,9 @@ public class PlayerMovement : MonoBehaviour
     public float sprintDepletionRate = 1f;
     public float sprintRegenRate = 1f;
     public float sprintCooldown = 3f;
-    public Slider sprintSlider;
+
+    public Slider sprintSlider1; // eerste slider
+    public Slider sprintSlider2; // tweede slider
 
     private CharacterController controller;
     private float verticalVelocity = 0f;
@@ -29,10 +31,16 @@ public class PlayerMovement : MonoBehaviour
         controller = GetComponent<CharacterController>();
         currentSprint = maxSprint;
 
-        if (sprintSlider != null)
+        // Stel beide sliders in
+        if (sprintSlider1 != null)
         {
-            sprintSlider.maxValue = maxSprint;
-            sprintSlider.value = currentSprint;
+            sprintSlider1.maxValue = maxSprint;
+            sprintSlider1.value = currentSprint;
+        }
+        if (sprintSlider2 != null)
+        {
+            sprintSlider2.maxValue = maxSprint;
+            sprintSlider2.value = currentSprint;
         }
 
         Cursor.lockState = CursorLockMode.Locked;
@@ -43,7 +51,7 @@ public class PlayerMovement : MonoBehaviour
     {
         HandleMovement();
         HandleSprint();
-        UpdateSlider();
+        UpdateSliders();
     }
 
     // ================= MOVEMENT =================
@@ -103,9 +111,11 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ================= UI =================
-    private void UpdateSlider()
+    private void UpdateSliders()
     {
-        if (sprintSlider != null)
-            sprintSlider.value = currentSprint;
+        if (sprintSlider1 != null)
+            sprintSlider1.value = currentSprint;
+        if (sprintSlider2 != null)
+            sprintSlider2.value = currentSprint;
     }
 }

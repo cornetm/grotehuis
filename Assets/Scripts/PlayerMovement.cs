@@ -6,7 +6,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
     public float sprintMultiplier = 2f;
-    public float crouchMultiplier = 0.5f;
+    public float crouchMultiplier = 0.5f; // snelheid bij crouch
     public float jumpHeight = 2f;
     public float gravity = -9.81f;
 
@@ -23,6 +23,14 @@ public class PlayerMovement : MonoBehaviour
 
     public Slider sprintSlider1;
     public Slider sprintSlider2;
+
+    [Header("Audio Settings")]
+    public AudioSource walkAudio;           // …Èn AudioSource voor alle voetstappen
+    public float walkIntervalNormal = 0.5f; // Interval bij normaal lopen
+    public float walkIntervalSprint = 0.3f; // Interval bij sprinten
+    public float walkIntervalCrouch = 0.7f; // Interval bij crouchen
+
+    private float walkTimer = 0f;
 
     private CharacterController controller;
     private float verticalVelocity = 0f;
@@ -51,6 +59,9 @@ public class PlayerMovement : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        if (walkAudio != null)
+            walkAudio.playOnAwake = false; // niet automatisch afspelen
     }
 
     void Update()
@@ -59,6 +70,7 @@ public class PlayerMovement : MonoBehaviour
         HandleMovement();
         HandleSprint();
         UpdateSliders();
+        HandleWalkAudio();
     }
 
     // ================= CROUCH =================
@@ -93,7 +105,6 @@ public class PlayerMovement : MonoBehaviour
         else if (isSprinting)
             speed *= sprintMultiplier;
 
-        // Zwaartekracht & springen
         if (controller.isGrounded)
         {
             verticalVelocity = -1f;
@@ -115,7 +126,6 @@ public class PlayerMovement : MonoBehaviour
     {
         bool shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
-        // Niet sprinten tijdens crouch
         if (isCrouching)
         {
             isSprinting = false;
@@ -154,5 +164,39 @@ public class PlayerMovement : MonoBehaviour
             sprintSlider1.value = currentSprint;
         if (sprintSlider2 != null)
             sprintSlider2.value = currentSprint;
+    }
+
+    // ================= WALK AUDIO =================
+    private void HandleWalkAudio()
+    {
+        if (walkAudio == null) return;
+
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+        bool isMoving = (horizontal != 0 || vertical != 0) && controller.isGrounded;
+
+        if (isMoving)
+        {
+            walkTimer -= Time.deltaTime;
+
+            // bepaal interval afhankelijk van crouch, sprint of normaal
+            float interval;
+            if (isCrouching)
+                interval = walkIntervalCrouch;
+            else if (isSprinting)
+                interval = walkIntervalSprint;
+            else
+                interval = walkIntervalNormal;
+
+            if (walkTimer <= 0f)
+            {
+                walkAudio.Play();
+                walkTimer = interval;
+            }
+        }
+        else
+        {
+            walkTimer = 0f; // reset timer als je stopt
+        }
     }
 }

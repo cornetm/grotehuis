@@ -8,11 +8,14 @@ public class FirstPersonCamera : MonoBehaviour
     public Transform playerBody;
 
     [Header("Interaction Settings")]
-    public Image crossbarImage;       // UI crossbar
-    public float rayDistance = 5f;    // Hoe ver interactie gaat
-    public float sphereRadius = 0.3f; // Straal van SphereCast
+    public Image crossbarImage;
+    public float rayDistance = 5f;
+    public float sphereRadius = 0.3f;
+
+    public InventorySystem inventorySystem; // Reference naar inventory
 
     private Highlight currentHighlight;
+    private GameObject currentInteractObject;
     private Color originalCrossbarColor = Color.red;
     private float xRotation = 0f;
 
@@ -29,6 +32,7 @@ public class FirstPersonCamera : MonoBehaviour
     {
         HandleCameraRotation();
         HandleSphereCast();
+        HandleInteractionInput();
     }
 
     private void HandleCameraRotation()
@@ -69,10 +73,26 @@ public class FirstPersonCamera : MonoBehaviour
 
                 highlight.EnableHighlight();
                 currentHighlight = highlight;
+                currentInteractObject = hit.collider.gameObject;
             }
         }
         else
         {
+            ResetHighlightAndCrossbar();
+        }
+    }
+
+    private void HandleInteractionInput()
+    {
+        if (currentInteractObject != null && Input.GetKeyDown(KeyCode.E))
+        {
+            // Voeg prefab naam automatisch toe aan inventory
+            if (inventorySystem != null)
+                inventorySystem.AddItem(currentInteractObject.name);
+
+            // Verwijder het object uit de scene
+            Destroy(currentInteractObject);
+
             ResetHighlightAndCrossbar();
         }
     }
@@ -84,6 +104,8 @@ public class FirstPersonCamera : MonoBehaviour
             currentHighlight.DisableHighlight();
             currentHighlight = null;
         }
+
+        currentInteractObject = null;
 
         if (crossbarImage != null)
             crossbarImage.color = originalCrossbarColor;

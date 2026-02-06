@@ -541,7 +541,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d094c0e5eb370bc4fa6e9b4eea13f230, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
-  item: 0
+  item: 1
 --- !u!1 &514940599
 GameObject:
   m_ObjectHideFlags: 0
@@ -1253,7 +1253,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d094c0e5eb370bc4fa6e9b4eea13f230, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
-  item: 0
+  item: 1
 --- !u!1 &986220832
 GameObject:
   m_ObjectHideFlags: 0
@@ -1430,6 +1430,7 @@ MonoBehaviour:
   - {fileID: 838015400}
   - {fileID: 448208500}
   - {fileID: 1853765506}
+  inventoryList: []
 --- !u!1 &1119380556
 GameObject:
   m_ObjectHideFlags: 0
@@ -2741,6 +2742,7 @@ MonoBehaviour:
   crossbarImage: {fileID: 1231191083}
   rayDistance: 10
   sphereRadius: 0.05
+  inventorySystem: {fileID: 1014915896}
 --- !u!1 &1824801268
 GameObject:
   m_ObjectHideFlags: 0
@@ -2916,7 +2918,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d094c0e5eb370bc4fa6e9b4eea13f230, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
-  item: 0
+  item: 1
 --- !u!1 &2013410473
 GameObject:
   m_ObjectHideFlags: 1

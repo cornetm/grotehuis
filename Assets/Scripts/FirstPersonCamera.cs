@@ -1,30 +1,91 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FirstPersonCamera : MonoBehaviour
 {
+    [Header("Camera Settings")]
     public float mouseSensitivity = 100f;
-    public Transform playerBody; // Wijs hier je parent "Player" object aan
+    public Transform playerBody;
 
+    [Header("Interaction Settings")]
+    public Image crossbarImage;       // UI crossbar
+    public float rayDistance = 5f;    // Hoe ver interactie gaat
+    public float sphereRadius = 0.3f; // Straal van SphereCast
+
+    private Highlight currentHighlight;
+    private Color originalCrossbarColor = Color.red;
     private float xRotation = 0f;
 
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        if (crossbarImage != null)
+            originalCrossbarColor = crossbarImage.color;
     }
 
     void Update()
     {
+        HandleCameraRotation();
+        HandleSphereCast();
+    }
+
+    private void HandleCameraRotation()
+    {
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
-        // Verticale rotatie (op/af)
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
-        // Horizontale rotatie (links/rechts)
         if (playerBody != null)
             playerBody.Rotate(Vector3.up * mouseX);
+    }
+
+    private void HandleSphereCast()
+    {
+        Vector3 origin = transform.position;
+        Vector3 direction = transform.forward;
+
+        RaycastHit hit;
+        bool hitSomething = Physics.SphereCast(origin, sphereRadius, direction, out hit, rayDistance);
+
+        Debug.DrawRay(origin, direction * rayDistance, Color.green);
+
+        if (hitSomething && hit.collider.CompareTag("Interaction"))
+        {
+            // Crossbar wit
+            if (crossbarImage != null)
+                crossbarImage.color = Color.white;
+
+            // Highlight inschakelen
+            Highlight highlight = hit.collider.GetComponent<Highlight>();
+            if (highlight != null && highlight != currentHighlight)
+            {
+                if (currentHighlight != null)
+                    currentHighlight.DisableHighlight();
+
+                highlight.EnableHighlight();
+                currentHighlight = highlight;
+            }
+        }
+        else
+        {
+            ResetHighlightAndCrossbar();
+        }
+    }
+
+    private void ResetHighlightAndCrossbar()
+    {
+        if (currentHighlight != null)
+        {
+            currentHighlight.DisableHighlight();
+            currentHighlight = null;
+        }
+
+        if (crossbarImage != null)
+            crossbarImage.color = originalCrossbarColor;
     }
 }

@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using TMPro;
 
-public class InventoryItem : MonoBehaviour
+public class InventorySlotItem : MonoBehaviour
 {
     [Header("Slot Info")]
-    public GameObject prefab; // Originele prefab uit Assets
+    public GameObject prefab; // Het originele prefab
 
     [HideInInspector]
     public bool isEquipped = false;
@@ -18,6 +18,7 @@ public class InventoryItem : MonoBehaviour
         this.prefab = prefab;
         this.inventorySystem = system;
 
+        // Zoek TMP text child automatisch
         slotText = GetComponentInChildren<TextMeshProUGUI>();
         if (slotText != null)
         {
@@ -46,6 +47,7 @@ public class InventoryItem : MonoBehaviour
     public void Drop()
     {
         if (!isEquipped || inventorySystem == null) return;
+
         inventorySystem.DropSlotItem(this);
     }
 }

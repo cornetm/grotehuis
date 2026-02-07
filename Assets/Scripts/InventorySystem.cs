@@ -21,8 +21,12 @@ public class InventorySystem : MonoBehaviour
     public Transform playerTransform;
     public float dropDistance = 2f;
 
+    [Header("Spawner")]
+    public ItemSpawner itemSpawner; // Koppel hier je ItemSpawner
+
+    // Lists
     private List<RawImage> slots = new List<RawImage>();
-    private List<InventoryItem> slotComponents = new List<InventoryItem>();
+    private List<InventorySlotItem> slotComponents = new List<InventorySlotItem>();
 
     private int activeSlot = -1;
 
@@ -53,8 +57,8 @@ public class InventorySystem : MonoBehaviour
         if (icon != null)
             newSlot.texture = icon;
 
-        // Voeg InventorySlotItem toe
-        InventoryItem slotComp = newSlot.gameObject.AddComponent<InventoryItem>();
+        // Voeg InventorySlotItem toe en initialiseer met prefab reference
+        InventorySlotItem slotComp = newSlot.gameObject.AddComponent<InventorySlotItem>();
         slotComp.Initialize(prefab, this);
 
         slots.Add(newSlot);
@@ -68,6 +72,7 @@ public class InventorySystem : MonoBehaviour
     {
         if (index >= slots.Count) return;
 
+        // Klik op hetzelfde slot = unequip
         if (activeSlot == index)
         {
             UnequipAll();
@@ -77,7 +82,8 @@ public class InventorySystem : MonoBehaviour
         for (int i = 0; i < slotComponents.Count; i++)
         {
             bool selected = (i == index);
-            slots[i].transform.localScale = selected ? Vector3.one * selectedScale : Vector3.one * normalScale;
+            slots[i].transform.localScale =
+                selected ? Vector3.one * selectedScale : Vector3.one * normalScale;
 
             if (selected) slotComponents[i].Equip();
             else slotComponents[i].Unequip();
@@ -98,20 +104,20 @@ public class InventorySystem : MonoBehaviour
         activeSlot = -1;
     }
 
-    // ================= DROP =================
-    public void DropSlotItem(InventoryItem slotItem)
+    // ================= DROP SLOT ITEM =================
+    public void DropSlotItem(InventorySlotItem slotItem)
     {
         int index = slotComponents.IndexOf(slotItem);
         if (index < 0) return;
 
-        if (slotItem.prefab != null && playerTransform != null)
+        if (slotItem.prefab != null && playerTransform != null && itemSpawner != null)
         {
+            // Spawn via ItemSpawner
             Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
-            GameObject dropped = Instantiate(slotItem.prefab, spawnPos, Quaternion.identity);
-            dropped.name = slotItem.prefab.name; // verwijder (Clone)
+            itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos);
         }
 
-        // Verwijder UI slot
+        // Verwijder slot UI
         Destroy(slots[index].gameObject);
         slots.RemoveAt(index);
         slotComponents.RemoveAt(index);
@@ -120,6 +126,7 @@ public class InventorySystem : MonoBehaviour
         RepositionSlots();
     }
 
+    // ================= POSITION =================
     private void RepositionSlots()
     {
         int count = slots.Count;
@@ -128,7 +135,8 @@ public class InventorySystem : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             float x = startX + i * spacing;
-            slots[i].rectTransform.anchoredPosition = new Vector2(x, yOffset);
+            slots[i].rectTransform.anchoredPosition =
+                new Vector2(x, yOffset);
             slots[i].transform.localScale = Vector3.one * normalScale;
         }
     }

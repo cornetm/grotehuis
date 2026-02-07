@@ -75,11 +75,11 @@ public class FirstPersonCamera : MonoBehaviour
                 currentHighlight = highlight;
                 currentInteractObject = hit.collider.gameObject;
 
-                // Pak prefab automatisch
+                // Pak prefab automatisch van PrefabReferenceAuto
                 PrefabReferenceAuto prefabRef = currentInteractObject.GetComponent<PrefabReferenceAuto>();
                 if (prefabRef != null)
                 {
-                    currentPrefab = prefabRef.prefab;
+                    currentPrefab = prefabRef.prefab; // Dit is het originele prefab uit Assets
                     currentIcon = prefabRef.icon;
                 }
             }
@@ -99,7 +99,9 @@ public class FirstPersonCamera : MonoBehaviour
                 inventorySystem.AddItem(currentPrefab, currentIcon);
             }
 
+            // Verwijder het object uit de scene
             Destroy(currentInteractObject);
+
             ResetHighlightAndCrossbar();
         }
     }

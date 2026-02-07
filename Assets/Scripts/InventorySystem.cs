@@ -7,88 +7,78 @@ public class InventorySystem : MonoBehaviour
     [Header("Inventory Slots")]
     public RawImage[] inventorySlots;
 
-    [Header("Items")]
-    public Item[] items;
+    [Header("Slot Scale Settings")]
+    public float normalScale = 1f;
+    public float selectedScale = 1.4f;
 
     [Header("Inventory List")]
-    public List<string> inventoryList = new List<string>(); // Prefab namen van opgepakte items
+    public List<string> inventoryList = new List<string>();
 
-    private int activeSlot = -1; // -1 = niets geselecteerd
+    private int activeSlot = -1;
 
     void Start()
     {
-        // Alles uit bij start
+        // Alles uit + normaal formaat
         for (int i = 0; i < inventorySlots.Length; i++)
         {
             if (inventorySlots[i] != null)
+            {
                 inventorySlots[i].enabled = false;
+                inventorySlots[i].transform.localScale = Vector3.one * normalScale;
+            }
         }
     }
 
     void Update()
     {
-        // Toetsen 1 t/m 9 om slots te selecteren
+        // 1 t/m 9 selecteren slots
         for (int i = 0; i < inventorySlots.Length && i < 9; i++)
         {
             if (Input.GetKeyDown(KeyCode.Alpha1 + i))
             {
-                if (items[i] != null && items[i].item)
-                {
-                    ToggleSlot(i);
-                }
+                SelectSlot(i);
             }
         }
     }
 
-    private void ToggleSlot(int index)
+    private void SelectSlot(int index)
     {
-        // Als dit slot al actief is → deselect
-        if (activeSlot == index)
-        {
-            DeactivateAll();
-            activeSlot = -1;
-            return;
-        }
+        if (index >= inventorySlots.Length) return;
+        if (!inventorySlots[index].enabled) return;
 
-        // Anders → selecteer dit slot
         for (int i = 0; i < inventorySlots.Length; i++)
         {
-            if (inventorySlots[i] != null)
-                inventorySlots[i].enabled = (i == index);
+            if (inventorySlots[i] == null) continue;
+
+            // Geselecteerde slot groot, rest klein
+            inventorySlots[i].transform.localScale =
+                (i == index) ? Vector3.one * selectedScale : Vector3.one * normalScale;
         }
 
         activeSlot = index;
     }
 
-    private void DeactivateAll()
-    {
-        for (int i = 0; i < inventorySlots.Length; i++)
-        {
-            if (inventorySlots[i] != null)
-                inventorySlots[i].enabled = false;
-        }
-    }
-
-    /// <summary>
-    /// Voeg item toe aan inventory list en zet eventueel icon in UI
-    /// </summary>
+    // Wordt aangeroepen vanuit FirstPersonCamera
     public void AddItem(string prefabName, Texture itemIcon = null)
     {
-        // Voeg prefab naam toe
         inventoryList.Add(prefabName);
         Debug.Log("Added to inventory: " + prefabName);
 
-        // Zet icon in eerste vrije slot
+        // Eerste vrije slot vinden
         for (int i = 0; i < inventorySlots.Length; i++)
         {
-            if (inventorySlots[i] != null && !inventorySlots[i].enabled)
+            if (!inventorySlots[i].enabled)
             {
                 inventorySlots[i].enabled = true;
 
                 if (itemIcon != null)
                     inventorySlots[i].texture = itemIcon;
 
-                break; // Alleen eerste vrije slot vullen
+                // Automatisch selecteren als eerste item
+                if (activeSlot == -1)
+                    SelectSlot(i);
+
+                break;
             }
         }
     }

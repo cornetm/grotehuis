@@ -1,85 +1,133 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class InventorySystem : MonoBehaviour
 {
-    [Header("Inventory Slots")]
-    public RawImage[] inventorySlots;
+    [Header("UI")]
+    public RectTransform inventoryParent;
+    public RawImage slotPrefab;
 
-    [Header("Slot Scale Settings")]
+    [Header("Layout")]
+    public int maxItems = 5;
+    public float spacing = 140f;
+    public float yOffset = -200f;
+
+    [Header("Scale")]
     public float normalScale = 1f;
     public float selectedScale = 1.4f;
 
-    [Header("Inventory List")]
-    public List<string> inventoryList = new List<string>();
+    // Lists
+    private List<RawImage> slots = new List<RawImage>();
+    private List<Item> slotItems = new List<Item>();
+    private List<string> slotPrefabNames = new List<string>();
+    private List<TextMeshProUGUI> slotTexts = new List<TextMeshProUGUI>();
 
     private int activeSlot = -1;
 
-    void Start()
-    {
-        // Alles uit + normaal formaat
-        for (int i = 0; i < inventorySlots.Length; i++)
-        {
-            if (inventorySlots[i] != null)
-            {
-                inventorySlots[i].enabled = false;
-                inventorySlots[i].transform.localScale = Vector3.one * normalScale;
-            }
-        }
-    }
-
     void Update()
     {
-        // 1 t/m 9 selecteren slots
-        for (int i = 0; i < inventorySlots.Length && i < 9; i++)
+        for (int i = 0; i < slots.Count && i < 9; i++)
         {
             if (Input.GetKeyDown(KeyCode.Alpha1 + i))
             {
-                SelectSlot(i);
+                ToggleSlot(i);
             }
         }
     }
 
-    private void SelectSlot(int index)
+    // ================= ADD ITEM =================
+    public void AddItem(string prefabName, Texture icon = null)
     {
-        if (index >= inventorySlots.Length) return;
-        if (!inventorySlots[index].enabled) return;
+        if (slots.Count >= maxItems)
+            return;
 
-        for (int i = 0; i < inventorySlots.Length; i++)
+        // Instantiate slot
+        RawImage newSlot = Instantiate(slotPrefab, inventoryParent);
+        newSlot.gameObject.SetActive(true);
+
+        if (icon != null)
+            newSlot.texture = icon;
+
+        // Item component
+        Item item = newSlot.gameObject.AddComponent<Item>();
+        item.item = false;
+
+        // TMP text in prefab zoeken
+        TextMeshProUGUI tmpText = newSlot.GetComponentInChildren<TextMeshProUGUI>();
+        if (tmpText != null)
+            tmpText.gameObject.SetActive(false);
+
+        // Add to lists
+        slots.Add(newSlot);
+        slotItems.Add(item);
+        slotPrefabNames.Add(prefabName);
+        slotTexts.Add(tmpText);
+
+        RepositionSlots();
+    }
+
+    // ================= TOGGLE SLOT =================
+    private void ToggleSlot(int index)
+    {
+        if (index >= slots.Count) return;
+
+        // Klik op hetzelfde slot = UNEQUIP
+        if (activeSlot == index)
         {
-            if (inventorySlots[i] == null) continue;
+            UnequipAll();
+            return;
+        }
 
-            // Geselecteerde slot groot, rest klein
-            inventorySlots[i].transform.localScale =
-                (i == index) ? Vector3.one * selectedScale : Vector3.one * normalScale;
+        // Equip nieuwe slot
+        for (int i = 0; i < slots.Count; i++)
+        {
+            bool selected = (i == index);
+
+            slots[i].transform.localScale =
+                selected ? Vector3.one * selectedScale : Vector3.one * normalScale;
+
+            slotItems[i].item = selected;
+
+            // TMP text aan/uit
+            if (slotTexts[i] != null)
+                slotTexts[i].gameObject.SetActive(selected);
+
+            if (selected && slotTexts[i] != null)
+                slotTexts[i].text = slotPrefabNames[i];
         }
 
         activeSlot = index;
     }
 
-    // Wordt aangeroepen vanuit FirstPersonCamera
-    public void AddItem(string prefabName, Texture itemIcon = null)
+    // ================= UNEQUIP =================
+    private void UnequipAll()
     {
-        inventoryList.Add(prefabName);
-        Debug.Log("Added to inventory: " + prefabName);
-
-        // Eerste vrije slot vinden
-        for (int i = 0; i < inventorySlots.Length; i++)
+        for (int i = 0; i < slots.Count; i++)
         {
-            if (!inventorySlots[i].enabled)
-            {
-                inventorySlots[i].enabled = true;
+            slots[i].transform.localScale = Vector3.one * normalScale;
+            slotItems[i].item = false;
 
-                if (itemIcon != null)
-                    inventorySlots[i].texture = itemIcon;
+            if (slotTexts[i] != null)
+                slotTexts[i].gameObject.SetActive(false);
+        }
 
-                // Automatisch selecteren als eerste item
-                if (activeSlot == -1)
-                    SelectSlot(i);
+        activeSlot = -1;
+    }
 
-                break;
-            }
+    // ================= POSITION =================
+    private void RepositionSlots()
+    {
+        int count = slots.Count;
+        float startX = -(count - 1) * spacing * 0.5f;
+
+        for (int i = 0; i < count; i++)
+        {
+            float x = startX + i * spacing;
+            slots[i].rectTransform.anchoredPosition =
+                new Vector2(x, yOffset);
+            slots[i].transform.localScale = Vector3.one * normalScale;
         }
     }
 }

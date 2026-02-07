@@ -1162,6 +1162,8 @@ MonoBehaviour:
   yOffset: -400
   normalScale: 1
   selectedScale: 1.4
+  playerTransform: {fileID: 670264219}
+  dropDistance: 1
 --- !u!1 &1119380556
 GameObject:
   m_ObjectHideFlags: 0
@@ -1814,6 +1816,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -45
       objectReference: {fileID: 0}
+    - target: {fileID: 2922617393786238748, guid: 11d7cc895a7cbf04ba8f17c21caa71df, type: 3}
+      propertyPath: prefab
+      value: 
+      objectReference: {fileID: 3289339795620472521, guid: 11d7cc895a7cbf04ba8f17c21caa71df, type: 3}
     - target: {fileID: 3289339795620472521, guid: 11d7cc895a7cbf04ba8f17c21caa71df, type: 3}
       propertyPath: m_Name
       value: mes 2
@@ -1822,7 +1828,8 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Interaction
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 8439701087916032784, guid: 11d7cc895a7cbf04ba8f17c21caa71df, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -2153,6 +2160,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -5444005397701731262, guid: 48570e042d0230a46852328a852c2a3e, type: 3}
+      propertyPath: prefab
+      value: 
+      objectReference: {fileID: 7882557225515349911, guid: 48570e042d0230a46852328a852c2a3e, type: 3}
     - target: {fileID: -4892951268985501329, guid: 48570e042d0230a46852328a852c2a3e, type: 3}
       propertyPath: m_Convex
       value: 1
@@ -2213,7 +2224,8 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: b246b4ad578bdfd43b53fd3c4ccb0246, type: 2}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -2670158018456196082, guid: 48570e042d0230a46852328a852c2a3e, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -2740,6 +2752,10 @@ PrefabInstance:
       propertyPath: m_IsTrigger
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -2011936855577789068, guid: bad6999aa56d3164188f617f38632194, type: 3}
+      propertyPath: prefab
+      value: 
+      objectReference: {fileID: 7852686394439491770, guid: bad6999aa56d3164188f617f38632194, type: 3}
     - target: {fileID: 7471902821431622144, guid: bad6999aa56d3164188f617f38632194, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.31056166
@@ -2788,7 +2804,8 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Interaction
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7342830467074967184, guid: bad6999aa56d3164188f617f38632194, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:

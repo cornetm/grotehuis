@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class FirstPersonCamera : MonoBehaviour
@@ -12,10 +12,12 @@ public class FirstPersonCamera : MonoBehaviour
     public float rayDistance = 5f;
     public float sphereRadius = 0.3f;
 
-    public InventorySystem inventorySystem; // Reference naar inventory
+    public InventorySystem inventorySystem;
 
     private Highlight currentHighlight;
     private GameObject currentInteractObject;
+    private GameObject currentPrefab; // prefab uit Assets
+    private Texture currentIcon;
     private Color originalCrossbarColor = Color.red;
     private float xRotation = 0f;
 
@@ -60,11 +62,9 @@ public class FirstPersonCamera : MonoBehaviour
 
         if (hitSomething && hit.collider.CompareTag("Interaction"))
         {
-            // Crossbar wit
             if (crossbarImage != null)
                 crossbarImage.color = Color.white;
 
-            // Highlight inschakelen
             Highlight highlight = hit.collider.GetComponent<Highlight>();
             if (highlight != null && highlight != currentHighlight)
             {
@@ -74,6 +74,14 @@ public class FirstPersonCamera : MonoBehaviour
                 highlight.EnableHighlight();
                 currentHighlight = highlight;
                 currentInteractObject = hit.collider.gameObject;
+
+                // Pak prefab automatisch
+                PrefabReferenceAuto prefabRef = currentInteractObject.GetComponent<PrefabReferenceAuto>();
+                if (prefabRef != null)
+                {
+                    currentPrefab = prefabRef.prefab;
+                    currentIcon = prefabRef.icon;
+                }
             }
         }
         else
@@ -86,13 +94,12 @@ public class FirstPersonCamera : MonoBehaviour
     {
         if (currentInteractObject != null && Input.GetKeyDown(KeyCode.E))
         {
-            // Voeg prefab naam automatisch toe aan inventory
-            if (inventorySystem != null)
-                inventorySystem.AddItem(currentInteractObject.name);
+            if (inventorySystem != null && currentPrefab != null)
+            {
+                inventorySystem.AddItem(currentPrefab, currentIcon);
+            }
 
-            // Verwijder het object uit de scene
             Destroy(currentInteractObject);
-
             ResetHighlightAndCrossbar();
         }
     }
@@ -106,6 +113,8 @@ public class FirstPersonCamera : MonoBehaviour
         }
 
         currentInteractObject = null;
+        currentPrefab = null;
+        currentIcon = null;
 
         if (crossbarImage != null)
             crossbarImage.color = originalCrossbarColor;

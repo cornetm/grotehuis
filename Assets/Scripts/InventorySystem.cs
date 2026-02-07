@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class InventorySystem : MonoBehaviour
 {
@@ -18,52 +17,48 @@ public class InventorySystem : MonoBehaviour
     public float normalScale = 1f;
     public float selectedScale = 1.4f;
 
-    // Lists
+    [Header("Player & Drop Settings")]
+    public Transform playerTransform;
+    public float dropDistance = 2f;
+
     private List<RawImage> slots = new List<RawImage>();
-    private List<Item> slotItems = new List<Item>();
-    private List<string> slotPrefabNames = new List<string>();
-    private List<TextMeshProUGUI> slotTexts = new List<TextMeshProUGUI>();
+    private List<InventoryItem> slotComponents = new List<InventoryItem>();
 
     private int activeSlot = -1;
 
     void Update()
     {
+        // Slot select (1-9)
         for (int i = 0; i < slots.Count && i < 9; i++)
         {
             if (Input.GetKeyDown(KeyCode.Alpha1 + i))
-            {
                 ToggleSlot(i);
-            }
+        }
+
+        // Drop item
+        if (Input.GetKeyDown(KeyCode.F) && activeSlot >= 0)
+        {
+            slotComponents[activeSlot].Drop();
         }
     }
 
     // ================= ADD ITEM =================
-    public void AddItem(string prefabName, Texture icon = null)
+    public void AddItem(GameObject prefab, Texture icon = null)
     {
-        if (slots.Count >= maxItems)
-            return;
+        if (slots.Count >= maxItems) return;
 
-        // Instantiate slot
         RawImage newSlot = Instantiate(slotPrefab, inventoryParent);
         newSlot.gameObject.SetActive(true);
 
         if (icon != null)
             newSlot.texture = icon;
 
-        // Item component
-        Item item = newSlot.gameObject.AddComponent<Item>();
-        item.item = false;
+        // Voeg InventorySlotItem toe
+        InventoryItem slotComp = newSlot.gameObject.AddComponent<InventoryItem>();
+        slotComp.Initialize(prefab, this);
 
-        // TMP text in prefab zoeken
-        TextMeshProUGUI tmpText = newSlot.GetComponentInChildren<TextMeshProUGUI>();
-        if (tmpText != null)
-            tmpText.gameObject.SetActive(false);
-
-        // Add to lists
         slots.Add(newSlot);
-        slotItems.Add(item);
-        slotPrefabNames.Add(prefabName);
-        slotTexts.Add(tmpText);
+        slotComponents.Add(slotComp);
 
         RepositionSlots();
     }
@@ -73,29 +68,19 @@ public class InventorySystem : MonoBehaviour
     {
         if (index >= slots.Count) return;
 
-        // Klik op hetzelfde slot = UNEQUIP
         if (activeSlot == index)
         {
             UnequipAll();
             return;
         }
 
-        // Equip nieuwe slot
-        for (int i = 0; i < slots.Count; i++)
+        for (int i = 0; i < slotComponents.Count; i++)
         {
             bool selected = (i == index);
+            slots[i].transform.localScale = selected ? Vector3.one * selectedScale : Vector3.one * normalScale;
 
-            slots[i].transform.localScale =
-                selected ? Vector3.one * selectedScale : Vector3.one * normalScale;
-
-            slotItems[i].item = selected;
-
-            // TMP text aan/uit
-            if (slotTexts[i] != null)
-                slotTexts[i].gameObject.SetActive(selected);
-
-            if (selected && slotTexts[i] != null)
-                slotTexts[i].text = slotPrefabNames[i];
+            if (selected) slotComponents[i].Equip();
+            else slotComponents[i].Unequip();
         }
 
         activeSlot = index;
@@ -104,19 +89,37 @@ public class InventorySystem : MonoBehaviour
     // ================= UNEQUIP =================
     private void UnequipAll()
     {
-        for (int i = 0; i < slots.Count; i++)
+        for (int i = 0; i < slotComponents.Count; i++)
         {
             slots[i].transform.localScale = Vector3.one * normalScale;
-            slotItems[i].item = false;
-
-            if (slotTexts[i] != null)
-                slotTexts[i].gameObject.SetActive(false);
+            slotComponents[i].Unequip();
         }
 
         activeSlot = -1;
     }
 
-    // ================= POSITION =================
+    // ================= DROP =================
+    public void DropSlotItem(InventoryItem slotItem)
+    {
+        int index = slotComponents.IndexOf(slotItem);
+        if (index < 0) return;
+
+        if (slotItem.prefab != null && playerTransform != null)
+        {
+            Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
+            GameObject dropped = Instantiate(slotItem.prefab, spawnPos, Quaternion.identity);
+            dropped.name = slotItem.prefab.name; // verwijder (Clone)
+        }
+
+        // Verwijder UI slot
+        Destroy(slots[index].gameObject);
+        slots.RemoveAt(index);
+        slotComponents.RemoveAt(index);
+
+        activeSlot = -1;
+        RepositionSlots();
+    }
+
     private void RepositionSlots()
     {
         int count = slots.Count;
@@ -125,8 +128,7 @@ public class InventorySystem : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             float x = startX + i * spacing;
-            slots[i].rectTransform.anchoredPosition =
-                new Vector2(x, yOffset);
+            slots[i].rectTransform.anchoredPosition = new Vector2(x, yOffset);
             slots[i].transform.localScale = Vector3.one * normalScale;
         }
     }

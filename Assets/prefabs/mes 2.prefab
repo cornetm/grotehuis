@@ -68,6 +68,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: mes 2
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
+      propertyPath: m_TagString
+      value: Interaction
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -78,6 +82,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
       insertIndex: -1
       addedObject: {fileID: -8006956944965092596}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8439701087916032784}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2922617393786238748}
   m_SourcePrefab: {fileID: 100100000, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
 --- !u!1 &3289339795620472521 stripped
 GameObject:
@@ -133,3 +143,34 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -5495902117074765545, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
+--- !u!114 &8439701087916032784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3289339795620472521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a87e92dd148e5342861fa010eec8b73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Highlight
+  outlineGlowMaterial: {fileID: 2100000, guid: 090bac8236feff948b6441f02a2c05c9, type: 2}
+  glowColor: {r: 1, g: 1, b: 1, a: 1}
+  maxAlpha: 0.5
+  glowIntensity: 2
+  fadeSpeed: 10
+--- !u!114 &2922617393786238748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3289339795620472521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af44984af8378b445a2f72e99b519f7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PrefabReference
+  prefab: {fileID: 3289339795620472521}
+  icon: {fileID: 0}

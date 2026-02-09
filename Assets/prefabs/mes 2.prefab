@@ -22,19 +22,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.587
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.745
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2.31
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.92387956
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
       propertyPath: m_LocalRotation.x
@@ -46,7 +46,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.38268343
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -58,7 +58,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: -45
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 1757a62d6c92e9b478bc7458f68c104a, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -160,6 +164,9 @@ MonoBehaviour:
   maxAlpha: 0.5
   glowIntensity: 2
   fadeSpeed: 10
+  showItemText: 1
+  textY: 1.5
+  textScale: 0.1
 --- !u!114 &2922617393786238748
 MonoBehaviour:
   m_ObjectHideFlags: 0

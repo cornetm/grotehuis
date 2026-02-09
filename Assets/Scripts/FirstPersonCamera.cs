@@ -79,7 +79,7 @@ public class FirstPersonCamera : MonoBehaviour
                 PrefabReferenceAuto prefabRef = currentInteractObject.GetComponent<PrefabReferenceAuto>();
                 if (prefabRef != null)
                 {
-                    currentPrefab = prefabRef.prefab; // Dit is het originele prefab uit Assets
+                    currentPrefab = prefabRef.prefab;
                     currentIcon = prefabRef.icon;
                 }
             }
@@ -96,13 +96,31 @@ public class FirstPersonCamera : MonoBehaviour
         {
             if (inventorySystem != null && currentPrefab != null)
             {
-                inventorySystem.AddItem(currentPrefab, currentIcon);
+                bool inventoryFull = inventorySystem.IsFull();
+                bool hasEquipped = inventorySystem.HasEquippedItem();
+
+                if (!inventoryFull)
+                {
+                    // Inventory niet vol, normaal toevoegen
+                    inventorySystem.AddItem(currentPrefab, currentIcon);
+                    Destroy(currentInteractObject);
+                    Debug.Log($"Picked up {currentPrefab.name}.");
+                }
+                else if (hasEquipped)
+                {
+                    // Inventory vol, vervang equipped item
+                    inventorySystem.ReplaceEquippedItem(currentPrefab, currentIcon);
+                    Destroy(currentInteractObject);
+                    Debug.Log($"Replaced equipped item with {currentPrefab.name}.");
+                }
+                else
+                {
+                    // Inventory vol, geen equipped item
+                    Debug.Log("Cannot pick up item: Inventory is full and no item equipped!");
+                }
+
+                ResetHighlightAndCrossbar();
             }
-
-            // Verwijder het object uit de scene
-            Destroy(currentInteractObject);
-
-            ResetHighlightAndCrossbar();
         }
     }
 

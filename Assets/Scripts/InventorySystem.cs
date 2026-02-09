@@ -22,9 +22,8 @@ public class InventorySystem : MonoBehaviour
     public float dropDistance = 2f;
 
     [Header("Spawner")]
-    public ItemSpawner itemSpawner; // Koppel hier je ItemSpawner
+    public ItemSpawner itemSpawner;
 
-    // Lists
     private List<RawImage> slots = new List<RawImage>();
     private List<InventorySlotItem> slotComponents = new List<InventorySlotItem>();
 
@@ -47,9 +46,9 @@ public class InventorySystem : MonoBehaviour
     }
 
     // ================= ADD ITEM =================
-    public void AddItem(GameObject prefab, Texture icon = null)
+    public void AddItem(GameObject prefab, Texture icon = null, int index = -1)
     {
-        if (slots.Count >= maxItems) return;
+        if (index < 0 && slots.Count >= maxItems) return;
 
         RawImage newSlot = Instantiate(slotPrefab, inventoryParent);
         newSlot.gameObject.SetActive(true);
@@ -57,14 +56,62 @@ public class InventorySystem : MonoBehaviour
         if (icon != null)
             newSlot.texture = icon;
 
-        // Voeg InventorySlotItem toe en initialiseer met prefab reference
         InventorySlotItem slotComp = newSlot.gameObject.AddComponent<InventorySlotItem>();
         slotComp.Initialize(prefab, this);
 
-        slots.Add(newSlot);
-        slotComponents.Add(slotComp);
+        if (index < 0 || index >= slots.Count)
+        {
+            slots.Add(newSlot);
+            slotComponents.Add(slotComp);
+        }
+        else
+        {
+            slots.Insert(index, newSlot);
+            slotComponents.Insert(index, slotComp);
+        }
 
         RepositionSlots();
+    }
+
+    // ================= CHECK FULL =================
+    public bool IsFull()
+    {
+        return slots.Count >= maxItems;
+    }
+
+    // ================= CHECK EQUIPPED =================
+    public bool HasEquippedItem()
+    {
+        foreach (var slot in slotComponents)
+        {
+            if (slot.isEquipped)
+                return true;
+        }
+        return false;
+    }
+
+    // ================= REPLACE EQUIPPED =================
+    public void ReplaceEquippedItem(GameObject newPrefab, Texture newIcon)
+    {
+        for (int i = 0; i < slotComponents.Count; i++)
+        {
+            if (slotComponents[i].isEquipped)
+            {
+                InventorySlotItem oldSlot = slotComponents[i];
+                int slotIndex = i;
+
+                // Drop oude item in de wereld
+                DropSlotItem(oldSlot);
+
+                // Voeg nieuwe item toe op dezelfde plek
+                AddItem(newPrefab, newIcon, slotIndex);
+
+                // Equip nieuwe item
+                ToggleSlot(slotIndex);
+
+                break;
+            }
+        }
     }
 
     // ================= TOGGLE SLOT =================
@@ -72,7 +119,6 @@ public class InventorySystem : MonoBehaviour
     {
         if (index >= slots.Count) return;
 
-        // Klik op hetzelfde slot = unequip
         if (activeSlot == index)
         {
             UnequipAll();
@@ -112,12 +158,11 @@ public class InventorySystem : MonoBehaviour
 
         if (slotItem.prefab != null && playerTransform != null && itemSpawner != null)
         {
-            // Spawn via ItemSpawner
             Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
             itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos);
+            Debug.Log($"Dropped {slotItem.prefab.name}.");
         }
 
-        // Verwijder slot UI
         Destroy(slots[index].gameObject);
         slots.RemoveAt(index);
         slotComponents.RemoveAt(index);

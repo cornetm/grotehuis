@@ -1417,8 +1417,8 @@ MonoBehaviour:
   - {fileID: 3289339795620472521, guid: 11d7cc895a7cbf04ba8f17c21caa71df, type: 3}
   - {fileID: 7852686394439491770, guid: bad6999aa56d3164188f617f38632194, type: 3}
   itemIcons: []
-  spawnCount: 5
-  spawnArea: {x: 5, y: 0, z: 5}
+  spawnCount: 20
+  spawnArea: {x: 10, y: 0, z: 10}
   yOffset: 0.5
   randomRotation: 1
 --- !u!1 &1389164983

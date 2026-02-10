@@ -12,8 +12,8 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Crouch Settings")]
     public float crouchHeight = 1f;
-    private float standingHeight;
-    private bool isCrouching = false;
+    public float standingHeight;
+    public bool isCrouching = false;
 
     [Header("Sprint Settings")]
     public float maxSprint = 5f;
@@ -30,15 +30,15 @@ public class PlayerMovement : MonoBehaviour
     public float walkIntervalSprint = 0.3f; // Interval bij sprinten
     public float walkIntervalCrouch = 0.7f; // Interval bij crouchen
 
-    private float walkTimer = 0f;
+    public float walkTimer = 0f;
 
-    private CharacterController controller;
-    private float verticalVelocity = 0f;
+    public CharacterController controller;
+    public float verticalVelocity = 0f;
 
-    private float currentSprint;
-    private float cooldownTimer = 0f;
-    private bool isSprinting = false;
-    private bool shiftHeldLastFrame = false;
+    public float currentSprint;
+    public float cooldownTimer = 0f;
+    public bool isSprinting = false;
+    public bool shiftHeldLastFrame = false;
 
     void Start()
     {

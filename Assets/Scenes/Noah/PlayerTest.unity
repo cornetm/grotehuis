@@ -1609,7 +1609,7 @@ MonoBehaviour:
   spawnCount: 20
   spawnArea: {x: 10, y: 0, z: 10}
   yOffset: 0.5
-  randomRotation: 1
+  randomRotation: 0
 --- !u!1 &1349208774
 GameObject:
   m_ObjectHideFlags: 0

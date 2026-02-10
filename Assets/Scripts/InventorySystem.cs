@@ -49,17 +49,15 @@ public class InventorySystem : MonoBehaviour
 
     void Update()
     {
-        // Slot select (1-9)
+        // SLOT SELECT (1-9)
         for (int i = 0; i < slots.Count && i < 9; i++)
-        {
             if (Input.GetKeyDown(KeyCode.Alpha1 + i)) ToggleSlot(i);
-        }
 
         // DROP F
         if (Input.GetKeyDown(KeyCode.F) && activeSlot >= 0)
             DropSlotItem(slotComponents[activeSlot]);
 
-        // THROW Q START
+        // THROW Q
         if (Input.GetKeyDown(KeyCode.Q) && activeSlot >= 0)
         {
             chargingThrow = true;
@@ -68,7 +66,6 @@ public class InventorySystem : MonoBehaviour
                 throwPowerSlider.gameObject.SetActive(true);
         }
 
-        // CHARGING
         if (chargingThrow)
         {
             throwCharge += Time.deltaTime * chargeSpeed;
@@ -77,7 +74,6 @@ public class InventorySystem : MonoBehaviour
                 throwPowerSlider.value = throwCharge;
         }
 
-        // RELEASE THROW
         if (Input.GetKeyUp(KeyCode.Q) && chargingThrow && activeSlot >= 0)
         {
             chargingThrow = false;
@@ -118,9 +114,15 @@ public class InventorySystem : MonoBehaviour
         }
 
         RepositionSlots();
+
+        // AUTO EQUIP FIRST ITEM
+        if (slots.Count == 1)
+        {
+            ToggleSlot(0);
+            Debug.Log($"Automatically equipped {prefab.name} as the first item.");
+        }
     }
 
-    // ================= CHECK INVENTORY =================
     public bool IsFull() => slots.Count >= maxItems;
 
     public bool HasEquippedItem()
@@ -140,13 +142,8 @@ public class InventorySystem : MonoBehaviour
                 InventorySlotItem oldSlot = slotComponents[i];
                 int slotIndex = i;
 
-                // Drop oude item in de wereld
                 DropSlotItem(oldSlot);
-
-                // Voeg nieuwe item toe op dezelfde plek
                 AddItem(newPrefab, newIcon, slotIndex);
-
-                // Equip nieuwe item
                 ToggleSlot(slotIndex);
 
                 Debug.Log("Equipped item replaced and old item dropped.");
@@ -162,7 +159,10 @@ public class InventorySystem : MonoBehaviour
         if (index < 0) return;
 
         Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
-        itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos);
+
+        // Rotate 90 degrees on X-axis for drop
+        Quaternion dropRotation = Quaternion.LookRotation(playerTransform.forward) * Quaternion.Euler(90f, 0f, 0f);
+        itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, dropRotation);
 
         Debug.Log($"Dropped {slotItem.prefab.name}");
         RemoveSlot(index);
@@ -175,25 +175,19 @@ public class InventorySystem : MonoBehaviour
         if (index < 0) return;
 
         Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
-        GameObject obj = itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos);
 
-        // Richting van de camera
-        Camera cam = Camera.main;
-        if (cam != null)
-        {
-            Rigidbody rb = obj.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                Vector3 throwDir = cam.transform.forward.normalized;
-                rb.AddForce(throwDir * force, ForceMode.Impulse);
-            }
-        }
+        // Rotate 90 degrees on X-axis for throw
+        Quaternion throwRotation = Quaternion.LookRotation(playerTransform.forward) * Quaternion.Euler(90f, 0f, 0f);
+        GameObject obj = itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, throwRotation);
 
-        Debug.Log($"Threw {slotItem.prefab.name} with force {force} towards camera direction");
+        Rigidbody rb = obj.GetComponent<Rigidbody>();
+        if (rb != null)
+            rb.AddForce(playerTransform.forward.normalized * force, ForceMode.Impulse);
+
+        Debug.Log($"Threw {slotItem.prefab.name} with force {force}");
         RemoveSlot(index);
     }
 
-    // ================= REMOVE SLOT =================
     void RemoveSlot(int index)
     {
         Destroy(slots[index].gameObject);
@@ -203,20 +197,38 @@ public class InventorySystem : MonoBehaviour
         RepositionSlots();
     }
 
-    // ================= SLOT SELECT =================
+    // ================= SLOT SELECT / UNEQUIP =================
     void ToggleSlot(int index)
     {
         if (index >= slots.Count) return;
+
+        if (activeSlot == index)
+        {
+            UnequipAll();
+            return;
+        }
 
         for (int i = 0; i < slotComponents.Count; i++)
         {
             bool selected = i == index;
             slots[i].transform.localScale = selected ? Vector3.one * selectedScale : Vector3.one * normalScale;
-            if (selected) slotComponents[i].Equip();
-            else slotComponents[i].Unequip();
+            if (selected)
+                slotComponents[i].Equip();
+            else
+                slotComponents[i].Unequip();
         }
 
         activeSlot = index;
+    }
+
+    void UnequipAll()
+    {
+        for (int i = 0; i < slotComponents.Count; i++)
+        {
+            slots[i].transform.localScale = Vector3.one * normalScale;
+            slotComponents[i].Unequip();
+        }
+        activeSlot = -1;
     }
 
     // ================= POSITION =================
@@ -226,7 +238,7 @@ public class InventorySystem : MonoBehaviour
         for (int i = 0; i < slots.Count; i++)
         {
             slots[i].rectTransform.anchoredPosition = new Vector2(startX + i * spacing, yOffset);
-            slots[i].transform.localScale = Vector3.one * normalScale;
+            slots[i].transform.localScale = slotComponents[i].isEquipped ? Vector3.one * selectedScale : Vector3.one * normalScale;
         }
     }
 }

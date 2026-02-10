@@ -55,7 +55,7 @@ public class FirstPersonCamera : MonoBehaviour
         Vector3 direction = transform.forward;
 
         RaycastHit hit;
-        bool hitSomething = Physics.SphereCast(origin, 0.3f, direction, out hit, rayDistance);
+        bool hitSomething = Physics.SphereCast(origin, sphereRadius, direction, out hit, rayDistance);
 
         Debug.DrawRay(origin, direction * rayDistance, Color.green);
 
@@ -85,8 +85,6 @@ public class FirstPersonCamera : MonoBehaviour
         else
         {
             ResetHighlightAndCrossbar();
-            if (crossbarImage != null)
-                crossbarImage.color = Color.red;
         }
     }
 

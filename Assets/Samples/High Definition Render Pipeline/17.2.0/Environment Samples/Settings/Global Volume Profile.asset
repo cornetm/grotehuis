@@ -268,6 +268,11 @@ MonoBehaviour:
   m_RayMaxIterationsRT:
     m_OverrideState: 0
     m_Value: 48
+  adaptiveProbeVolumesLayerMask:
+    m_OverrideState: 0
+    m_Value:
+      serializedVersion: 0
+      m_Bits: 1
 --- !u!114 &-6563850445765255598
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -526,7 +531,7 @@ MonoBehaviour:
     m_Value: 1
   renderingMode:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 0
   material:
     m_OverrideState: 1
     m_Value: {fileID: 2100000, guid: ea9fafc49a843284e87b8c741d4381ca, type: 2}
@@ -1024,7 +1029,7 @@ MonoBehaviour:
     m_Value: 2
   anisotropy:
     m_OverrideState: 1
-    m_Value: 0.3
+    m_Value: 0
   sliceDistributionUniformity:
     m_OverrideState: 0
     m_Value: 0.75
@@ -1931,8 +1936,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   active: 1
   enable:
-    m_OverrideState: 0
-    m_Value: 0
+    m_OverrideState: 1
+    m_Value: 1
   cloudTiling:
     m_OverrideState: 0
     m_Value: {x: 1, y: 1}

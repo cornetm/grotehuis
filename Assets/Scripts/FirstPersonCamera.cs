@@ -16,9 +16,8 @@ public class FirstPersonCamera : MonoBehaviour
 
     private Highlight currentHighlight;
     private GameObject currentInteractObject;
-    private GameObject currentPrefab; // prefab uit Assets
+    private GameObject currentPrefab;
     private Texture currentIcon;
-    private Color originalCrossbarColor = Color.red;
     private float xRotation = 0f;
 
     void Start()
@@ -27,7 +26,7 @@ public class FirstPersonCamera : MonoBehaviour
         Cursor.visible = false;
 
         if (crossbarImage != null)
-            originalCrossbarColor = crossbarImage.color;
+            crossbarImage.color = Color.red;
     }
 
     void Update()
@@ -56,7 +55,7 @@ public class FirstPersonCamera : MonoBehaviour
         Vector3 direction = transform.forward;
 
         RaycastHit hit;
-        bool hitSomething = Physics.SphereCast(origin, sphereRadius, direction, out hit, rayDistance);
+        bool hitSomething = Physics.SphereCast(origin, 0.3f, direction, out hit, rayDistance);
 
         Debug.DrawRay(origin, direction * rayDistance, Color.green);
 
@@ -75,7 +74,6 @@ public class FirstPersonCamera : MonoBehaviour
                 currentHighlight = highlight;
                 currentInteractObject = hit.collider.gameObject;
 
-                // Pak prefab automatisch van PrefabReferenceAuto
                 PrefabReferenceAuto prefabRef = currentInteractObject.GetComponent<PrefabReferenceAuto>();
                 if (prefabRef != null)
                 {
@@ -87,6 +85,8 @@ public class FirstPersonCamera : MonoBehaviour
         else
         {
             ResetHighlightAndCrossbar();
+            if (crossbarImage != null)
+                crossbarImage.color = Color.red;
         }
     }
 
@@ -101,22 +101,19 @@ public class FirstPersonCamera : MonoBehaviour
 
                 if (!inventoryFull)
                 {
-                    // Inventory niet vol, normaal toevoegen
                     inventorySystem.AddItem(currentPrefab, currentIcon);
                     Destroy(currentInteractObject);
                     Debug.Log($"Picked up {currentPrefab.name}.");
                 }
                 else if (hasEquipped)
                 {
-                    // Inventory vol, vervang equipped item
                     inventorySystem.ReplaceEquippedItem(currentPrefab, currentIcon);
                     Destroy(currentInteractObject);
                     Debug.Log($"Replaced equipped item with {currentPrefab.name}.");
                 }
                 else
                 {
-                    // Inventory vol, geen equipped item
-                    Debug.Log("Cannot pick up item: Inventory is full and no item equipped!");
+                    Debug.Log("Cannot pick up item: Inventory full & no item equipped!");
                 }
 
                 ResetHighlightAndCrossbar();
@@ -137,6 +134,6 @@ public class FirstPersonCamera : MonoBehaviour
         currentIcon = null;
 
         if (crossbarImage != null)
-            crossbarImage.color = originalCrossbarColor;
+            crossbarImage.color = Color.red;
     }
 }

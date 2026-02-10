@@ -62,9 +62,9 @@ public class ItemSpawner : MonoBehaviour
     }
 
     // ================= SPAWN DROPPED ITEM =================
-    public void SpawnDroppedItem(GameObject prefab, Vector3 position)
+    public GameObject SpawnDroppedItem(GameObject prefab, Vector3 position)
     {
-        if (prefab == null) return;
+        if (prefab == null) return null;
 
         Quaternion rot = randomRotation ? Quaternion.Euler(0f, Random.Range(0f, 360f), 0f) : Quaternion.identity;
         GameObject spawned = Instantiate(prefab, position, rot);
@@ -78,8 +78,9 @@ public class ItemSpawner : MonoBehaviour
 
         if (!spawned.CompareTag("Interaction"))
             spawned.tag = "Interaction";
-    }
 
+        return spawned; // <-- TERUGGEVEN!
+    }
     // ================= GIZMOS =================
     private void OnDrawGizmosSelected()
     {

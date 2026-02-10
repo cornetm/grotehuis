@@ -164,7 +164,7 @@ MonoBehaviour:
   maxAlpha: 0.5
   glowIntensity: 2
   fadeSpeed: 10
-  showItemText: 1
+  showItemText: 0
   textY: 1.5
   textScale: 0.1
 --- !u!114 &2922617393786238748

@@ -2041,6 +2041,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   mouseSensitivity: 300
   playerBody: {fileID: 2041822409}
+  crossbarImage: {fileID: 0}
+  rayDistance: 5
+  sphereRadius: 0.3
+  inventorySystem: {fileID: 0}
 --- !u!114 &167441384
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10094,18 +10098,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cffd34b48e2bc7c42bb838cdf1bd9ebc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  inventorySlots:
-  - {fileID: 1250234252}
-  - {fileID: 1266728970}
-  - {fileID: 800138393}
-  - {fileID: 1586583479}
-  - {fileID: 135344815}
-  items:
-  - {fileID: 1250234251}
-  - {fileID: 1266728969}
-  - {fileID: 800138392}
-  - {fileID: 1586583478}
-  - {fileID: 135344814}
+  inventoryParent: {fileID: 0}
+  slotPrefab: {fileID: 0}
+  maxItems: 5
+  spacing: 140
+  yOffset: -200
+  normalScale: 1
+  selectedScale: 1.4
+  playerTransform: {fileID: 0}
+  dropDistance: 2
+  itemSpawner: {fileID: 0}
 --- !u!1 &539826755
 GameObject:
   m_ObjectHideFlags: 0

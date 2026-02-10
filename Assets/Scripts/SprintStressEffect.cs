@@ -6,8 +6,18 @@ public class SprintStressEffectHDRP : MonoBehaviour
 {
     public PlayerMovement player;
     public Volume volume; // HDRP Volume
+
     private Vignette vignette;
     private ChromaticAberration chromatic;
+
+    [Header("Base values")]
+    public float baseVignette = 0.18f;
+    public float sprintVignetteMultiplier = 2f; // verdubbelen bij sprint
+    public float baseChromatic = 0.04f;
+    public float sprintChromaticMultiplier = 2f;
+
+    [Header("Smooth speed")]
+    public float lerpSpeed = 5f;
 
     void Start()
     {
@@ -21,14 +31,21 @@ public class SprintStressEffectHDRP : MonoBehaviour
     {
         if (player == null) return;
 
-        // Subtiele sprint stress
-        float targetChromatic = player.isSprinting ? 0.04f : 0f;
-        if (chromatic != null)
-            chromatic.intensity.value = Mathf.Lerp(chromatic.intensity.value, targetChromatic, Time.deltaTime * 5f);
+        // Target waarden afhankelijk van sprint
+        float targetVignette = baseVignette;
+        float targetChromatic = baseChromatic;
 
-        // Optioneel: vignette intensiteit verhogen bij sprint
-        float targetVignette = player.isSprinting ? 0.25f : 0.18f;
+        if (player.isSprinting)
+        {
+            targetVignette *= sprintVignetteMultiplier;
+            targetChromatic *= sprintChromaticMultiplier;
+        }
+
+        // Smooth toepassen
         if (vignette != null)
-            vignette.intensity.value = Mathf.Lerp(vignette.intensity.value, targetVignette, Time.deltaTime * 5f);
+            vignette.intensity.value = Mathf.Lerp(vignette.intensity.value, targetVignette, Time.deltaTime * lerpSpeed);
+
+        if (chromatic != null)
+            chromatic.intensity.value = Mathf.Lerp(chromatic.intensity.value, targetChromatic, Time.deltaTime * lerpSpeed);
     }
 }

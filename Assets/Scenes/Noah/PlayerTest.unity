@@ -3122,14 +3122,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   walkBobSpeed: 14
-  walkBobAmountY: 0.07
-  walkBobAmountX: 0.07
+  walkBobAmountY: 0.1
+  walkBobAmountX: 0.1
   sprintBobSpeed: 18
-  sprintBobAmountY: 0.1
-  sprintBobAmountX: 0.1
+  sprintBobAmountY: 0.15
+  sprintBobAmountX: 0.15
   crouchBobSpeed: 8
-  crouchBobAmountY: 0.05
-  crouchBobAmountX: 0.05
+  crouchBobAmountY: 0.07
+  crouchBobAmountX: 0.07
   playerMovement: {fileID: 670264220}
 --- !u!114 &1823688473
 MonoBehaviour:

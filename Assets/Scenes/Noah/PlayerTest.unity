@@ -2727,9 +2727,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   mouseSensitivity: 300
   playerBody: {fileID: 670264219}
+  eyeSwayAmount: 2
+  eyeSwaySpeed: 1.5
+  rotationSmoothSpeed: 10
   crossbarImage: {fileID: 1231191083}
-  rayDistance: 3
-  sphereRadius: 0.15
+  rayDistance: 5
+  sphereRadius: 0.3
   inventorySystem: {fileID: 1014915896}
 --- !u!114 &1823688470
 MonoBehaviour:
@@ -2744,14 +2747,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   walkBobSpeed: 14
-  walkBobAmount: 0.05
-  walkSwayAmount: 0.1
+  walkBobAmountY: 0.07
+  walkBobAmountX: 0.07
   sprintBobSpeed: 18
-  sprintBobAmount: 0.08
-  sprintSwayAmount: 0.2
+  sprintBobAmountY: 0.1
+  sprintBobAmountX: 0.1
   crouchBobSpeed: 8
-  crouchBobAmount: 0.02
-  crouchSwayAmount: 0.05
+  crouchBobAmountY: 0.05
+  crouchBobAmountX: 0.05
+  playerMovement: {fileID: 670264220}
 --- !u!1 &1824801268
 GameObject:
   m_ObjectHideFlags: 0

@@ -3,37 +3,41 @@ using UnityEngine;
 public class CameraBobbing : MonoBehaviour
 {
     [Header("Bobbing Settings")]
-    public float walkBobSpeed = 14f;   // verticale snelheid bij lopen
-    public float walkBobAmount = 0.05f; // verticale amplitude
-    public float walkSwayAmount = 0.03f; // horizontale amplitude
-
+    public float walkBobSpeed = 14f;
+    public float walkBobAmountY = 0.05f;
+    public float walkBobAmountX = 0.05f; // links/rechts beweging
     public float sprintBobSpeed = 18f;
-    public float sprintBobAmount = 0.08f;
-    public float sprintSwayAmount = 0.05f;
-
+    public float sprintBobAmountY = 0.08f;
+    public float sprintBobAmountX = 0.08f;
     public float crouchBobSpeed = 8f;
-    public float crouchBobAmount = 0.02f;
-    public float crouchSwayAmount = 0.01f;
+    public float crouchBobAmountY = 0.02f;
+    public float crouchBobAmountX = 0.02f;
 
-    private float defaultYPos;
-    private float defaultXPos;
-    private float timer = 0f;
+    [HideInInspector]
+    public PlayerMovement playerMovement;
 
-    private PlayerMovement playerMovement;
+    private float bobTimer = 0f;
+    private Vector3 targetLocalPosition;
+    private Vector3 initialLocalPosition;
 
     void Start()
     {
-        defaultYPos = transform.localPosition.y;
-        defaultXPos = transform.localPosition.x;
+        initialLocalPosition = transform.localPosition;
+
         playerMovement = GetComponentInParent<PlayerMovement>();
         if (playerMovement == null)
             Debug.LogError("CameraBobbing: PlayerMovement not found in parent!");
+
+        targetLocalPosition = initialLocalPosition;
     }
 
     void Update()
     {
-        if (playerMovement == null) return;
+        HandleBobbing();
+    }
 
+    private void HandleBobbing()
+    {
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
         bool isMoving = (horizontal != 0 || vertical != 0) && playerMovement.controller.isGrounded;
@@ -41,41 +45,36 @@ public class CameraBobbing : MonoBehaviour
         if (isMoving)
         {
             float speed = walkBobSpeed;
-            float verticalAmount = walkBobAmount;
-            float horizontalAmount = walkSwayAmount;
+            float amountY = walkBobAmountY;
+            float amountX = walkBobAmountX;
 
             if (playerMovement.isCrouching)
             {
                 speed = crouchBobSpeed;
-                verticalAmount = crouchBobAmount;
-                horizontalAmount = crouchSwayAmount;
+                amountY = crouchBobAmountY;
+                amountX = crouchBobAmountX;
             }
             else if (playerMovement.isSprinting)
             {
                 speed = sprintBobSpeed;
-                verticalAmount = sprintBobAmount;
-                horizontalAmount = sprintSwayAmount;
+                amountY = sprintBobAmountY;
+                amountX = sprintBobAmountX;
             }
 
-            timer += Time.deltaTime * speed;
+            bobTimer += Time.deltaTime * speed;
+            float bobY = Mathf.Sin(bobTimer) * amountY;
+            float bobX = Mathf.Sin(bobTimer * 0.5f) * amountX;
 
-            // Vertical bob (op en neer)
-            float newY = defaultYPos + Mathf.Sin(timer) * verticalAmount;
-
-            // Horizontal sway (links-rechts)
-            float newX = defaultXPos + Mathf.Sin(timer * 0.5f) * horizontalAmount;
-
-            transform.localPosition = new Vector3(newX, newY, transform.localPosition.z);
+            targetLocalPosition = initialLocalPosition + new Vector3(bobX, bobY, 0f);
         }
         else
         {
-            // reset naar standaardpositie als de speler stilstaat
-            timer = 0f;
-            transform.localPosition = new Vector3(
-                Mathf.Lerp(transform.localPosition.x, defaultXPos, Time.deltaTime * 5f),
-                Mathf.Lerp(transform.localPosition.y, defaultYPos, Time.deltaTime * 5f),
-                transform.localPosition.z
-            );
+            // idle, terug naar neutrale positie (blended door FirstPersonCamera)
+            targetLocalPosition = initialLocalPosition;
+            bobTimer = 0f;
         }
+
+        // smooth position transition (blend)
+        transform.localPosition = Vector3.Lerp(transform.localPosition, targetLocalPosition, Time.deltaTime * 8f);
     }
 }

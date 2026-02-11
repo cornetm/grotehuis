@@ -1064,7 +1064,7 @@ Transform:
   m_GameObject: {fileID: 670264215}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: -5}
+  m_LocalPosition: {x: 0, y: 2, z: -4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1087,8 +1087,10 @@ MonoBehaviour:
   moveSpeed: 1
   sprintMultiplier: 2
   crouchMultiplier: 0.5
-  jumpHeight: 1
-  gravity: -20
+  jumpHeight: 2.25
+  gravity: -9.81
+  fallMultiplier: 2.5
+  lowJumpMultiplier: 2
   crouchHeight: 1
   standingHeight: 0
   isCrouching: 0
@@ -1102,13 +1104,9 @@ MonoBehaviour:
   walkIntervalNormal: 0.5
   walkIntervalSprint: 0.3
   walkIntervalCrouch: 0.7
-  walkTimer: 0
   controller: {fileID: 0}
   verticalVelocity: 0
-  currentSprint: 0
-  cooldownTimer: 0
   isSprinting: 0
-  shiftHeldLastFrame: 0
 --- !u!143 &670264222
 CharacterController:
   m_ObjectHideFlags: 0
@@ -3104,7 +3102,7 @@ MonoBehaviour:
   playerBody: {fileID: 670264219}
   eyeSwayAmount: 2
   eyeSwaySpeed: 1.5
-  rotationSmoothSpeed: 10
+  rotationSmoothSpeed: 20
   crossbarImage: {fileID: 1231191083}
   rayDistance: 5
   sphereRadius: 0.3
@@ -3130,6 +3128,10 @@ MonoBehaviour:
   crouchBobSpeed: 8
   crouchBobAmountY: 0.07
   crouchBobAmountX: 0.07
+  jumpSwayAmountX: 0.25
+  jumpSwayAmountY: 0.25
+  jumpSwaySpeed: 5
+  sprintJumpMultiplier: 1.5
   playerMovement: {fileID: 670264220}
 --- !u!114 &1823688473
 MonoBehaviour:

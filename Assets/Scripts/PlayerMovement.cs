@@ -6,9 +6,13 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
     public float sprintMultiplier = 2f;
-    public float crouchMultiplier = 0.5f; // snelheid bij crouch
-    public float jumpHeight = 2f;
-    public float gravity = -9.81f;
+    public float crouchMultiplier = 0.5f;
+
+    [Header("Jump Settings")]
+    public float jumpHeight = 3.2f;       // meters omhoog
+    public float gravity = -9.81f;        // standaard aarde
+    public float fallMultiplier = 2.5f;   // sneller vallen dan stijgen
+    public float lowJumpMultiplier = 1.7f;
 
     [Header("Crouch Settings")]
     public float crouchHeight = 1f;
@@ -25,20 +29,19 @@ public class PlayerMovement : MonoBehaviour
     public Slider sprintSlider2;
 
     [Header("Audio Settings")]
-    public AudioSource walkAudio;           // …Èn AudioSource voor alle voetstappen
-    public float walkIntervalNormal = 0.5f; // Interval bij normaal lopen
-    public float walkIntervalSprint = 0.3f; // Interval bij sprinten
-    public float walkIntervalCrouch = 0.7f; // Interval bij crouchen
+    public AudioSource walkAudio;
+    public float walkIntervalNormal = 0.5f;
+    public float walkIntervalSprint = 0.3f;
+    public float walkIntervalCrouch = 0.7f;
 
-    public float walkTimer = 0f;
+    [HideInInspector] public CharacterController controller;
+    [HideInInspector] public float verticalVelocity;
+    [HideInInspector] public bool isSprinting;
 
-    public CharacterController controller;
-    public float verticalVelocity = 0f;
-
-    public float currentSprint;
-    public float cooldownTimer = 0f;
-    public bool isSprinting = false;
-    public bool shiftHeldLastFrame = false;
+    private float walkTimer = 0f;
+    private float currentSprint;
+    private float cooldownTimer = 0f;
+    private bool shiftHeldLastFrame = false;
 
     void Start()
     {
@@ -46,12 +49,12 @@ public class PlayerMovement : MonoBehaviour
         standingHeight = controller.height;
         currentSprint = maxSprint;
 
-        if (sprintSlider1 != null)
+        if (sprintSlider1)
         {
             sprintSlider1.maxValue = maxSprint;
             sprintSlider1.value = currentSprint;
         }
-        if (sprintSlider2 != null)
+        if (sprintSlider2)
         {
             sprintSlider2.maxValue = maxSprint;
             sprintSlider2.value = currentSprint;
@@ -60,8 +63,8 @@ public class PlayerMovement : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        if (walkAudio != null)
-            walkAudio.playOnAwake = false; // niet automatisch afspelen
+        if (walkAudio)
+            walkAudio.playOnAwake = false;
     }
 
     void Update()
@@ -74,7 +77,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ================= CROUCH =================
-    private void HandleCrouch()
+    void HandleCrouch()
     {
         bool ctrlHeld = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
 
@@ -91,7 +94,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ================= MOVEMENT =================
-    private void HandleMovement()
+    void HandleMovement()
     {
         float moveX = Input.GetAxis("Horizontal");
         float moveZ = Input.GetAxis("Vertical");
@@ -99,22 +102,23 @@ public class PlayerMovement : MonoBehaviour
         Vector3 move = transform.right * moveX + transform.forward * moveZ;
 
         float speed = moveSpeed;
+        if (isCrouching) speed *= crouchMultiplier;
+        else if (isSprinting) speed *= sprintMultiplier;
 
-        if (isCrouching)
-            speed *= crouchMultiplier;
-        else if (isSprinting)
-            speed *= sprintMultiplier;
-
+        // ===== JUMP & GRAVITY =====
         if (controller.isGrounded)
         {
-            verticalVelocity = -1f;
+            if (verticalVelocity < 0) verticalVelocity = -2f; // contact grond
 
             if (Input.GetButtonDown("Jump") && !isCrouching)
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
         else
         {
-            verticalVelocity += gravity * Time.deltaTime;
+            if (verticalVelocity < 0)
+                verticalVelocity += gravity * fallMultiplier * Time.deltaTime;
+            else
+                verticalVelocity += gravity * lowJumpMultiplier * Time.deltaTime;
         }
 
         move.y = verticalVelocity;
@@ -122,7 +126,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ================= SPRINT =================
-    private void HandleSprint()
+    void HandleSprint()
     {
         bool shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
@@ -158,18 +162,16 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ================= UI =================
-    private void UpdateSliders()
+    void UpdateSliders()
     {
-        if (sprintSlider1 != null)
-            sprintSlider1.value = currentSprint;
-        if (sprintSlider2 != null)
-            sprintSlider2.value = currentSprint;
+        if (sprintSlider1) sprintSlider1.value = currentSprint;
+        if (sprintSlider2) sprintSlider2.value = currentSprint;
     }
 
     // ================= WALK AUDIO =================
-    private void HandleWalkAudio()
+    void HandleWalkAudio()
     {
-        if (walkAudio == null) return;
+        if (!walkAudio) return;
 
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
@@ -178,15 +180,7 @@ public class PlayerMovement : MonoBehaviour
         if (isMoving)
         {
             walkTimer -= Time.deltaTime;
-
-            // bepaal interval afhankelijk van crouch, sprint of normaal
-            float interval;
-            if (isCrouching)
-                interval = walkIntervalCrouch;
-            else if (isSprinting)
-                interval = walkIntervalSprint;
-            else
-                interval = walkIntervalNormal;
+            float interval = isCrouching ? walkIntervalCrouch : isSprinting ? walkIntervalSprint : walkIntervalNormal;
 
             if (walkTimer <= 0f)
             {
@@ -196,7 +190,7 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            walkTimer = 0f; // reset timer als je stopt
+            walkTimer = 0f;
         }
     }
 }

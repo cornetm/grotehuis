@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
 public class FirstPersonCamera : MonoBehaviour
 {
@@ -39,9 +38,9 @@ public class FirstPersonCamera : MonoBehaviour
         playerBody.Rotate(Vector3.up * mouseX);
 
         // Idle sway
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-        bool isMoving = (horizontal != 0 || vertical != 0) && playerBody.GetComponent<CharacterController>().isGrounded;
+        bool isMoving = (Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f ||
+                         Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f) &&
+                        playerBody.GetComponent<CharacterController>().isGrounded;
 
         if (!isMoving)
         {

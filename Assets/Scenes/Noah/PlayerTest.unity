@@ -3102,7 +3102,7 @@ MonoBehaviour:
   playerBody: {fileID: 670264219}
   eyeSwayAmount: 2
   eyeSwaySpeed: 1.5
-  rotationSmoothSpeed: 20
+  rotationSmoothSpeed: 10
 --- !u!114 &1823688470
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -16,9 +16,9 @@ public class CameraBobbing : MonoBehaviour
     public float crouchBobAmountX = 0.02f;
 
     [Header("Jump / Landing Sway")]
-    public float jumpSwayAmountX = 0.03f;  // horizontaal tijdens springen
-    public float jumpSwayAmountY = 0.05f;  // verticaal tijdens springen
-    public float jumpSwaySpeed = 5f;       // snelheid van sway in lucht
+    public float jumpSwayAmountX = 0.03f;
+    public float jumpSwayAmountY = 0.05f;
+    public float jumpSwaySpeed = 5f;
 
     [HideInInspector] public PlayerMovement playerMovement;
 
@@ -50,7 +50,6 @@ public class CameraBobbing : MonoBehaviour
                          Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f) &&
                         playerMovement.controller.isGrounded;
 
-        // ===== Walk / Sprint / Crouch Bobbing =====
         float speed = walkBobSpeed;
         float amountY = walkBobAmountY;
         float amountX = walkBobAmountX;
@@ -81,7 +80,7 @@ public class CameraBobbing : MonoBehaviour
             bobTimer = 0f;
         }
 
-        // ===== Jump Sway =====
+        // Jump sway
         if (!playerMovement.controller.isGrounded)
         {
             jumpSwayOffset.x = Mathf.Sin(Time.time * jumpSwaySpeed) * jumpSwayAmountX;
@@ -92,10 +91,6 @@ public class CameraBobbing : MonoBehaviour
             jumpSwayOffset = Vector3.Lerp(jumpSwayOffset, Vector3.zero, Time.deltaTime * jumpSwaySpeed);
         }
 
-        // ===== Combineer alles =====
-        Vector3 finalPosition = targetLocalPosition + jumpSwayOffset;
-
-        // Smooth transition
-        transform.localPosition = Vector3.Lerp(transform.localPosition, finalPosition, Time.deltaTime * 8f);
+        transform.localPosition = Vector3.Lerp(transform.localPosition, targetLocalPosition + jumpSwayOffset, Time.deltaTime * 8f);
     }
 }

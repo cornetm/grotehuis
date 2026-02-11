@@ -76,13 +76,24 @@ public class PlayerMovement : MonoBehaviour
         HandleWalkAudio();
     }
 
+    // ================= CROUCH =================
     void HandleCrouch()
     {
         bool ctrlHeld = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-        isCrouching = ctrlHeld;
-        controller.height = isCrouching ? crouchHeight : standingHeight;
+
+        if (ctrlHeld)
+        {
+            isCrouching = true;
+            controller.height = crouchHeight;
+        }
+        else
+        {
+            isCrouching = false;
+            controller.height = standingHeight;
+        }
     }
 
+    // ================= MOVEMENT =================
     void HandleMovement()
     {
         float moveX = Input.GetAxis("Horizontal");
@@ -90,19 +101,24 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 horizontalMove = transform.right * moveX + transform.forward * moveZ;
         float horizontalSpeed = moveSpeed;
+
         if (isCrouching) horizontalSpeed *= crouchMultiplier;
         else if (isSprinting) horizontalSpeed *= sprintMultiplier;
 
-        // Jump & gravity
+        // ===== JUMP & GRAVITY =====
         if (controller.isGrounded)
         {
             if (verticalVelocity < 0f) verticalVelocity = -2f;
+
             if (Input.GetButtonDown("Jump") && !isCrouching)
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
         else
         {
-            verticalVelocity += (verticalVelocity < 0 ? gravity * fallMultiplier : gravity * lowJumpMultiplier) * Time.deltaTime;
+            if (verticalVelocity < 0)
+                verticalVelocity += gravity * fallMultiplier * Time.deltaTime;
+            else
+                verticalVelocity += gravity * lowJumpMultiplier * Time.deltaTime;
         }
 
         Vector3 move = horizontalMove * horizontalSpeed;
@@ -111,6 +127,7 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(move * Time.deltaTime);
     }
 
+    // ================= SPRINT =================
     void HandleSprint()
     {
         bool shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
@@ -132,41 +149,48 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             isSprinting = false;
-        }
 
-        // Sprint regeneratie loopt altijd, ook tijdens crouch
-        if (cooldownTimer > 0f)
-            cooldownTimer -= Time.deltaTime;
-        else if (currentSprint < maxSprint)
-        {
-            currentSprint += sprintRegenRate * Time.deltaTime;
-            currentSprint = Mathf.Min(currentSprint, maxSprint);
+            // Sprint regeneratie loopt altijd, ook tijdens crouch
+            if (cooldownTimer > 0f)
+                cooldownTimer -= Time.deltaTime;
+            else if (currentSprint < maxSprint)
+            {
+                currentSprint += sprintRegenRate * Time.deltaTime;
+                currentSprint = Mathf.Min(currentSprint, maxSprint);
+            }
         }
     }
 
+    // ================= UI =================
     void UpdateSliders()
     {
         if (sprintSlider1) sprintSlider1.value = currentSprint;
         if (sprintSlider2) sprintSlider2.value = currentSprint;
     }
 
+    // ================= WALK AUDIO =================
     void HandleWalkAudio()
     {
         if (!walkAudio) return;
-        bool isMoving = (Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f ||
-                         Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f) &&
-                        controller.isGrounded;
+
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+        bool isMoving = (horizontal != 0 || vertical != 0) && controller.isGrounded;
 
         if (isMoving)
         {
             walkTimer -= Time.deltaTime;
             float interval = isCrouching ? walkIntervalCrouch : isSprinting ? walkIntervalSprint : walkIntervalNormal;
+
             if (walkTimer <= 0f)
             {
                 walkAudio.Play();
                 walkTimer = interval;
             }
         }
-        else walkTimer = 0f;
+        else
+        {
+            walkTimer = 0f;
+        }
     }
 }

@@ -2661,7 +2661,7 @@ MonoBehaviour:
   m_LightUnit: 0
   m_LuxAtDistance: 1
   m_Intensity: 0
-  m_InnerSpotPercent: 65.54825
+  m_InnerSpotPercent: 81.01129
   m_SpotIESCutoffPercent: 100
   m_LightDimmer: 1
   m_VolumetricDimmer: 1
@@ -2795,9 +2795,9 @@ Light:
   serializedVersion: 11
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 100
+  m_Intensity: 20
   m_Range: 50
-  m_SpotAngle: 87.07799
+  m_SpotAngle: 123.43958
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
@@ -3145,6 +3145,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   player: {fileID: 670264220}
   volume: {fileID: 1823688474}
+  baseVignette: 0.55
+  sprintVignetteMultiplier: 1.1
+  baseChromatic: 0.4
+  sprintChromaticMultiplier: 2
+  lerpSpeed: 5
 --- !u!114 &1823688474
 MonoBehaviour:
   m_ObjectHideFlags: 0

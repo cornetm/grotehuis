@@ -16,19 +16,16 @@ public class CameraBobbing : MonoBehaviour
     public float crouchBobAmountX = 0.02f;
 
     [Header("Jump / Landing Sway")]
-    public float jumpSwayAmountX = 0.03f;  // standaard sway
-    public float jumpSwayAmountY = 0.05f;
-    public float jumpSwaySpeed = 5f;
-
-    [Header("Sprint Jump Boost")]
-    public float sprintJumpMultiplier = 2f; // boost als je sprint en springt
+    public float jumpSwayAmountX = 0.03f;  // horizontaal tijdens springen
+    public float jumpSwayAmountY = 0.05f;  // verticaal tijdens springen
+    public float jumpSwaySpeed = 5f;       // snelheid van sway in lucht
 
     [HideInInspector] public PlayerMovement playerMovement;
 
     private Vector3 initialLocalPosition;
     private Vector3 targetLocalPosition;
-    private float bobTimer = 0f;
     private Vector3 jumpSwayOffset;
+    private float bobTimer = 0f;
 
     void Start()
     {
@@ -76,12 +73,10 @@ public class CameraBobbing : MonoBehaviour
             bobTimer += Time.deltaTime * speed;
             float bobY = Mathf.Sin(bobTimer) * amountY;
             float bobX = Mathf.Sin(bobTimer * 0.5f) * amountX;
-
             targetLocalPosition = initialLocalPosition + new Vector3(bobX, bobY, 0f);
         }
         else
         {
-            // Idle, terug naar neutrale positie
             targetLocalPosition = initialLocalPosition;
             bobTimer = 0f;
         }
@@ -89,22 +84,18 @@ public class CameraBobbing : MonoBehaviour
         // ===== Jump Sway =====
         if (!playerMovement.controller.isGrounded)
         {
-            // sprint jump multiplier toepassen
-            float boost = playerMovement.isSprinting ? sprintJumpMultiplier : 1f;
-
-            jumpSwayOffset.x = Mathf.Sin(Time.time * jumpSwaySpeed) * jumpSwayAmountX * boost;
-            jumpSwayOffset.y = Mathf.Sin(Time.time * jumpSwaySpeed * 1.2f) * jumpSwayAmountY * boost;
+            jumpSwayOffset.x = Mathf.Sin(Time.time * jumpSwaySpeed) * jumpSwayAmountX;
+            jumpSwayOffset.y = Mathf.Sin(Time.time * jumpSwaySpeed * 1.2f) * jumpSwayAmountY;
         }
         else
         {
-            // smooth terug naar 0 als speler landt
             jumpSwayOffset = Vector3.Lerp(jumpSwayOffset, Vector3.zero, Time.deltaTime * jumpSwaySpeed);
         }
 
         // ===== Combineer alles =====
         Vector3 finalPosition = targetLocalPosition + jumpSwayOffset;
 
-        // Smooth position
+        // Smooth transition
         transform.localPosition = Vector3.Lerp(transform.localPosition, finalPosition, Time.deltaTime * 8f);
     }
 }

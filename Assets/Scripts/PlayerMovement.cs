@@ -1,18 +1,19 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement Settings")]
-    public float moveSpeed = 5f;
-    public float sprintMultiplier = 2f;
+    public float moveSpeed = 5f;       // standaard snelheid
+    public float sprintMultiplier = 2f; // alleen horizontaal
     public float crouchMultiplier = 0.5f;
 
     [Header("Jump Settings")]
     public float jumpHeight = 3.2f;       // meters omhoog
     public float gravity = -9.81f;        // standaard aarde
     public float fallMultiplier = 2.5f;   // sneller vallen dan stijgen
-    public float lowJumpMultiplier = 1.7f;
+    public float lowJumpMultiplier = 1.7f; // korte jump
 
     [Header("Crouch Settings")]
     public float crouchHeight = 1f;
@@ -63,15 +64,14 @@ public class PlayerMovement : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        if (walkAudio)
-            walkAudio.playOnAwake = false;
+        if (walkAudio) walkAudio.playOnAwake = false;
     }
 
     void Update()
     {
         HandleCrouch();
-        HandleMovement();
         HandleSprint();
+        HandleMovement();
         UpdateSliders();
         HandleWalkAudio();
     }
@@ -99,30 +99,35 @@ public class PlayerMovement : MonoBehaviour
         float moveX = Input.GetAxis("Horizontal");
         float moveZ = Input.GetAxis("Vertical");
 
-        Vector3 move = transform.right * moveX + transform.forward * moveZ;
+        // horizontale beweging
+        Vector3 horizontalMove = transform.right * moveX + transform.forward * moveZ;
+        float horizontalSpeed = moveSpeed;
 
-        float speed = moveSpeed;
-        if (isCrouching) speed *= crouchMultiplier;
-        else if (isSprinting) speed *= sprintMultiplier;
+        if (isCrouching) horizontalSpeed *= crouchMultiplier;
+        else if (isSprinting) horizontalSpeed *= sprintMultiplier;
 
         // ===== JUMP & GRAVITY =====
         if (controller.isGrounded)
         {
-            if (verticalVelocity < 0) verticalVelocity = -2f; // contact grond
+            if (verticalVelocity < 0f) verticalVelocity = -2f;
 
             if (Input.GetButtonDown("Jump") && !isCrouching)
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
         else
         {
+            // val sneller of korte jump
             if (verticalVelocity < 0)
                 verticalVelocity += gravity * fallMultiplier * Time.deltaTime;
             else
                 verticalVelocity += gravity * lowJumpMultiplier * Time.deltaTime;
         }
 
+        // combineer horizontaal en verticaal
+        Vector3 move = horizontalMove * horizontalSpeed;
         move.y = verticalVelocity;
-        controller.Move(move * speed * Time.deltaTime);
+
+        controller.Move(move * Time.deltaTime);
     }
 
     // ================= SPRINT =================
@@ -130,18 +135,18 @@ public class PlayerMovement : MonoBehaviour
     {
         bool shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
+        // Sprint mag niet actief tijdens crouch
         if (isCrouching)
-        {
             isSprinting = false;
-            return;
-        }
 
+        // Zet cooldown als shift net losgelaten of sprint leeg
         if ((shiftHeld && currentSprint <= 0f) || (!shiftHeld && shiftHeldLastFrame))
             cooldownTimer = sprintCooldown;
 
         shiftHeldLastFrame = shiftHeld;
 
-        if (shiftHeld && currentSprint > 0f)
+        // Sprint actief alleen als shift ingedrukt, sprint > 0 en niet crouched
+        if (shiftHeld && currentSprint > 0f && !isCrouching)
         {
             isSprinting = true;
             currentSprint -= sprintDepletionRate * Time.deltaTime;
@@ -151,6 +156,7 @@ public class PlayerMovement : MonoBehaviour
         {
             isSprinting = false;
 
+            // Sprint regeneratie loopt altijd, ook tijdens crouch
             if (cooldownTimer > 0f)
                 cooldownTimer -= Time.deltaTime;
             else if (currentSprint < maxSprint)

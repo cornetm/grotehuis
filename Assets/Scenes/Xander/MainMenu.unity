@@ -1723,8 +1723,8 @@ MonoBehaviour:
   m_Intensity: 0
   m_InnerSpotPercent: 0
   m_SpotIESCutoffPercent: 100
-  m_LightDimmer: 3.9
-  m_VolumetricDimmer: 11.2
+  m_LightDimmer: 2.1
+  m_VolumetricDimmer: 11.6
   m_FadeDistance: 10000
   m_VolumetricFadeDistance: 10000
   m_AffectDiffuse: 1
@@ -1751,7 +1751,7 @@ MonoBehaviour:
   m_AngularDiameter: 5
   diameterMultiplerMode: 0
   diameterMultiplier: 1
-  diameterOverride: 0.5
+  diameterOverride: 6
   celestialBodyShadingSource: 1
   sunLightOverride: {fileID: 0}
   sunColor: {r: 1, g: 1, b: 1, a: 1}
@@ -1759,10 +1759,10 @@ MonoBehaviour:
   moonPhase: 0.2
   moonPhaseRotation: 0
   earthshine: 1
-  flareSize: 90
+  flareSize: 12
   flareTint: {r: 1, g: 1, b: 1, a: 1}
   flareFalloff: 212.1
-  flareMultiplier: 1
+  flareMultiplier: 0.46
   surfaceTexture: {fileID: 2800000, guid: d4e375c47130c904c9ba6ff8563b4529, type: 3}
   surfaceTint: {r: 1, g: 1, b: 1, a: 1}
   m_Distance: 1.5e+11
@@ -1917,13 +1917,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1903778867}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.20729057, y: 0.08524806, z: -0.018135585, w: 0.9743893}
+  m_LocalRotation: {x: -0.08859712, y: -0.8850216, z: 0.18827862, w: -0.41645926}
   m_LocalPosition: {x: 139.49171, y: 0, z: 778.9475}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 24.02, y: 10, z: 0}
+  m_LocalEulerAnglesHint: {x: 24.02, y: -230.4, z: 0}
 --- !u!1 &2030930630
 GameObject:
   m_ObjectHideFlags: 0
@@ -2080,7 +2080,7 @@ SceneRoots:
   - {fileID: 846337814}
   - {fileID: 499437884}
   - {fileID: 915296881}
-  - {fileID: 917351196}
   - {fileID: 1393261519}
+  - {fileID: 917351196}
   - {fileID: 1903778870}
   - {fileID: 1559871078}

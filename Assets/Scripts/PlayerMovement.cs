@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(CharacterController))]
@@ -56,6 +56,8 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 targetCameraLocalPos;
     public Vector3 cameraVelocity = Vector3.zero;
 
+    private bool crouchYLocked = false; // Lock pas nadat camera beneden is
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -100,6 +102,9 @@ public class PlayerMovement : MonoBehaviour
                 float offset = isCrouching ? -cameraCrouchOffset : 0f;
                 targetCameraLocalPos = initialCameraLocalPos + new Vector3(0, offset, 0);
             }
+
+            // Reset Y-lock bij toggle zodat smooth start
+            crouchYLocked = false;
         }
     }
 
@@ -111,7 +116,7 @@ public class PlayerMovement : MonoBehaviour
 
         float previousHeight = controller.height;
 
-        // Lerpen als er een verschil is of als de speler beweegt
+        // Lerpen van de CharacterController hoogte
         if (Mathf.Abs(controller.height - targetHeight) > 0.01f || isMoving)
         {
             controller.height = Mathf.SmoothDamp(controller.height, targetHeight, ref heightVelocity, crouchSmoothTime);
@@ -121,12 +126,25 @@ public class PlayerMovement : MonoBehaviour
             controller.center += new Vector3(0, deltaHeight / 2f, 0);
         }
 
-        // Camera aanpassen
         if (playerCamera != null)
         {
-            if ((targetCameraLocalPos - playerCamera.localPosition).sqrMagnitude > 0.0001f)
+            // Smooth naar target
+            playerCamera.localPosition = Vector3.SmoothDamp(playerCamera.localPosition, targetCameraLocalPos, ref cameraVelocity, crouchSmoothTime);
+
+            // Pas Y-lock toe pas nadat camera bijna beneden is
+            if (isCrouching && !crouchYLocked)
             {
-                playerCamera.localPosition = Vector3.SmoothDamp(playerCamera.localPosition, targetCameraLocalPos, ref cameraVelocity, crouchSmoothTime);
+                if (Mathf.Abs(playerCamera.localPosition.y - targetCameraLocalPos.y) < 0.01f)
+                {
+                    playerCamera.localPosition = new Vector3(playerCamera.localPosition.x, targetCameraLocalPos.y, playerCamera.localPosition.z);
+                    crouchYLocked = true;
+                }
+            }
+
+            // Forceer lock als Y eenmaal bereikt is
+            if (crouchYLocked)
+            {
+                playerCamera.localPosition = new Vector3(playerCamera.localPosition.x, targetCameraLocalPos.y, playerCamera.localPosition.z);
             }
         }
     }

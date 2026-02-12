@@ -38,6 +38,8 @@ public class CameraBobbing : MonoBehaviour
 
     private float bobTimer = 0f;
     private bool wasCrouchingLastFrame = false;
+    private bool lockY = false;   // Flag voor Y lock
+    private float lockedY = 0f;   // Y waarde van camera wanneer gelockt
 
     void Start()
     {
@@ -128,6 +130,17 @@ public class CameraBobbing : MonoBehaviour
             float direction = playerMovement.isCrouching ? -1f : 1f;
             crouchSwayOffset = new Vector3(crouchSwayAmountX * direction, crouchSwayAmountY * direction, 0f);
             wasCrouchingLastFrame = playerMovement.isCrouching;
+
+            if (playerMovement.isCrouching)
+            {
+                // Lock Y zodra crouch is ingeschakeld
+                lockY = true;
+                lockedY = playerMovement.playerCamera.localPosition.y;
+            }
+            else
+            {
+                lockY = false;
+            }
         }
         else if (!playerMovement.isCrouching || isMoving)
         {
@@ -135,7 +148,6 @@ public class CameraBobbing : MonoBehaviour
         }
         else
         {
-            // Stilstaand crouched → geen offset
             crouchSwayOffset = Vector3.zero;
         }
     }
@@ -144,6 +156,13 @@ public class CameraBobbing : MonoBehaviour
     private void ApplyCameraPosition()
     {
         targetLocalPosition = initialLocalPosition + bobOffset + jumpSwayOffset + crouchSwayOffset;
+
+        // Als Y gelockt is, override target Y
+        if (lockY)
+        {
+            targetLocalPosition.y = lockedY;
+        }
+
         transform.localPosition = Vector3.Lerp(transform.localPosition, targetLocalPosition, Time.deltaTime * smoothSpeed);
     }
 }

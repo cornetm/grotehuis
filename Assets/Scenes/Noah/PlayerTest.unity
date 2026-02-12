@@ -1139,7 +1139,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 1
   sprintMultiplier: 2
-  crouchMultiplier: 0.5
+  crouchMultiplier: 0.7
   jumpHeight: 2.25
   gravity: -9.81
   fallMultiplier: 2.5
@@ -1149,7 +1149,7 @@ MonoBehaviour:
   isCrouching: 0
   crouchSmoothTime: 0.35
   playerCamera: {fileID: 1823688467}
-  cameraCrouchOffset: 1.25
+  cameraCrouchOffset: 1
   maxSprint: 5
   sprintDepletionRate: 1
   sprintRegenRate: 1
@@ -3400,13 +3400,13 @@ MonoBehaviour:
   sprintBobAmountY: 0.07
   sprintBobAmountX: 0.07
   crouchBobSpeed: 8
-  crouchBobAmountY: 0.03
-  crouchBobAmountX: 0.03
+  crouchBobAmountY: 0.06
+  crouchBobAmountX: 0.06
   jumpSwayAmountX: 0.15
   jumpSwayAmountY: 0.15
   jumpSwaySpeed: 5
-  crouchSwayAmountX: 0.1
-  crouchSwayAmountY: 0.1
+  crouchSwayAmountX: 0.15
+  crouchSwayAmountY: 0.15
   crouchSwaySpeed: 7
   smoothSpeed: 8
   playerMovement: {fileID: 670264220}

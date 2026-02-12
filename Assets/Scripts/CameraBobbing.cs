@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CameraBobbing : MonoBehaviour
 {
@@ -15,17 +15,29 @@ public class CameraBobbing : MonoBehaviour
     public float crouchBobAmountY = 0.02f;
     public float crouchBobAmountX = 0.02f;
 
-    [Header("Jump / Landing Sway")]
+    [Header("Jump / Crouch Sway Settings")]
     public float jumpSwayAmountX = 0.03f;
     public float jumpSwayAmountY = 0.05f;
     public float jumpSwaySpeed = 5f;
+
+    public float crouchSwayAmountX = 0.03f;
+    public float crouchSwayAmountY = 0.05f;
+    public float crouchSwaySpeed = 7f;
+
+    [Header("Smooth Settings")]
+    public float smoothSpeed = 8f;
 
     [HideInInspector] public PlayerMovement playerMovement;
 
     private Vector3 initialLocalPosition;
     private Vector3 targetLocalPosition;
+
+    private Vector3 bobOffset;
     private Vector3 jumpSwayOffset;
+    private Vector3 crouchSwayOffset;
+
     private float bobTimer = 0f;
+    private bool wasCrouchingLastFrame = false;
 
     void Start()
     {
@@ -40,8 +52,11 @@ public class CameraBobbing : MonoBehaviour
     void Update()
     {
         HandleBobbing();
+        HandleJumpAndCrouchSway();
+        ApplyCameraPosition();
     }
 
+    // ================= BOBBING =================
     private void HandleBobbing()
     {
         if (playerMovement == null) return;
@@ -49,6 +64,14 @@ public class CameraBobbing : MonoBehaviour
         bool isMoving = (Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f ||
                          Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f) &&
                         playerMovement.controller.isGrounded;
+
+        // Stilstaand crouched → geen bobbing
+        if (playerMovement.isCrouching && !isMoving)
+        {
+            bobOffset = Vector3.zero;
+            bobTimer = 0f;
+            return;
+        }
 
         float speed = walkBobSpeed;
         float amountY = walkBobAmountY;
@@ -72,13 +95,21 @@ public class CameraBobbing : MonoBehaviour
             bobTimer += Time.deltaTime * speed;
             float bobY = Mathf.Sin(bobTimer) * amountY;
             float bobX = Mathf.Sin(bobTimer * 0.5f) * amountX;
-            targetLocalPosition = initialLocalPosition + new Vector3(bobX, bobY, 0f);
+            bobOffset = new Vector3(bobX, bobY, 0f);
         }
         else
         {
-            targetLocalPosition = initialLocalPosition;
+            bobOffset = Vector3.Lerp(bobOffset, Vector3.zero, Time.deltaTime * speed);
             bobTimer = 0f;
         }
+    }
+
+    // ================= JUMP & CROUCH SWAY =================
+    private void HandleJumpAndCrouchSway()
+    {
+        if (playerMovement == null) return;
+
+        bool isMoving = Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f || Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f;
 
         // Jump sway
         if (!playerMovement.controller.isGrounded)
@@ -91,6 +122,28 @@ public class CameraBobbing : MonoBehaviour
             jumpSwayOffset = Vector3.Lerp(jumpSwayOffset, Vector3.zero, Time.deltaTime * jumpSwaySpeed);
         }
 
-        transform.localPosition = Vector3.Lerp(transform.localPosition, targetLocalPosition + jumpSwayOffset, Time.deltaTime * 8f);
+        // Crouch sway
+        if (playerMovement.isCrouching != wasCrouchingLastFrame)
+        {
+            float direction = playerMovement.isCrouching ? -1f : 1f;
+            crouchSwayOffset = new Vector3(crouchSwayAmountX * direction, crouchSwayAmountY * direction, 0f);
+            wasCrouchingLastFrame = playerMovement.isCrouching;
+        }
+        else if (!playerMovement.isCrouching || isMoving)
+        {
+            crouchSwayOffset = Vector3.Lerp(crouchSwayOffset, Vector3.zero, Time.deltaTime * crouchSwaySpeed);
+        }
+        else
+        {
+            // Stilstaand crouched → geen offset
+            crouchSwayOffset = Vector3.zero;
+        }
+    }
+
+    // ================= APPLY CAMERA POSITION =================
+    private void ApplyCameraPosition()
+    {
+        targetLocalPosition = initialLocalPosition + bobOffset + jumpSwayOffset + crouchSwayOffset;
+        transform.localPosition = Vector3.Lerp(transform.localPosition, targetLocalPosition, Time.deltaTime * smoothSpeed);
     }
 }

@@ -19,6 +19,11 @@ public class PlayerMovement : MonoBehaviour
     public float crouchHeight = 1f;
     public float standingHeight;
     public bool isCrouching = false;
+    public float crouchSmoothTime = 0.2f;
+
+    [Header("Camera Settings")]
+    public Transform playerCamera;
+    public float cameraCrouchOffset = 0.5f;
 
     [Header("Sprint Settings")]
     public float maxSprint = 5f;
@@ -44,52 +49,85 @@ public class PlayerMovement : MonoBehaviour
     private float cooldownTimer = 0f;
     private bool shiftHeldLastFrame = false;
 
+    private float targetHeight;
+    private float heightVelocity = 0f;
+
+    public Vector3 initialCameraLocalPos;
+    public Vector3 targetCameraLocalPos;
+    public Vector3 cameraVelocity = Vector3.zero;
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
         standingHeight = controller.height;
+        targetHeight = standingHeight;
         currentSprint = maxSprint;
 
-        if (sprintSlider1)
-        {
-            sprintSlider1.maxValue = maxSprint;
-            sprintSlider1.value = currentSprint;
-        }
-        if (sprintSlider2)
-        {
-            sprintSlider2.maxValue = maxSprint;
-            sprintSlider2.value = currentSprint;
-        }
+        if (sprintSlider1) { sprintSlider1.maxValue = maxSprint; sprintSlider1.value = currentSprint; }
+        if (sprintSlider2) { sprintSlider2.maxValue = maxSprint; sprintSlider2.value = currentSprint; }
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
         if (walkAudio) walkAudio.playOnAwake = false;
+
+        if (playerCamera != null)
+            initialCameraLocalPos = playerCamera.localPosition;
+
+        targetCameraLocalPos = initialCameraLocalPos;
     }
 
     void Update()
     {
         HandleCrouch();
+        SmoothCrouch();
         HandleSprint();
         HandleMovement();
         UpdateSliders();
         HandleWalkAudio();
     }
 
-    // ================= CROUCH =================
+    // ================= CROUCH (TOGGLE) =================
     void HandleCrouch()
     {
-        bool ctrlHeld = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl))
+        {
+            isCrouching = !isCrouching;
+            targetHeight = isCrouching ? crouchHeight : standingHeight;
 
-        if (ctrlHeld)
-        {
-            isCrouching = true;
-            controller.height = crouchHeight;
+            if (playerCamera != null)
+            {
+                float offset = isCrouching ? -cameraCrouchOffset : 0f;
+                targetCameraLocalPos = initialCameraLocalPos + new Vector3(0, offset, 0);
+            }
         }
-        else
+    }
+
+    // ================= SMOOTH CROUCH =================
+    void SmoothCrouch()
+    {
+        bool isMoving = Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f ||
+                        Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f;
+
+        float previousHeight = controller.height;
+
+        // Lerpen als er een verschil is of als de speler beweegt
+        if (Mathf.Abs(controller.height - targetHeight) > 0.01f || isMoving)
         {
-            isCrouching = false;
-            controller.height = standingHeight;
+            controller.height = Mathf.SmoothDamp(controller.height, targetHeight, ref heightVelocity, crouchSmoothTime);
+
+            // Compenseer de center
+            float deltaHeight = controller.height - previousHeight;
+            controller.center += new Vector3(0, deltaHeight / 2f, 0);
+        }
+
+        // Camera aanpassen
+        if (playerCamera != null)
+        {
+            if ((targetCameraLocalPos - playerCamera.localPosition).sqrMagnitude > 0.0001f)
+            {
+                playerCamera.localPosition = Vector3.SmoothDamp(playerCamera.localPosition, targetCameraLocalPos, ref cameraVelocity, crouchSmoothTime);
+            }
         }
     }
 
@@ -105,7 +143,6 @@ public class PlayerMovement : MonoBehaviour
         if (isCrouching) horizontalSpeed *= crouchMultiplier;
         else if (isSprinting) horizontalSpeed *= sprintMultiplier;
 
-        // ===== JUMP & GRAVITY =====
         if (controller.isGrounded)
         {
             if (verticalVelocity < 0f) verticalVelocity = -2f;
@@ -132,8 +169,7 @@ public class PlayerMovement : MonoBehaviour
     {
         bool shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
-        if (isCrouching)
-            isSprinting = false;
+        if (isCrouching) isSprinting = false;
 
         if ((shiftHeld && currentSprint <= 0f) || (!shiftHeld && shiftHeldLastFrame))
             cooldownTimer = sprintCooldown;
@@ -150,7 +186,6 @@ public class PlayerMovement : MonoBehaviour
         {
             isSprinting = false;
 
-            // Sprint regeneratie loopt altijd, ook tijdens crouch
             if (cooldownTimer > 0f)
                 cooldownTimer -= Time.deltaTime;
             else if (currentSprint < maxSprint)
@@ -188,9 +223,6 @@ public class PlayerMovement : MonoBehaviour
                 walkTimer = interval;
             }
         }
-        else
-        {
-            walkTimer = 0f;
-        }
+        else walkTimer = 0f;
     }
 }

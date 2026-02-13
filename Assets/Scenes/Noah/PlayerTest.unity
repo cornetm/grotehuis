@@ -752,6 +752,7 @@ MonoBehaviour:
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1006,6 +1007,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &595808305
 MeshFilter:
@@ -1099,6 +1101,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &670264218
 MeshFilter:
@@ -1139,33 +1142,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 1
   sprintMultiplier: 2
-  crouchMultiplier: 0.7
+  crouchMultiplier: 0.65
   jumpHeight: 2.25
   gravity: -9.81
   fallMultiplier: 2.5
-  lowJumpMultiplier: 2
+  lowJumpMultiplier: 1.7
   crouchHeight: 1
-  standingHeight: 0
-  isCrouching: 0
-  crouchSmoothTime: 0.35
-  playerCamera: {fileID: 1823688467}
-  cameraCrouchOffset: 1
+  crouchSmoothTime: 0.3
   maxSprint: 5
-  sprintDepletionRate: 1
-  sprintRegenRate: 1
-  sprintCooldown: 2
+  sprintDrain: 1
+  sprintRegen: 1
   sprintSlider1: {fileID: 585307631}
   sprintSlider2: {fileID: 1824801270}
-  walkAudio: {fileID: 670264224}
-  walkIntervalNormal: 0.5
-  walkIntervalSprint: 0.3
-  walkIntervalCrouch: 0.7
   controller: {fileID: 0}
-  verticalVelocity: 0
+  isCrouching: 0
   isSprinting: 0
-  initialCameraLocalPos: {x: 0, y: 0, z: 0}
-  targetCameraLocalPos: {x: 0, y: 0, z: 0}
-  cameraVelocity: {x: 0, y: 0, z: 0}
 --- !u!143 &670264222
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1450,6 +1441,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &694797146
 MeshFilter:
@@ -1715,6 +1707,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &972749631
 MeshFilter:
@@ -1811,6 +1804,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &986220835
 MeshFilter:
@@ -2133,6 +2127,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1136387654
 MeshFilter:
@@ -2479,6 +2474,7 @@ MonoBehaviour:
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -2929,7 +2925,10 @@ MonoBehaviour:
   m_LightUnit: 0
   m_LuxAtDistance: 1
   m_Intensity: 0
-  m_InnerSpotPercent: 12.567157
+  m_InnerSpotPercent: -1
+  m_ShapeWidth: -1
+  m_ShapeHeight: -1
+  m_AspectRatio: 1
   m_SpotIESCutoffPercent: 100
   m_LightDimmer: 1
   m_VolumetricDimmer: 1
@@ -2938,9 +2937,6 @@ MonoBehaviour:
   m_AffectDiffuse: 1
   m_AffectSpecular: 1
   m_NonLightmappedOnly: 0
-  m_ShapeWidth: 0.05
-  m_ShapeHeight: 0.5
-  m_AspectRatio: 1
   m_ShapeRadius: 0.025
   m_SoftnessScale: 1
   m_UseCustomSpotLightShadowCone: 0
@@ -3047,7 +3043,7 @@ MonoBehaviour:
   m_AreaLightEmissiveMeshShadowCastingMode: 0
   m_AreaLightEmissiveMeshMotionVectorGenerationMode: 0
   m_AreaLightEmissiveMeshLayer: -1
-  m_Version: 13
+  m_Version: 14
   m_ObsoleteShadowResolutionTier: 1
   m_ObsoleteUseShadowQualitySettings: 0
   m_ObsoleteCustomShadowResolution: 512
@@ -3060,14 +3056,14 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1756473938}
   m_Enabled: 1
-  serializedVersion: 11
+  serializedVersion: 12
   m_Type: 3
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 20
   m_Range: 20
   m_SpotAngle: 39.786247
-  m_InnerSpotAngle: 21.80208
-  m_CookieSize: 10
+  m_InnerSpotAngle: 5
+  m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
     m_Type: 1
     m_Resolution: -1
@@ -3368,7 +3364,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   mouseSensitivity: 300
   playerBody: {fileID: 670264219}
-  eyeSwayAmount: 2
+  eyeSwayAmount: 1.5
   eyeSwaySpeed: 1.5
   rotationSmoothSpeed: 10
   tiltAmount: 1.5
@@ -3394,22 +3390,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   walkBobSpeed: 14
-  walkBobAmountY: 0.05
-  walkBobAmountX: 0.05
+  walkBobAmount: 0.05
   sprintBobSpeed: 18
-  sprintBobAmountY: 0.07
-  sprintBobAmountX: 0.07
+  sprintBobAmount: 0.08
   crouchBobSpeed: 8
-  crouchBobAmountY: 0.06
-  crouchBobAmountX: 0.06
-  jumpSwayAmountX: 0.15
-  jumpSwayAmountY: 0.15
-  jumpSwaySpeed: 5
-  crouchSwayAmountX: 0.15
-  crouchSwayAmountY: 0.15
-  crouchSwaySpeed: 7
+  crouchBobAmount: 0.02
+  crouchCameraOffset: -0.5
+  crouchSideSway: 0.03
+  crouchToggleSway: 0.1
   smoothSpeed: 8
-  playerMovement: {fileID: 670264220}
+  jumpToggleSway: 0.08
+  jumpTweenDuration: 0.3
 --- !u!114 &1823688473
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3588,7 +3579,10 @@ MonoBehaviour:
   m_LightUnit: 0
   m_LuxAtDistance: 1
   m_Intensity: 0
-  m_InnerSpotPercent: 12.567157
+  m_InnerSpotPercent: -1
+  m_ShapeWidth: -1
+  m_ShapeHeight: -1
+  m_AspectRatio: 1
   m_SpotIESCutoffPercent: 100
   m_LightDimmer: 1
   m_VolumetricDimmer: 1
@@ -3597,9 +3591,6 @@ MonoBehaviour:
   m_AffectDiffuse: 1
   m_AffectSpecular: 1
   m_NonLightmappedOnly: 0
-  m_ShapeWidth: 0.05
-  m_ShapeHeight: 0.5
-  m_AspectRatio: 1
   m_ShapeRadius: 0.025
   m_SoftnessScale: 1
   m_UseCustomSpotLightShadowCone: 0
@@ -3706,7 +3697,7 @@ MonoBehaviour:
   m_AreaLightEmissiveMeshShadowCastingMode: 0
   m_AreaLightEmissiveMeshMotionVectorGenerationMode: 0
   m_AreaLightEmissiveMeshLayer: -1
-  m_Version: 13
+  m_Version: 14
   m_ObsoleteShadowResolutionTier: 1
   m_ObsoleteUseShadowQualitySettings: 0
   m_ObsoleteCustomShadowResolution: 512
@@ -3719,14 +3710,14 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1861288506}
   m_Enabled: 1
-  serializedVersion: 11
+  serializedVersion: 12
   m_Type: 3
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 20
   m_Range: 20
   m_SpotAngle: 39.786247
-  m_InnerSpotAngle: 21.80208
-  m_CookieSize: 10
+  m_InnerSpotAngle: 5
+  m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
     m_Type: 1
     m_Resolution: -1
@@ -3912,6 +3903,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &2092448275
 MeshFilter:

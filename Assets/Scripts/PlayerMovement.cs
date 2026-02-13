@@ -4,59 +4,41 @@ using UnityEngine.UI;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("Movement Settings")]
+    [Header("Movement")]
     public float moveSpeed = 5f;
     public float sprintMultiplier = 2f;
     public float crouchMultiplier = 0.5f;
 
-    [Header("Jump Settings")]
+    [Header("Jump")]
     public float jumpHeight = 3.2f;
     public float gravity = -9.81f;
     public float fallMultiplier = 2.5f;
     public float lowJumpMultiplier = 1.7f;
 
-    [Header("Crouch Settings")]
+    [Header("Crouch")]
     public float crouchHeight = 1f;
-    public float standingHeight;
-    public bool isCrouching = false;
     public float crouchSmoothTime = 0.2f;
 
-    [Header("Camera Settings")]
-    public Transform playerCamera;
-    public float cameraCrouchOffset = 0.5f;
-
-    [Header("Sprint Settings")]
+    [Header("Sprint")]
     public float maxSprint = 5f;
-    public float sprintDepletionRate = 1f;
-    public float sprintRegenRate = 1f;
-    public float sprintCooldown = 3f;
+    public float sprintDrain = 1f;
+    public float sprintRegen = 1f;
 
     public Slider sprintSlider1;
     public Slider sprintSlider2;
 
-    [Header("Audio Settings")]
-    public AudioSource walkAudio;
-    public float walkIntervalNormal = 0.5f;
-    public float walkIntervalSprint = 0.3f;
-    public float walkIntervalCrouch = 0.7f;
-
     [HideInInspector] public CharacterController controller;
-    [HideInInspector] public float verticalVelocity;
+    [HideInInspector] public bool isCrouching;
     [HideInInspector] public bool isSprinting;
 
-    private float walkTimer = 0f;
-    private float currentSprint;
-    private float cooldownTimer = 0f;
-    private bool shiftHeldLastFrame = false;
+    float standingHeight;
+    float targetHeight;
+    float heightVelocity;
+    float verticalVelocity;
+    float currentSprint;
 
-    private float targetHeight;
-    private float heightVelocity = 0f;
-
-    public Vector3 initialCameraLocalPos;
-    public Vector3 targetCameraLocalPos;
-    public Vector3 cameraVelocity = Vector3.zero;
-
-    private bool crouchYLocked = false; // Lock pas nadat camera beneden is
+    // Flag om te voorkomen dat jump afgaat bij uncrouch
+    private bool justUncrouched = false;
 
     void Start()
     {
@@ -65,182 +47,125 @@ public class PlayerMovement : MonoBehaviour
         targetHeight = standingHeight;
         currentSprint = maxSprint;
 
-        if (sprintSlider1) { sprintSlider1.maxValue = maxSprint; sprintSlider1.value = currentSprint; }
-        if (sprintSlider2) { sprintSlider2.maxValue = maxSprint; sprintSlider2.value = currentSprint; }
+        // Init beide sliders
+        if (sprintSlider1)
+        {
+            sprintSlider1.maxValue = maxSprint;
+            sprintSlider1.value = currentSprint;
+        }
+        if (sprintSlider2)
+        {
+            sprintSlider2.maxValue = maxSprint;
+            sprintSlider2.value = currentSprint;
+        }
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
-        if (walkAudio) walkAudio.playOnAwake = false;
-
-        if (playerCamera != null)
-            initialCameraLocalPos = playerCamera.localPosition;
-
-        targetCameraLocalPos = initialCameraLocalPos;
     }
 
     void Update()
     {
         HandleCrouch();
-        SmoothCrouch();
-        HandleSprint();
+        SmoothCapsule();
         HandleMovement();
-        UpdateSliders();
-        HandleWalkAudio();
+        HandleSprint();
+        UpdateUI();
+
+        // Reset flag voor volgende frame
+        justUncrouched = false;
     }
 
-    // ================= CROUCH (TOGGLE) =================
+    // ================= CROUCH =================
     void HandleCrouch()
     {
-        if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl))
+        // Toggle crouch met Control
+        if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             isCrouching = !isCrouching;
             targetHeight = isCrouching ? crouchHeight : standingHeight;
+        }
 
-            if (playerCamera != null)
-            {
-                float offset = isCrouching ? -cameraCrouchOffset : 0f;
-                targetCameraLocalPos = initialCameraLocalPos + new Vector3(0, offset, 0);
-            }
-
-            // Reset Y-lock bij toggle zodat smooth start
-            crouchYLocked = false;
+        // Spacebar in crouch → uncrouch, geen jump
+        if (Input.GetButtonDown("Jump") && isCrouching)
+        {
+            isCrouching = false;
+            targetHeight = standingHeight;
+            justUncrouched = true; // voorkomt springen in dezelfde frame
         }
     }
 
-    // ================= SMOOTH CROUCH =================
-    void SmoothCrouch()
+    void SmoothCapsule()
     {
-        bool isMoving = Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f ||
-                        Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f;
-
-        float previousHeight = controller.height;
-
-        // Lerpen van de CharacterController hoogte
-        if (Mathf.Abs(controller.height - targetHeight) > 0.01f || isMoving)
-        {
-            controller.height = Mathf.SmoothDamp(controller.height, targetHeight, ref heightVelocity, crouchSmoothTime);
-
-            // Compenseer de center
-            float deltaHeight = controller.height - previousHeight;
-            controller.center += new Vector3(0, deltaHeight / 2f, 0);
-        }
-
-        if (playerCamera != null)
-        {
-            // Smooth naar target
-            playerCamera.localPosition = Vector3.SmoothDamp(playerCamera.localPosition, targetCameraLocalPos, ref cameraVelocity, crouchSmoothTime);
-
-            // Pas Y-lock toe pas nadat camera bijna beneden is
-            if (isCrouching && !crouchYLocked)
-            {
-                if (Mathf.Abs(playerCamera.localPosition.y - targetCameraLocalPos.y) < 0.01f)
-                {
-                    playerCamera.localPosition = new Vector3(playerCamera.localPosition.x, targetCameraLocalPos.y, playerCamera.localPosition.z);
-                    crouchYLocked = true;
-                }
-            }
-
-            // Forceer lock als Y eenmaal bereikt is
-            if (crouchYLocked)
-            {
-                playerCamera.localPosition = new Vector3(playerCamera.localPosition.x, targetCameraLocalPos.y, playerCamera.localPosition.z);
-            }
-        }
+        float prevHeight = controller.height;
+        controller.height = Mathf.SmoothDamp(controller.height, targetHeight, ref heightVelocity, crouchSmoothTime);
+        float delta = controller.height - prevHeight;
+        controller.center += Vector3.up * (delta / 2f);
     }
 
     // ================= MOVEMENT =================
     void HandleMovement()
     {
-        float moveX = Input.GetAxis("Horizontal");
-        float moveZ = Input.GetAxis("Vertical");
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
 
-        Vector3 horizontalMove = transform.right * moveX + transform.forward * moveZ;
-        float horizontalSpeed = moveSpeed;
+        Vector3 move = transform.right * x + transform.forward * z;
+        float speed = moveSpeed;
 
-        if (isCrouching) horizontalSpeed *= crouchMultiplier;
-        else if (isSprinting) horizontalSpeed *= sprintMultiplier;
+        if (isCrouching) speed *= crouchMultiplier;
+        if (isSprinting) speed *= sprintMultiplier;
 
         if (controller.isGrounded)
         {
-            if (verticalVelocity < 0f) verticalVelocity = -2f;
+            if (verticalVelocity < 0) verticalVelocity = -2f;
 
-            if (Input.GetButtonDown("Jump") && !isCrouching)
+            // Alleen springen als niet crouching en niet net uncrouched
+            if (Input.GetButtonDown("Jump") && !isCrouching && !justUncrouched)
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
-        else
+
+        // Realistic jump/fall
+        if (!controller.isGrounded)
         {
             if (verticalVelocity < 0)
                 verticalVelocity += gravity * fallMultiplier * Time.deltaTime;
             else
                 verticalVelocity += gravity * lowJumpMultiplier * Time.deltaTime;
         }
+        else
+        {
+            verticalVelocity += gravity * Time.deltaTime;
+        }
 
-        Vector3 move = horizontalMove * horizontalSpeed;
-        move.y = verticalVelocity;
-
-        controller.Move(move * Time.deltaTime);
+        Vector3 velocity = move * speed;
+        velocity.y = verticalVelocity;
+        controller.Move(velocity * Time.deltaTime);
     }
 
     // ================= SPRINT =================
     void HandleSprint()
     {
-        bool shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        bool holdingShift = Input.GetKey(KeyCode.LeftShift);
 
-        if (isCrouching) isSprinting = false;
-
-        if ((shiftHeld && currentSprint <= 0f) || (!shiftHeld && shiftHeldLastFrame))
-            cooldownTimer = sprintCooldown;
-
-        shiftHeldLastFrame = shiftHeld;
-
-        if (shiftHeld && currentSprint > 0f && !isCrouching)
+        if (holdingShift && currentSprint > 0 && !isCrouching)
         {
             isSprinting = true;
-            currentSprint -= sprintDepletionRate * Time.deltaTime;
-            currentSprint = Mathf.Max(currentSprint, 0f);
+            currentSprint -= sprintDrain * Time.deltaTime;
         }
         else
         {
             isSprinting = false;
-
-            if (cooldownTimer > 0f)
-                cooldownTimer -= Time.deltaTime;
-            else if (currentSprint < maxSprint)
-            {
-                currentSprint += sprintRegenRate * Time.deltaTime;
-                currentSprint = Mathf.Min(currentSprint, maxSprint);
-            }
+            currentSprint += sprintRegen * Time.deltaTime;
         }
+
+        currentSprint = Mathf.Clamp(currentSprint, 0, maxSprint);
     }
 
     // ================= UI =================
-    void UpdateSliders()
+    void UpdateUI()
     {
-        if (sprintSlider1) sprintSlider1.value = currentSprint;
-        if (sprintSlider2) sprintSlider2.value = currentSprint;
-    }
-
-    // ================= WALK AUDIO =================
-    void HandleWalkAudio()
-    {
-        if (!walkAudio) return;
-
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-        bool isMoving = (horizontal != 0 || vertical != 0) && controller.isGrounded;
-
-        if (isMoving)
-        {
-            walkTimer -= Time.deltaTime;
-            float interval = isCrouching ? walkIntervalCrouch : isSprinting ? walkIntervalSprint : walkIntervalNormal;
-
-            if (walkTimer <= 0f)
-            {
-                walkAudio.Play();
-                walkTimer = interval;
-            }
-        }
-        else walkTimer = 0f;
+        if (sprintSlider1)
+            sprintSlider1.value = currentSprint;
+        if (sprintSlider2)
+            sprintSlider2.value = currentSprint;
     }
 }

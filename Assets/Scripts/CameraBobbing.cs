@@ -2,167 +2,126 @@
 
 public class CameraBobbing : MonoBehaviour
 {
-    [Header("Bobbing Settings")]
+    [Header("Bobbing")]
     public float walkBobSpeed = 14f;
-    public float walkBobAmountY = 0.05f;
-    public float walkBobAmountX = 0.05f;
+    public float walkBobAmount = 0.05f;
 
     public float sprintBobSpeed = 18f;
-    public float sprintBobAmountY = 0.08f;
-    public float sprintBobAmountX = 0.08f;
+    public float sprintBobAmount = 0.08f;
 
     public float crouchBobSpeed = 8f;
-    public float crouchBobAmountY = 0.02f;
-    public float crouchBobAmountX = 0.02f;
+    public float crouchBobAmount = 0.02f;
 
-    [Header("Jump / Crouch Sway Settings")]
-    public float jumpSwayAmountX = 0.03f;
-    public float jumpSwayAmountY = 0.05f;
-    public float jumpSwaySpeed = 5f;
-
-    public float crouchSwayAmountX = 0.03f;
-    public float crouchSwayAmountY = 0.05f;
-    public float crouchSwaySpeed = 7f;
-
-    [Header("Smooth Settings")]
+    [Header("Crouch Sway")]
+    public float crouchCameraOffset = -0.5f;
+    public float crouchSideSway = 0.03f;     // side sway tijdens crouch lopen
+    public float crouchToggleSway = 0.06f;   // bij crouch toggle
     public float smoothSpeed = 8f;
 
-    [HideInInspector] public PlayerMovement playerMovement;
+    [Header("Jump Sway")]
+    public float jumpToggleSway = 0.06f;     // side sway bij springen
+    public float jumpTweenDuration = 0.3f;
 
-    private Vector3 initialLocalPosition;
-    private Vector3 targetLocalPosition;
+    PlayerMovement pm;
+    Vector3 startPos;
+    float bobTimer;
 
-    private Vector3 bobOffset;
-    private Vector3 jumpSwayOffset;
-    private Vector3 crouchSwayOffset;
+    // Voor crouch toggle
+    private bool crouchJustToggled = false;
+    private float crouchTweenTimer = 0f;
+    private float crouchTweenDuration = 0.3f;
 
-    private float bobTimer = 0f;
-    private bool wasCrouchingLastFrame = false;
-    private bool lockY = false;   // Flag voor Y lock
-    private float lockedY = 0f;   // Y waarde van camera wanneer gelockt
+    // Voor jump toggle
+    private bool wasGrounded = true;
+    private float jumpTweenTimer = 0f;
 
     void Start()
     {
-        initialLocalPosition = transform.localPosition;
-        targetLocalPosition = initialLocalPosition;
-
-        playerMovement = GetComponentInParent<PlayerMovement>();
-        if (playerMovement == null)
-            Debug.LogError("CameraBobbing: PlayerMovement not found in parent!");
+        startPos = transform.localPosition;
+        pm = GetComponentInParent<PlayerMovement>();
     }
 
     void Update()
     {
-        HandleBobbing();
-        HandleJumpAndCrouchSway();
-        ApplyCameraPosition();
-    }
+        if (!pm) return;
 
-    // ================= BOBBING =================
-    private void HandleBobbing()
-    {
-        if (playerMovement == null) return;
+        bool moving = Mathf.Abs(Input.GetAxis("Horizontal")) > 0.1f ||
+                      Mathf.Abs(Input.GetAxis("Vertical")) > 0.1f;
 
-        bool isMoving = (Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f ||
-                         Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f) &&
-                        playerMovement.controller.isGrounded;
-
-        // Stilstaand crouched → geen bobbing
-        if (playerMovement.isCrouching && !isMoving)
-        {
-            bobOffset = Vector3.zero;
-            bobTimer = 0f;
-            return;
-        }
-
+        // ================= BOB =================
         float speed = walkBobSpeed;
-        float amountY = walkBobAmountY;
-        float amountX = walkBobAmountX;
+        float amountY = walkBobAmount;
 
-        if (playerMovement.isCrouching)
+        if (pm.isCrouching)
         {
             speed = crouchBobSpeed;
-            amountY = crouchBobAmountY;
-            amountX = crouchBobAmountX;
+            amountY = crouchBobAmount;
         }
-        else if (playerMovement.isSprinting)
+        else if (pm.isSprinting)
         {
             speed = sprintBobSpeed;
-            amountY = sprintBobAmountY;
-            amountX = sprintBobAmountX;
+            amountY = sprintBobAmount;
         }
 
-        if (isMoving)
+        float bobY = 0f;
+        float bobX = 0f;
+
+        if (moving && pm.controller.isGrounded)
         {
             bobTimer += Time.deltaTime * speed;
-            float bobY = Mathf.Sin(bobTimer) * amountY;
-            float bobX = Mathf.Sin(bobTimer * 0.5f) * amountX;
-            bobOffset = new Vector3(bobX, bobY, 0f);
+            bobY = Mathf.Sin(bobTimer) * amountY;
+
+            if (pm.isCrouching)
+                bobX = Mathf.Sin(bobTimer * 0.5f) * crouchSideSway;
         }
-        else
+        else bobTimer = 0f;
+
+        // ================= CROUCH TOGGLE SWAY =================
+        if (pm.isCrouching != crouchJustToggled)
         {
-            bobOffset = Vector3.Lerp(bobOffset, Vector3.zero, Time.deltaTime * speed);
-            bobTimer = 0f;
+            crouchJustToggled = pm.isCrouching;
+            crouchTweenTimer = 0f;
         }
-    }
 
-    // ================= JUMP & CROUCH SWAY =================
-    private void HandleJumpAndCrouchSway()
-    {
-        if (playerMovement == null) return;
-
-        bool isMoving = Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f || Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f;
-
-        // Jump sway
-        if (!playerMovement.controller.isGrounded)
+        float toggleCrouchOffsetX = 0f;
+        if (crouchTweenTimer < crouchTweenDuration)
         {
-            jumpSwayOffset.x = Mathf.Sin(Time.time * jumpSwaySpeed) * jumpSwayAmountX;
-            jumpSwayOffset.y = Mathf.Sin(Time.time * jumpSwaySpeed * 1.2f) * jumpSwayAmountY;
-        }
-        else
-        {
-            jumpSwayOffset = Vector3.Lerp(jumpSwayOffset, Vector3.zero, Time.deltaTime * jumpSwaySpeed);
+            crouchTweenTimer += Time.deltaTime;
+            float t = crouchTweenTimer / crouchTweenDuration;
+            toggleCrouchOffsetX = Mathf.Sin(t * Mathf.PI) * crouchToggleSway;
         }
 
-        // Crouch sway
-        if (playerMovement.isCrouching != wasCrouchingLastFrame)
+        // ================= JUMP TOGGLE SWAY =================
+        if (!wasGrounded && pm.controller.isGrounded)
         {
-            float direction = playerMovement.isCrouching ? -1f : 1f;
-            crouchSwayOffset = new Vector3(crouchSwayAmountX * direction, crouchSwayAmountY * direction, 0f);
-            wasCrouchingLastFrame = playerMovement.isCrouching;
-
-            if (playerMovement.isCrouching)
-            {
-                // Lock Y zodra crouch is ingeschakeld
-                lockY = true;
-                lockedY = playerMovement.playerCamera.localPosition.y;
-            }
-            else
-            {
-                lockY = false;
-            }
+            // net geland → trigger sway
+            jumpTweenTimer = 0f;
         }
-        else if (!playerMovement.isCrouching || isMoving)
+        else if (wasGrounded && !pm.controller.isGrounded)
         {
-            crouchSwayOffset = Vector3.Lerp(crouchSwayOffset, Vector3.zero, Time.deltaTime * crouchSwaySpeed);
-        }
-        else
-        {
-            crouchSwayOffset = Vector3.zero;
-        }
-    }
-
-    // ================= APPLY CAMERA POSITION =================
-    private void ApplyCameraPosition()
-    {
-        targetLocalPosition = initialLocalPosition + bobOffset + jumpSwayOffset + crouchSwayOffset;
-
-        // Als Y gelockt is, override target Y
-        if (lockY)
-        {
-            targetLocalPosition.y = lockedY;
+            // net gesprongen → trigger sway
+            jumpTweenTimer = 0f;
         }
 
-        transform.localPosition = Vector3.Lerp(transform.localPosition, targetLocalPosition, Time.deltaTime * smoothSpeed);
+        wasGrounded = pm.controller.isGrounded;
+
+        float toggleJumpOffsetX = 0f;
+        if (jumpTweenTimer < jumpTweenDuration)
+        {
+            jumpTweenTimer += Time.deltaTime;
+            float t = jumpTweenTimer / jumpTweenDuration;
+            toggleJumpOffsetX = Mathf.Sin(t * Mathf.PI) * jumpToggleSway;
+        }
+
+        // ================= COMBINE =================
+        float crouchOffsetY = pm.isCrouching ? crouchCameraOffset : 0f;
+
+        Vector3 target =
+            startPos +
+            Vector3.up * (crouchOffsetY + bobY) +
+            Vector3.right * (bobX + toggleCrouchOffsetX + toggleJumpOffsetX);
+
+        transform.localPosition =
+            Vector3.Lerp(transform.localPosition, target, Time.deltaTime * smoothSpeed);
     }
 }

@@ -27,6 +27,12 @@ public class PlayerMovement : MonoBehaviour
     public Slider sprintSlider1;
     public Slider sprintSlider2;
 
+    [Header("Footstep Audio")]
+    public AudioSource footstepAudio;
+    public float walkInterval = 0.5f;
+    public float sprintInterval = 0.3f;
+    public float crouchInterval = 0.7f;
+
     [HideInInspector] public CharacterController controller;
     [HideInInspector] public bool isCrouching;
     [HideInInspector] public bool isSprinting;
@@ -36,6 +42,7 @@ public class PlayerMovement : MonoBehaviour
     float heightVelocity;
     float verticalVelocity;
     float currentSprint;
+    float footstepTimer = 0f;
 
     // Flag om te voorkomen dat jump afgaat bij uncrouch
     private bool justUncrouched = false;
@@ -61,6 +68,8 @@ public class PlayerMovement : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        if (footstepAudio) footstepAudio.playOnAwake = false;
     }
 
     void Update()
@@ -69,6 +78,7 @@ public class PlayerMovement : MonoBehaviour
         SmoothCapsule();
         HandleMovement();
         HandleSprint();
+        HandleFootsteps();
         UpdateUI();
 
         // Reset flag voor volgende frame
@@ -78,19 +88,17 @@ public class PlayerMovement : MonoBehaviour
     // ================= CROUCH =================
     void HandleCrouch()
     {
-        // Toggle crouch met Control
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             isCrouching = !isCrouching;
             targetHeight = isCrouching ? crouchHeight : standingHeight;
         }
 
-        // Spacebar in crouch → uncrouch, geen jump
         if (Input.GetButtonDown("Jump") && isCrouching)
         {
             isCrouching = false;
             targetHeight = standingHeight;
-            justUncrouched = true; // voorkomt springen in dezelfde frame
+            justUncrouched = true;
         }
     }
 
@@ -118,12 +126,10 @@ public class PlayerMovement : MonoBehaviour
         {
             if (verticalVelocity < 0) verticalVelocity = -2f;
 
-            // Alleen springen als niet crouching en niet net uncrouched
             if (Input.GetButtonDown("Jump") && !isCrouching && !justUncrouched)
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
-        // Realistic jump/fall
         if (!controller.isGrounded)
         {
             if (verticalVelocity < 0)
@@ -160,12 +166,38 @@ public class PlayerMovement : MonoBehaviour
         currentSprint = Mathf.Clamp(currentSprint, 0, maxSprint);
     }
 
+    // ================= FOOTSTEP AUDIO =================
+    void HandleFootsteps()
+    {
+        if (!footstepAudio || !controller.isGrounded) return;
+
+        bool isMoving = Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f ||
+                        Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f;
+
+        if (isMoving)
+        {
+            footstepTimer -= Time.deltaTime;
+
+            float interval = walkInterval;
+            if (isSprinting) interval = sprintInterval;
+            else if (isCrouching) interval = crouchInterval;
+
+            if (footstepTimer <= 0f)
+            {
+                footstepAudio.Play();
+                footstepTimer = interval;
+            }
+        }
+        else
+        {
+            footstepTimer = 0f;
+        }
+    }
+
     // ================= UI =================
     void UpdateUI()
     {
-        if (sprintSlider1)
-            sprintSlider1.value = currentSprint;
-        if (sprintSlider2)
-            sprintSlider2.value = currentSprint;
+        if (sprintSlider1) sprintSlider1.value = currentSprint;
+        if (sprintSlider2) sprintSlider2.value = currentSprint;
     }
 }

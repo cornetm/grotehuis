@@ -31,7 +31,15 @@ public class ItemSpawner : MonoBehaviour
             Random.Range(-spawnArea.z * 0.5f, spawnArea.z * 0.5f)
         );
 
-        Quaternion rot = randomRotation ? Quaternion.Euler(0f, Random.Range(0f, 360f), 0f) : Quaternion.identity;
+        // Full random rotation
+        Quaternion rot = randomRotation
+            ? Quaternion.Euler(
+                Random.Range(0f, 360f),
+                Random.Range(0f, 360f),
+                Random.Range(0f, 360f)
+              )
+            : Quaternion.identity;
+
         GameObject spawned = Instantiate(prefab, pos, rot);
 
         PrefabReferenceAuto prefabRef = spawned.GetComponent<PrefabReferenceAuto>();
@@ -49,9 +57,12 @@ public class ItemSpawner : MonoBehaviour
     {
         if (prefab == null) return null;
 
-        // Random rotatie als drop, anders identity (voor throw)
         Quaternion rotation = randomRotationForDrop
-            ? Quaternion.Euler(Random.Range(0f, 360f), Random.Range(0f, 360f), Random.Range(0f, 360f))
+            ? Quaternion.Euler(
+                Random.Range(0f, 360f),
+                Random.Range(0f, 360f),
+                Random.Range(0f, 360f)
+              )
             : Quaternion.identity;
 
         GameObject spawned = Instantiate(prefab, position, rotation);
@@ -67,5 +78,16 @@ public class ItemSpawner : MonoBehaviour
             spawned.tag = "Interaction";
 
         return spawned;
+    }
+
+    // ================= GIZMO =================
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Color(1f, 1f, 0f, 0.25f); // geel transparant
+        Vector3 center = transform.position + new Vector3(0, yOffset, 0);
+        Vector3 size = new Vector3(spawnArea.x, 0.1f, spawnArea.z); // dunne hoogte
+        Gizmos.DrawCube(center, size);
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(center, size);
     }
 }

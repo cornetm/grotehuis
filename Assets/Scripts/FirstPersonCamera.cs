@@ -18,36 +18,36 @@ public class FirstPersonCamera : MonoBehaviour
     public float jumpTilt = 3f;
     public float jumpSwaySpeed = 5f;
 
-    [Header("Raycast / Interaction Settings")]
+    [Header("Raycast Settings")]
     public float rayDistance = 5f;
     public float sphereRadius = 0.3f;
+    public float raycastEyeOffset = 0.6f;
+
     public Image crosshairImage;
     public Color defaultCrossColor = Color.red;
     public Color highlightColor = Color.white;
     public InventorySystem inventorySystem;
 
-    private float xRotation = 0f;
-    private float eyeTimer = 0f;
-    private Quaternion targetRotation;
-    private float currentTilt = 0f;
-    private float targetTilt = 0f;
+    float xRotation;
+    float eyeTimer;
+    float currentTilt;
+    float targetTilt;
 
-    private PlayerMovement player;
-    private Highlight currentHighlight;
-    private GameObject currentInteractObject;
-    private GameObject currentPrefab;
-    private Texture currentIcon;
+    PlayerMovement player;
+    Highlight currentHighlight;
+    GameObject currentInteractObject;
+    GameObject currentPrefab;
+    Texture currentIcon;
 
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        targetRotation = transform.localRotation;
 
         player = playerBody.GetComponent<PlayerMovement>();
-        if (player == null) Debug.LogError("PlayerMovement component not found!");
 
-        if (crosshairImage) crosshairImage.color = defaultCrossColor;
+        if (crosshairImage)
+            crosshairImage.color = defaultCrossColor;
     }
 
     void Update()
@@ -57,8 +57,9 @@ public class FirstPersonCamera : MonoBehaviour
         HandleInteractionInput();
     }
 
-    // ================= CAMERA ROTATION + SWAY =================
-    private void HandleCameraRotation()
+    // ================= CAMERA =================
+
+    void HandleCameraRotation()
     {
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
@@ -68,64 +69,94 @@ public class FirstPersonCamera : MonoBehaviour
 
         playerBody.Rotate(Vector3.up * mouseX);
 
-        bool isMoving = (Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f ||
-                         Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f) &&
-                        player.controller.isGrounded;
+        bool moving =
+            (Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f ||
+             Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f) &&
+             player.controller.isGrounded;
 
-        if (!isMoving)
+        Quaternion targetRot;
+
+        if (!moving)
         {
             eyeTimer += Time.deltaTime * eyeSwaySpeed;
             float swayX = Mathf.Sin(eyeTimer * 0.7f) * eyeSwayAmount;
             float swayY = Mathf.Sin(eyeTimer * 1.3f) * eyeSwayAmount;
-            targetRotation = Quaternion.Euler(xRotation + swayY, swayX, 0f);
+            targetRot = Quaternion.Euler(xRotation + swayY, swayX, 0f);
         }
         else
         {
-            targetRotation = Quaternion.Euler(xRotation, 0f, 0f);
-            eyeTimer = Mathf.Lerp(eyeTimer, 0f, Time.deltaTime * 2f);
+            targetRot = Quaternion.Euler(xRotation, 0f, 0f);
+            eyeTimer = 0f;
         }
 
-        // Strafing tilt
-        float horizontalInput = Input.GetAxis("Horizontal");
-        targetTilt = -horizontalInput * tiltAmount;
+        float horizontal = Input.GetAxis("Horizontal");
+        targetTilt = -horizontal * tiltAmount;
         currentTilt = Mathf.Lerp(currentTilt, targetTilt, Time.deltaTime * tiltSmooth);
 
-        // Jump sway
         if (!player.controller.isGrounded)
-        {
-            float jumpTiltOffset = Mathf.Sin(Time.time * jumpSwaySpeed) * jumpTilt;
-            currentTilt += jumpTiltOffset;
-        }
+            currentTilt += Mathf.Sin(Time.time * jumpSwaySpeed) * jumpTilt;
 
-        Quaternion finalRotation = targetRotation * Quaternion.Euler(0f, 0f, currentTilt);
-        transform.localRotation = Quaternion.Slerp(transform.localRotation, finalRotation, Time.deltaTime * rotationSmoothSpeed);
+        transform.localRotation =
+            Quaternion.Slerp(transform.localRotation,
+            targetRot * Quaternion.Euler(0, 0, currentTilt),
+            Time.deltaTime * rotationSmoothSpeed);
     }
 
-    // ================= RAYCAST INTERACTION =================
-    private void HandleRaycast()
+    // ================= RAYCAST =================
+
+    void HandleRaycast()
     {
-        Vector3 origin = transform.position;
+        Vector3 origin =
+            playerBody.position +
+            Vector3.up * raycastEyeOffset +
+            transform.forward * 0.3f;
+
         Vector3 direction = transform.forward;
 
-        RaycastHit hit;
-        bool hitSomething = Physics.SphereCast(origin, sphereRadius, direction, out hit, rayDistance);
+        RaycastHit[] hits = Physics.SphereCastAll(origin, sphereRadius, direction, rayDistance);
 
         Debug.DrawRay(origin, direction * rayDistance, Color.green);
 
-        if (hitSomething && hit.collider.CompareTag("Interaction"))
-        {
-            if (crosshairImage) crosshairImage.color = highlightColor;
+        RaycastHit? bestHit = null;
+        float closest = Mathf.Infinity;
 
-            Highlight highlight = hit.collider.GetComponent<Highlight>();
-            if (highlight && highlight != currentHighlight)
+        foreach (RaycastHit hit in hits)
+        {
+            // Skip eigen player
+            if (hit.collider.CompareTag("Player"))
+                continue;
+
+            // Alleen interaction accepteren
+            if (!hit.collider.CompareTag("Interaction"))
+                continue;
+
+            if (hit.distance < closest)
+            {
+                closest = hit.distance;
+                bestHit = hit;
+            }
+        }
+
+        if (bestHit.HasValue)
+        {
+            RaycastHit hit = bestHit.Value;
+
+            if (crosshairImage)
+                crosshairImage.color = highlightColor;
+
+            Highlight h = hit.collider.GetComponent<Highlight>();
+
+            if (h && h != currentHighlight)
             {
                 if (currentHighlight) currentHighlight.DisableHighlight();
 
-                highlight.EnableHighlight();
-                currentHighlight = highlight;
+                h.EnableHighlight();
+                currentHighlight = h;
                 currentInteractObject = hit.collider.gameObject;
 
-                PrefabReferenceAuto prefabRef = currentInteractObject.GetComponent<PrefabReferenceAuto>();
+                PrefabReferenceAuto prefabRef =
+                    currentInteractObject.GetComponent<PrefabReferenceAuto>();
+
                 if (prefabRef)
                 {
                     currentPrefab = prefabRef.prefab;
@@ -133,24 +164,31 @@ public class FirstPersonCamera : MonoBehaviour
                 }
             }
         }
-        else ResetHighlightAndCrosshair();
+        else
+        {
+            ResetHighlight();
+        }
     }
 
-    private void ResetHighlightAndCrosshair()
+    void ResetHighlight()
     {
-        if (currentHighlight) currentHighlight.DisableHighlight();
+        if (currentHighlight)
+            currentHighlight.DisableHighlight();
+
         currentHighlight = null;
         currentInteractObject = null;
         currentPrefab = null;
         currentIcon = null;
 
-        if (crosshairImage) crosshairImage.color = defaultCrossColor;
+        if (crosshairImage)
+            crosshairImage.color = defaultCrossColor;
     }
 
-    // ================= INTERACTIE INPUT =================
-    private void HandleInteractionInput()
+    // ================= INTERACTION =================
+
+    void HandleInteractionInput()
     {
-        if (currentInteractObject != null && Input.GetKeyDown(KeyCode.E))
+        if (currentInteractObject && Input.GetKeyDown(KeyCode.E))
         {
             if (inventorySystem && currentPrefab)
             {
@@ -165,7 +203,7 @@ public class FirstPersonCamera : MonoBehaviour
                     Destroy(currentInteractObject);
                 }
 
-                ResetHighlightAndCrosshair();
+                ResetHighlight();
             }
         }
     }

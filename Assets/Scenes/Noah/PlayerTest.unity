@@ -3475,6 +3475,7 @@ MonoBehaviour:
   jumpSwaySpeed: 5
   rayDistance: 5
   sphereRadius: 0.25
+  raycastEyeOffset: 0.6
   crosshairImage: {fileID: 1231191083}
   defaultCrossColor: {r: 1, g: 0, b: 0, a: 1}
   highlightColor: {r: 1, g: 1, b: 1, a: 1}

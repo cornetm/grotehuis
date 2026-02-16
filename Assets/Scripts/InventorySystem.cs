@@ -115,12 +115,8 @@ public class InventorySystem : MonoBehaviour
 
         RepositionSlots();
 
-        // AUTO EQUIP FIRST ITEM
         if (slots.Count == 1)
-        {
-            ToggleSlot(0);
-            Debug.Log($"Automatically equipped {prefab.name} as the first item.");
-        }
+            ToggleSlot(0); // auto equip first item
     }
 
     public bool IsFull() => slots.Count >= maxItems;
@@ -145,8 +141,6 @@ public class InventorySystem : MonoBehaviour
                 DropSlotItem(oldSlot);
                 AddItem(newPrefab, newIcon, slotIndex);
                 ToggleSlot(slotIndex);
-
-                Debug.Log("Equipped item replaced and old item dropped.");
                 break;
             }
         }
@@ -160,11 +154,9 @@ public class InventorySystem : MonoBehaviour
 
         Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
 
-        // Rotate 90 degrees on X-axis for drop
-        Quaternion dropRotation = Quaternion.LookRotation(playerTransform.forward) * Quaternion.Euler(90f, 0f, 0f);
-        itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, dropRotation);
+        // Random rotatie bij drop
+        itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, true);
 
-        Debug.Log($"Dropped {slotItem.prefab.name}");
         RemoveSlot(index);
     }
 
@@ -176,15 +168,17 @@ public class InventorySystem : MonoBehaviour
 
         Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
 
-        // Rotate 90 degrees on X-axis for throw
-        Quaternion throwRotation = Quaternion.LookRotation(playerTransform.forward) * Quaternion.Euler(90f, 0f, 0f);
-        GameObject obj = itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, throwRotation);
+        // Eerst -90 graden X-as, daarna naar voren
+        Quaternion throwRotation = Quaternion.Euler(0f, -90f, 0f);
+        throwRotation = Quaternion.LookRotation(playerTransform.forward) * throwRotation;
+
+        GameObject obj = itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, false);
+        obj.transform.rotation = throwRotation;
 
         Rigidbody rb = obj.GetComponent<Rigidbody>();
         if (rb != null)
             rb.AddForce(playerTransform.forward.normalized * force, ForceMode.Impulse);
 
-        Debug.Log($"Threw {slotItem.prefab.name} with force {force}");
         RemoveSlot(index);
     }
 
@@ -212,10 +206,8 @@ public class InventorySystem : MonoBehaviour
         {
             bool selected = i == index;
             slots[i].transform.localScale = selected ? Vector3.one * selectedScale : Vector3.one * normalScale;
-            if (selected)
-                slotComponents[i].Equip();
-            else
-                slotComponents[i].Unequip();
+            if (selected) slotComponents[i].Equip();
+            else slotComponents[i].Unequip();
         }
 
         activeSlot = index;

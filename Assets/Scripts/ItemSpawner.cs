@@ -45,9 +45,14 @@ public class ItemSpawner : MonoBehaviour
     }
 
     // ================= SPAWN DROPPED ITEM =================
-    public GameObject SpawnDroppedItem(GameObject prefab, Vector3 position, Quaternion rotation)
+    public GameObject SpawnDroppedItem(GameObject prefab, Vector3 position, bool randomRotationForDrop = true)
     {
         if (prefab == null) return null;
+
+        // Random rotatie als drop, anders identity (voor throw)
+        Quaternion rotation = randomRotationForDrop
+            ? Quaternion.Euler(Random.Range(0f, 360f), Random.Range(0f, 360f), Random.Range(0f, 360f))
+            : Quaternion.identity;
 
         GameObject spawned = Instantiate(prefab, position, rotation);
 

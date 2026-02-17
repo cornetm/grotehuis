@@ -18,7 +18,22 @@ public class ItemFollow : MonoBehaviour
     public float bobAmount = 0.02f;
     public float bobSpeed = 8f;
 
+    // Opslaan van originele prefab rotaties
+    private Quaternion[] originalRotations;
     private float bobTimer = 0f;
+
+    void Start()
+    {
+        if (objectsToFollow != null && objectsToFollow.Length > 0)
+        {
+            originalRotations = new Quaternion[objectsToFollow.Length];
+            for (int i = 0; i < objectsToFollow.Length; i++)
+            {
+                if (objectsToFollow[i] != null)
+                    originalRotations[i] = objectsToFollow[i].transform.localRotation;
+            }
+        }
+    }
 
     void LateUpdate()
     {
@@ -52,15 +67,17 @@ public class ItemFollow : MonoBehaviour
         }
 
         // ================= APPLY TO ALL OBJECTS =================
-        foreach (GameObject obj in objectsToFollow)
+        for (int i = 0; i < objectsToFollow.Length; i++)
         {
+            GameObject obj = objectsToFollow[i];
             if (obj == null) continue;
 
             // Smooth positie
             obj.transform.position = Vector3.Lerp(obj.transform.position, basePosition, Time.deltaTime * positionSmooth);
 
-            // Smooth rotatie
-            obj.transform.rotation = Quaternion.Slerp(obj.transform.rotation, targetRotation, Time.deltaTime * rotationSmooth);
+            // Combineer player rotatie met originele prefab rotatie
+            Quaternion combinedRot = targetRotation * originalRotations[i];
+            obj.transform.rotation = Quaternion.Slerp(obj.transform.rotation, combinedRot, Time.deltaTime * rotationSmooth);
         }
     }
 }

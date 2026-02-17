@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class ItemUse : MonoBehaviour
 {
@@ -15,21 +16,45 @@ public class ItemUse : MonoBehaviour
     [Header("Limited Objects")]
     public GameObject pillsObject;
 
-    private bool isOn = false;
+    // Track hoe veel van elk type equipped zijn
+    private Dictionary<string, int> equippedCount = new Dictionary<string, int>();
 
     void Start()
     {
         SetAllOff();
     }
 
-    // Toggle voor elk type
-    public void Toggle(PrefabReferenceAuto.ItemCategory category, object typeEnum)
+    // ================= EQUIP ITEM =================
+    public void EquipItem(PrefabReferenceAuto.ItemCategory category, object typeEnum)
     {
-        isOn = !isOn;
-        SetState(category, typeEnum, isOn);
+        string key = GetKey(category, typeEnum);
+        if (!equippedCount.ContainsKey(key)) equippedCount[key] = 0;
+        equippedCount[key]++;
+
+        SetState(category, typeEnum, true);
     }
 
-    // Zet specifiek object aan/uit
+    // ================= UNEQUIP ITEM =================
+    public void UnequipItem(PrefabReferenceAuto.ItemCategory category, object typeEnum)
+    {
+        string key = GetKey(category, typeEnum);
+        if (!equippedCount.ContainsKey(key)) return;
+
+        equippedCount[key]--;
+        if (equippedCount[key] <= 0)
+        {
+            equippedCount[key] = 0;
+            SetState(category, typeEnum, false);
+        }
+    }
+
+    // ================= HULPFUNCTIE VOOR KEY =================
+    private string GetKey(PrefabReferenceAuto.ItemCategory category, object typeEnum)
+    {
+        return category.ToString() + "_" + typeEnum.ToString();
+    }
+
+    // ================= SET STATE =================
     public void SetState(PrefabReferenceAuto.ItemCategory category, object typeEnum, bool state)
     {
         switch (category)
@@ -78,7 +103,7 @@ public class ItemUse : MonoBehaviour
         }
     }
 
-    // Alles uitzetten
+    // ================= ZET ALLES UIT =================
     public void SetAllOff()
     {
         if (butcherKnifeObject != null) butcherKnifeObject.SetActive(false);
@@ -91,6 +116,6 @@ public class ItemUse : MonoBehaviour
 
         if (pillsObject != null) pillsObject.SetActive(false);
 
-        isOn = false;
+        equippedCount.Clear();
     }
 }

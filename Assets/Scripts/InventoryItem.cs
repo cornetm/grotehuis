@@ -32,6 +32,7 @@ public class InventorySlotItem : MonoBehaviour
 
     public void Equip()
     {
+        if (isEquipped) return;
         isEquipped = true;
         if (slotText != null) slotText.gameObject.SetActive(true);
 
@@ -39,12 +40,16 @@ public class InventorySlotItem : MonoBehaviour
         {
             ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
             if (itemUse != null)
-                itemUse.SetState(prefabRef.category, GetEnumFromCategory(prefabRef), true);
+            {
+                // Gebruik EquipItem ipv SetState!
+                itemUse.EquipItem(prefabRef.category, GetEnumFromCategory(prefabRef));
+            }
         }
     }
 
     public void Unequip()
     {
+        if (!isEquipped) return;
         isEquipped = false;
         if (slotText != null) slotText.gameObject.SetActive(false);
 
@@ -52,7 +57,10 @@ public class InventorySlotItem : MonoBehaviour
         {
             ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
             if (itemUse != null)
-                itemUse.SetState(prefabRef.category, GetEnumFromCategory(prefabRef), false);
+            {
+                // Gebruik UnequipItem ipv SetState!
+                itemUse.UnequipItem(prefabRef.category, GetEnumFromCategory(prefabRef));
+            }
         }
     }
 

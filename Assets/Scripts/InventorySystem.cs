@@ -87,20 +87,6 @@ public class InventorySystem : MonoBehaviour
                 throwPowerSlider.gameObject.SetActive(false);
             }
         }
-
-        // ================= TEMP/LIMITED/WEAPON ITEM TOGGLE MET LINKERMUIS =================
-        if (Input.GetMouseButtonDown(0))
-        {
-            InventorySlotItem equipped = CurrentEquippedItem();
-            if (equipped != null && equipped.prefabRef != null)
-            {
-                ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
-                if (itemUse != null)
-                {
-                    itemUse.Toggle(equipped.prefabRef.category, equipped.GetEnumFromCategory(equipped.prefabRef));
-                }
-            }
-        }
     }
 
     // ================= PUBLIC FUNCTIONS =================
@@ -175,8 +161,15 @@ public class InventorySystem : MonoBehaviour
         int index = slotComponents.IndexOf(slotItem);
         if (index < 0) return;
 
-        Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
+        // Zet object uit bij droppen
+        if (slotItem.prefabRef != null)
+        {
+            ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
+            if (itemUse != null)
+                itemUse.SetState(slotItem.prefabRef.category, slotItem.GetEnumFromCategory(slotItem.prefabRef), false);
+        }
 
+        Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
         itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, true);
 
         RemoveSlot(index);
@@ -187,10 +180,16 @@ public class InventorySystem : MonoBehaviour
         int index = slotComponents.IndexOf(slotItem);
         if (index < 0) return;
 
-        Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
+        // Zet object uit bij throw
+        if (slotItem.prefabRef != null)
+        {
+            ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
+            if (itemUse != null)
+                itemUse.SetState(slotItem.prefabRef.category, slotItem.GetEnumFromCategory(slotItem.prefabRef), false);
+        }
 
-        Quaternion throwRotation = Quaternion.Euler(0f, -90f, 0f);
-        throwRotation = Quaternion.LookRotation(playerTransform.forward) * throwRotation;
+        Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
+        Quaternion throwRotation = Quaternion.LookRotation(playerTransform.forward);
 
         GameObject obj = itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, false);
         obj.transform.rotation = throwRotation;

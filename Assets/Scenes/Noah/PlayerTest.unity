@@ -3697,6 +3697,7 @@ RectTransform:
   - {fileID: 1824801269}
   - {fileID: 1014915895}
   - {fileID: 2105236715}
+  - {fileID: 1865681121}
   m_Father: {fileID: 670264219}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -4335,7 +4336,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1624439871}
-  - {fileID: 1865681121}
   m_Father: {fileID: 670264219}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1823688468
@@ -4907,6 +4907,7 @@ GameObject:
   - component: {fileID: 1865681123}
   - component: {fileID: 1865681122}
   - component: {fileID: 1865681124}
+  - component: {fileID: 1865681125}
   m_Layer: 7
   m_Name: Flashlight
   m_TagString: Untagged
@@ -4923,11 +4924,11 @@ Transform:
   m_GameObject: {fileID: 1865681120}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.25, y: 0, z: 0}
+  m_LocalPosition: {x: -960, y: -537.25, z: -4.325}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1823688467}
+  m_Father: {fileID: 1389164984}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1865681122
 MonoBehaviour:
@@ -5149,6 +5150,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   flashlightLight: {fileID: 1865681123}
+--- !u!114 &1865681125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1865681120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73d8a106b033c1743bd6a73d4b10623f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  playerCamera: {fileID: 1823688467}
+  playerBody: {fileID: 670264219}
+  pm: {fileID: 670264220}
+  localOffset: {x: 0.2, y: 0.5, z: 0.5}
+  positionSmooth: 8
+  rotationSmooth: 12
+  bobAmount: 0.05
+  bobSpeed: 8
 --- !u!1 &2013410473
 GameObject:
   m_ObjectHideFlags: 1

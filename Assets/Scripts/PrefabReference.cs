@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class PrefabReferenceAuto : MonoBehaviour
 {
-    // ================= ENUMS =================
     public enum ItemCategory { Weapons, Temporary, Limited }
     public enum WeaponType { ButcherKnife, KitchenKnife, ButterKnife }
     public enum TemporaryType { Flashlight, Lucifer, Candle }

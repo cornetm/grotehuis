@@ -1,13 +1,16 @@
 using UnityEngine;
 
-public class FlashlightFollow : MonoBehaviour
+public class ItemFollow : MonoBehaviour
 {
     [Header("References")]
-    public Transform playerCamera;   // Je main camera
-    public PlayerMovement pm;        // PlayerMovement script voor crouch info
+    public Transform playerCamera;          // Sleep hier je camera
+    public PlayerMovement playerMovement;   // PlayerMovement script (voor crouch info)
+
+    [Header("Objects To Follow")]
+    public GameObject[] objectsToFollow;    // Sleep hier alle objecten die moeten volgen
 
     [Header("Follow Settings")]
-    public Vector3 offset = new Vector3(0.2f, -0.2f, 0.5f); // relative positie t.o.v. camera
+    public Vector3 offset = new Vector3(0.2f, -0.2f, 0.5f); // positie t.o.v. camera
     public float positionSmooth = 8f;
     public float rotationSmooth = 12f;
 
@@ -15,40 +18,49 @@ public class FlashlightFollow : MonoBehaviour
     public float bobAmount = 0.02f;
     public float bobSpeed = 8f;
 
-    Vector3 targetPosition;
-    float bobTimer = 0f;
+    private float bobTimer = 0f;
 
     void LateUpdate()
     {
-        if (!playerCamera || !pm) return;
+        if (playerCamera == null || playerMovement == null || objectsToFollow == null)
+            return;
 
         // ================= ROTATION =================
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            Quaternion.Euler(playerCamera.eulerAngles.x, playerCamera.eulerAngles.y, 0f),
-            Time.deltaTime * rotationSmooth
+        Quaternion targetRotation = Quaternion.Euler(
+            playerCamera.eulerAngles.x,
+            playerCamera.eulerAngles.y,
+            0f
         );
 
         // ================= POSITION =================
-        targetPosition = playerCamera.position + playerCamera.TransformDirection(offset);
+        Vector3 basePosition = playerCamera.position + playerCamera.TransformDirection(offset);
 
         // ================= ADD BOB =================
         bool moving = Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f ||
                       Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f;
 
-        if (moving && pm.controller.isGrounded)
+        if (moving && playerMovement.controller.isGrounded)
         {
-            float speed = pm.isSprinting ? bobSpeed * 1.5f : bobSpeed;
+            float speed = playerMovement.isSprinting ? bobSpeed * 1.5f : bobSpeed;
             bobTimer += Time.deltaTime * speed;
-            targetPosition += playerCamera.right * Mathf.Sin(bobTimer) * bobAmount;
-            targetPosition += Vector3.up * Mathf.Sin(bobTimer * 2f) * bobAmount;
+            basePosition += playerCamera.right * Mathf.Sin(bobTimer) * bobAmount;
+            basePosition += Vector3.up * Mathf.Sin(bobTimer * 2f) * bobAmount;
         }
         else
         {
             bobTimer = 0f;
         }
 
-        // ================= SMOOTH MOVE =================
-        transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * positionSmooth);
+        // ================= APPLY TO ALL OBJECTS =================
+        foreach (GameObject obj in objectsToFollow)
+        {
+            if (obj == null) continue;
+
+            // Smooth positie
+            obj.transform.position = Vector3.Lerp(obj.transform.position, basePosition, Time.deltaTime * positionSmooth);
+
+            // Smooth rotatie
+            obj.transform.rotation = Quaternion.Slerp(obj.transform.rotation, targetRotation, Time.deltaTime * rotationSmooth);
+        }
     }
 }

@@ -30,7 +30,7 @@ public class InventorySystem : MonoBehaviour
     public ItemSpawner itemSpawner;
 
     private List<RawImage> slots = new List<RawImage>();
-    private List<InventorySlotItem> slotComponents = new List<InventorySlotItem>();
+    public List<InventorySlotItem> slotComponents = new List<InventorySlotItem>();
 
     private int activeSlot = -1;
     private bool chargingThrow = false;
@@ -88,19 +88,17 @@ public class InventorySystem : MonoBehaviour
             }
         }
 
-        // ================= FLASHLIGHT TOGGLE MET LINKERMUIS =================
+        // ================= TEMP/LIMITED/WEAPON ITEM TOGGLE MET LINKERMUIS =================
         if (Input.GetMouseButtonDown(0))
         {
             InventorySlotItem equipped = CurrentEquippedItem();
-
-            if (equipped != null &&
-                equipped.prefabRef != null &&
-                equipped.prefabRef.category == PrefabReferenceAuto.ItemCategory.Temporary &&
-                equipped.prefabRef.temporaryType == PrefabReferenceAuto.TemporaryType.Flashlight)
+            if (equipped != null && equipped.prefabRef != null)
             {
-                FlashlightController fl = GameObject.FindObjectOfType<FlashlightController>();
-                if (fl != null)
-                    fl.Toggle();
+                ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
+                if (itemUse != null)
+                {
+                    itemUse.Toggle(equipped.prefabRef.category, equipped.GetEnumFromCategory(equipped.prefabRef));
+                }
             }
         }
     }

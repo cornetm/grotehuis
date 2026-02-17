@@ -33,35 +33,38 @@ public class InventorySlotItem : MonoBehaviour
     public void Equip()
     {
         isEquipped = true;
-        if (slotText != null)
-            slotText.gameObject.SetActive(true);
+        if (slotText != null) slotText.gameObject.SetActive(true);
 
-        // 🔦 Auto-enable flashlight controller als item Temporary → Flashlight
-        if (prefabRef != null &&
-            prefabRef.category == PrefabReferenceAuto.ItemCategory.Temporary &&
-            prefabRef.temporaryType == PrefabReferenceAuto.TemporaryType.Flashlight)
+        if (prefabRef != null)
         {
-            FlashlightController fl = GameObject.FindObjectOfType<FlashlightController>();
-            if (fl != null)
-                fl.gameObject.SetActive(true);
+            ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
+            if (itemUse != null)
+                itemUse.SetState(prefabRef.category, GetEnumFromCategory(prefabRef), true);
         }
     }
 
     public void Unequip()
     {
         isEquipped = false;
-        if (slotText != null)
-            slotText.gameObject.SetActive(false);
+        if (slotText != null) slotText.gameObject.SetActive(false);
 
-        // 🔦 Auto-disable flashlight als dit uit-equip wordt
-        if (prefabRef != null &&
-            prefabRef.category == PrefabReferenceAuto.ItemCategory.Temporary &&
-            prefabRef.temporaryType == PrefabReferenceAuto.TemporaryType.Flashlight)
+        if (prefabRef != null)
         {
-            FlashlightController fl = GameObject.FindObjectOfType<FlashlightController>();
-            if (fl != null)
-                fl.SetState(false);
+            ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
+            if (itemUse != null)
+                itemUse.SetState(prefabRef.category, GetEnumFromCategory(prefabRef), false);
         }
+    }
+
+    public object GetEnumFromCategory(PrefabReferenceAuto prefabRef)
+    {
+        switch (prefabRef.category)
+        {
+            case PrefabReferenceAuto.ItemCategory.Weapons: return prefabRef.weaponType;
+            case PrefabReferenceAuto.ItemCategory.Temporary: return prefabRef.temporaryType;
+            case PrefabReferenceAuto.ItemCategory.Limited: return prefabRef.limitedType;
+        }
+        return null;
     }
 
     public void Drop()

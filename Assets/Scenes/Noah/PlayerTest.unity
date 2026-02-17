@@ -3801,6 +3801,7 @@ MonoBehaviour:
   - {fileID: 3738723623220213838, guid: 86951b1ed8d58ce4486a18b4864d3406, type: 3}
   - {fileID: 6196800411092006803, guid: 338c9c82266a7b847a965b9fb93e967b, type: 3}
   - {fileID: 3786103366093705469, guid: d38594894d367374789705b4c74c6b14, type: 3}
+  - {fileID: 2857044343963498596, guid: 9ead5d66744f1124daacb5d92921da85, type: 3}
   spawnCount: 20
   spawnArea: {x: 20, y: 0, z: 10}
   yOffset: 0

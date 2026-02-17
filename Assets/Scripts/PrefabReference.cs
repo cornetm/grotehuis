@@ -2,14 +2,22 @@ using UnityEngine;
 
 public class PrefabReferenceAuto : MonoBehaviour
 {
-    [Header("Prefab Reference")]
-    public GameObject prefab; // Zet hier het prefab vanuit Assets in
-    public Texture icon;      // Optioneel: icon voor inventory
+    // ================= ENUMS =================
+    public enum ItemCategory { Weapons, Temporary, Limited }
+    public enum WeaponType { ButcherKnife, KitchenKnife, ButterKnife }
+    public enum TemporaryType { Flashlight, Lucifer, Candle }
+    public enum LimitedType { Pills }
 
-    [Header("Item Type")]
-    public bool isWeapon = false;
-    public bool isTemporary = false;
-    public bool isLimited = false;
+    [Header("Prefab Reference")]
+    public GameObject prefab;
+    public Texture icon;
+
+    [Header("Item Category")]
+    public ItemCategory category;
+
+    public WeaponType weaponType;
+    public TemporaryType temporaryType;
+    public LimitedType limitedType;
 
     [Header("Weapon Stats")]
     public float damage;
@@ -21,25 +29,4 @@ public class PrefabReferenceAuto : MonoBehaviour
 
     [Header("Limited Stats")]
     public int number;
-
-    // ================== EDITOR VALIDATION ==================
-    private void OnValidate()
-    {
-        // Zorg dat alleen 1 type tegelijk actief is
-        if (isWeapon)
-        {
-            isTemporary = false;
-            isLimited = false;
-        }
-        else if (isTemporary)
-        {
-            isWeapon = false;
-            isLimited = false;
-        }
-        else if (isLimited)
-        {
-            isWeapon = false;
-            isTemporary = false;
-        }
-    }
 }

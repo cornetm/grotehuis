@@ -187,9 +187,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PrefabReference
   prefab: {fileID: 7882557225515349911}
   icon: {fileID: 0}
-  isWeapon: 1
-  isTemporary: 0
-  isLimited: 0
+  category: 0
+  weaponType: 1
+  temporaryType: 0
+  limitedType: 0
   damage: 35
   speed: 5
   range: 3.5

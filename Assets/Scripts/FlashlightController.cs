@@ -2,14 +2,15 @@
 
 public class FlashlightController : MonoBehaviour
 {
-    public Light flashlightLight;
+    [Header("Flashlight Object")]
+    public GameObject flashlightObject; // sleep hier het hele prefab/object in
 
-    bool isOn = false;
+    private bool isOn = false;
 
     void Start()
     {
-        if (flashlightLight == null)
-            flashlightLight = GetComponentInChildren<Light>();
+        if (flashlightObject == null)
+            flashlightObject = gameObject; // fallback: zelf het object
 
         SetState(false);
     }
@@ -20,11 +21,11 @@ public class FlashlightController : MonoBehaviour
         SetState(isOn);
     }
 
-    // 🔹 Public zodat InventorySlotItem hem kan uitzetten
     public void SetState(bool state)
     {
         isOn = state;
-        if (flashlightLight != null)
-            flashlightLight.enabled = state;
+
+        if (flashlightObject != null)
+            flashlightObject.SetActive(state);
     }
 }

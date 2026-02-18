@@ -108,6 +108,10 @@ public class InventorySystem : MonoBehaviour
             {
                 int slotIndex = i;
 
+                // ================= FIX =================
+                // Zet het oude item uit
+                slotComponents[i].Unequip();
+
                 DropSlotItem(slotComponents[i]);
                 AddItem(newPrefab, newIcon, slotIndex);
                 ToggleSlot(slotIndex);

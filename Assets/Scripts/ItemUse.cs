@@ -10,14 +10,18 @@ public class ItemUse : MonoBehaviour
 
     [Header("Temporary Objects")]
     public GameObject flashlightObject;
+    public Light flashlightLight;   // <-- Sleep hier de Light component van de zaklamp
     public GameObject luciferObject;
     public GameObject candleObject;
 
     [Header("Limited Objects")]
     public GameObject pillsObject;
 
-    // Track hoe veel van elk type equipped zijn
+    // Houd bij hoeveel van elk type equipped zijn
     private Dictionary<string, int> equippedCount = new Dictionary<string, int>();
+
+    // Houd bij welke items geactiveerd zijn
+    private Dictionary<string, bool> activatedState = new Dictionary<string, bool>();
 
     void Start()
     {
@@ -32,6 +36,15 @@ public class ItemUse : MonoBehaviour
         equippedCount[key]++;
 
         SetState(category, typeEnum, true);
+
+        // Zet standaard activated uit bij equip
+        if (!activatedState.ContainsKey(key)) activatedState[key] = false;
+
+        // Voor tijdelijke items: licht standaard uit
+        if (category == PrefabReferenceAuto.ItemCategory.Temporary && typeEnum.Equals(PrefabReferenceAuto.TemporaryType.Flashlight))
+        {
+            if (flashlightLight != null) flashlightLight.enabled = false;
+        }
     }
 
     // ================= UNEQUIP ITEM =================
@@ -45,7 +58,38 @@ public class ItemUse : MonoBehaviour
         {
             equippedCount[key] = 0;
             SetState(category, typeEnum, false);
+
+            // Zet activated uit
+            if (activatedState.ContainsKey(key))
+                activatedState[key] = false;
+
+            // Zet tijdelijk licht uit
+            if (category == PrefabReferenceAuto.ItemCategory.Temporary && typeEnum.Equals(PrefabReferenceAuto.TemporaryType.Flashlight))
+            {
+                if (flashlightLight != null) flashlightLight.enabled = false;
+            }
         }
+    }
+
+    // ================= TOGGLE ACTIVATED BIJ LINKERMUIS =================
+    public void ToggleActivated(PrefabReferenceAuto.ItemCategory category, object typeEnum)
+    {
+        string key = GetKey(category, typeEnum);
+
+        if (!activatedState.ContainsKey(key))
+            activatedState[key] = false;
+
+        activatedState[key] = !activatedState[key];
+
+        // Voor de flashlight: zet Light component aan/uit
+        if (category == PrefabReferenceAuto.ItemCategory.Temporary && typeEnum.Equals(PrefabReferenceAuto.TemporaryType.Flashlight))
+        {
+            if (flashlightLight != null)
+                flashlightLight.enabled = activatedState[key];
+        }
+
+        // Weapons: activated wordt toggled, actie later implementeren
+        // Limited items: activated wordt toggled, actie later implementeren
     }
 
     // ================= HULPFUNCTIE VOOR KEY =================
@@ -117,5 +161,9 @@ public class ItemUse : MonoBehaviour
         if (pillsObject != null) pillsObject.SetActive(false);
 
         equippedCount.Clear();
+        activatedState.Clear();
+
+        if (flashlightLight != null)
+            flashlightLight.enabled = false;
     }
 }

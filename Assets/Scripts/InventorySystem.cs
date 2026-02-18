@@ -107,11 +107,7 @@ public class InventorySystem : MonoBehaviour
             if (slotComponents[i].isEquipped)
             {
                 int slotIndex = i;
-
-                // ================= FIX =================
-                // Zet het oude item uit
                 slotComponents[i].Unequip();
-
                 DropSlotItem(slotComponents[i]);
                 AddItem(newPrefab, newIcon, slotIndex);
                 ToggleSlot(slotIndex);
@@ -165,7 +161,7 @@ public class InventorySystem : MonoBehaviour
         int index = slotComponents.IndexOf(slotItem);
         if (index < 0) return;
 
-        // Zet object uit bij droppen
+        // Zet object uit
         if (slotItem.prefabRef != null)
         {
             ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
@@ -174,17 +170,18 @@ public class InventorySystem : MonoBehaviour
         }
 
         Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
-        itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, true);
+        itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, false);
 
         RemoveSlot(index);
     }
+
+    // ================= THROW ITEM =================
 
     public void ThrowSlotItem(InventorySlotItem slotItem, float force)
     {
         int index = slotComponents.IndexOf(slotItem);
         if (index < 0) return;
 
-        // Zet object uit bij throw
         if (slotItem.prefabRef != null)
         {
             ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
@@ -193,14 +190,19 @@ public class InventorySystem : MonoBehaviour
         }
 
         Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
-        Quaternion throwRotation = Quaternion.LookRotation(playerTransform.forward);
 
         GameObject obj = itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, false);
-        obj.transform.rotation = throwRotation;
+
+        // ==== PER ITEM THROW ROTATION ====
+        Vector3 offset = slotItem.prefabRef != null ? slotItem.prefabRef.throwRotationOffset : Vector3.zero;
+        obj.transform.rotation = Quaternion.LookRotation(playerTransform.forward) * Quaternion.Euler(offset);
 
         Rigidbody rb = obj.GetComponent<Rigidbody>();
         if (rb != null)
-            rb.AddForce(playerTransform.forward.normalized * force, ForceMode.Impulse);
+        {
+            Vector3 throwDir = (playerTransform.forward + Vector3.up * 0.1f).normalized;
+            rb.AddForce(throwDir * force, ForceMode.Impulse);
+        }
 
         RemoveSlot(index);
     }

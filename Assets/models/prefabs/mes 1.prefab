@@ -191,6 +191,7 @@ MonoBehaviour:
   weaponType: 1
   temporaryType: 0
   limitedType: 0
+  throwRotationOffset: {x: 0, y: -90, z: 0}
   damage: 35
   speed: 5
   range: 3.5

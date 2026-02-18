@@ -4998,6 +4998,7 @@ MonoBehaviour:
   kitchenKnifeObject: {fileID: 1157234461}
   butterKnifeObject: {fileID: 1721491519}
   flashlightObject: {fileID: 1865681120}
+  flashlightLight: {fileID: 1865681123}
   luciferObject: {fileID: 0}
   candleObject: {fileID: 0}
   pillsObject: {fileID: 0}

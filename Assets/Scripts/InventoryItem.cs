@@ -6,11 +6,15 @@ public class InventorySlotItem : MonoBehaviour
     [Header("Slot Info")]
     public GameObject prefab;
 
-    [HideInInspector]
-    public bool isEquipped = false;
+    [Header("States")]
+    public bool isEquipped = false;       // zichtbaar in Inspector
+    public bool activated = false;        // zichtbaar in Inspector
 
     [HideInInspector]
     public PrefabReferenceAuto prefabRef;
+
+    [Header("Optional Components")]
+    public Light flashlightLight;         // Wordt automatisch gekoppeld als dit een flashlight is
 
     TextMeshProUGUI slotText;
     InventorySystem inventorySystem;
@@ -28,6 +32,46 @@ public class InventorySlotItem : MonoBehaviour
             slotText.gameObject.SetActive(false);
             slotText.text = prefab.name;
         }
+
+        activated = false;
+
+        // ===== AUTOMATISCH FLASHLIGHT LIGHT COMPONENT OPHALEN =====
+        if (prefabRef != null && prefabRef.category == PrefabReferenceAuto.ItemCategory.Temporary)
+        {
+            if (prefabRef.temporaryType == PrefabReferenceAuto.TemporaryType.Flashlight)
+            {
+                // Zoek ItemUse in scene
+                ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
+                if (itemUse != null)
+                {
+                    flashlightLight = itemUse.flashlightLight;
+                    if (flashlightLight != null)
+                        flashlightLight.enabled = false; // standaard uit
+                }
+            }
+        }
+    }
+
+    void Update()
+    {
+        // Alleen reageren als dit item equipped is
+        if (isEquipped)
+        {
+            // Linkermuisknop toggled activated
+            if (Input.GetMouseButtonDown(0))
+            {
+                activated = !activated;
+
+                // Als het een zaklamp is, zet dan het Light component aan/uit
+                if (prefabRef != null && prefabRef.category == PrefabReferenceAuto.ItemCategory.Temporary)
+                {
+                    if (prefabRef.temporaryType == PrefabReferenceAuto.TemporaryType.Flashlight && flashlightLight != null)
+                    {
+                        flashlightLight.enabled = activated;
+                    }
+                }
+            }
+        }
     }
 
     public void Equip()
@@ -41,7 +85,6 @@ public class InventorySlotItem : MonoBehaviour
             ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
             if (itemUse != null)
             {
-                // Gebruik EquipItem ipv SetState!
                 itemUse.EquipItem(prefabRef.category, GetEnumFromCategory(prefabRef));
             }
         }
@@ -58,10 +101,14 @@ public class InventorySlotItem : MonoBehaviour
             ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
             if (itemUse != null)
             {
-                // Gebruik UnequipItem ipv SetState!
                 itemUse.UnequipItem(prefabRef.category, GetEnumFromCategory(prefabRef));
             }
         }
+
+        activated = false;
+
+        if (flashlightLight != null)
+            flashlightLight.enabled = false;
     }
 
     public object GetEnumFromCategory(PrefabReferenceAuto prefabRef)
@@ -79,5 +126,9 @@ public class InventorySlotItem : MonoBehaviour
     {
         if (!isEquipped || inventorySystem == null) return;
         inventorySystem.DropSlotItem(this);
+
+        activated = false;
+        if (flashlightLight != null)
+            flashlightLight.enabled = false;
     }
 }

@@ -44,6 +44,7 @@ public class PlayerMovement : MonoBehaviour
     float currentSprint;
     float footstepTimer = 0f;
 
+    // Flag om te voorkomen dat jump afgaat bij uncrouch
     private bool justUncrouched = false;
 
     void Start()
@@ -53,6 +54,7 @@ public class PlayerMovement : MonoBehaviour
         targetHeight = standingHeight;
         currentSprint = maxSprint;
 
+        // Init beide sliders
         if (sprintSlider1)
         {
             sprintSlider1.maxValue = maxSprint;
@@ -79,18 +81,19 @@ public class PlayerMovement : MonoBehaviour
         HandleFootsteps();
         UpdateUI();
 
+        // Reset flag voor volgende frame
         justUncrouched = false;
     }
 
     // ================= CROUCH =================
     void HandleCrouch()
     {
-        // 🔹 Toegevoegd: KeyCode.C
         if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.C))
         {
             isCrouching = !isCrouching;
             targetHeight = isCrouching ? crouchHeight : standingHeight;
         }
+
 
         if (Input.GetButtonDown("Jump") && isCrouching)
         {
@@ -108,6 +111,7 @@ public class PlayerMovement : MonoBehaviour
         controller.center += Vector3.up * (delta / 2f);
     }
 
+    // ================= MOVEMENT =================
     void HandleMovement()
     {
         float x = Input.GetAxis("Horizontal");
@@ -127,6 +131,12 @@ public class PlayerMovement : MonoBehaviour
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
+        // ================= CEILING CHECK =================
+        if ((controller.collisionFlags & CollisionFlags.Above) != 0 && verticalVelocity > 0)
+        {
+            verticalVelocity = 0f;
+        }
+
         if (!controller.isGrounded)
         {
             if (verticalVelocity < 0)
@@ -144,6 +154,7 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
     }
 
+    // ================= SPRINT =================
     void HandleSprint()
     {
         bool holdingShift = Input.GetKey(KeyCode.LeftShift);
@@ -162,6 +173,7 @@ public class PlayerMovement : MonoBehaviour
         currentSprint = Mathf.Clamp(currentSprint, 0, maxSprint);
     }
 
+    // ================= FOOTSTEP AUDIO =================
     void HandleFootsteps()
     {
         if (!footstepAudio || !controller.isGrounded) return;
@@ -189,6 +201,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    // ================= UI =================
     void UpdateUI()
     {
         if (sprintSlider1) sprintSlider1.value = currentSprint;

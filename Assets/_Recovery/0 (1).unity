@@ -1042,7 +1042,7 @@ MonoBehaviour:
 
     Shift = Sprint
 
-    Control/C
+    Control
     = Crouch'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3694,7 +3694,7 @@ MonoBehaviour:
   - {fileID: 1186311130547273802, guid: 3b6ed1493983c5e4fbc705f31fb2d71c, type: 3}
   itemIcons: []
   spawnCount: 20
-  spawnArea: {x: 20, y: 0, z: 9}
+  spawnArea: {x: 20, y: 0, z: 10}
   yOffset: 0.5
   randomRotation: 1
 --- !u!1 &1277178633
@@ -3776,7 +3776,7 @@ MonoBehaviour:
 
     Shift = Sprint
 
-    Control/C
+    Control
     = Crouch'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

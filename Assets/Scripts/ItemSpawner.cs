@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ItemSpawner : MonoBehaviour
 {
@@ -12,7 +12,26 @@ public class ItemSpawner : MonoBehaviour
     public float yOffset = 0.5f;
     public bool randomRotation = true;
 
-    void Start() => SpawnInitialItems();
+    private Transform itemsParent; // 🔹 Parent reference
+
+    void Start()
+    {
+        SetupParent();
+        SpawnInitialItems();
+    }
+
+    // 🔹 Zorgt dat er een "Items" parent bestaat
+    private void SetupParent()
+    {
+        GameObject parentObj = GameObject.Find("Items");
+
+        if (parentObj == null)
+        {
+            parentObj = new GameObject("Items");
+        }
+
+        itemsParent = parentObj.transform;
+    }
 
     private void SpawnInitialItems()
     {
@@ -31,7 +50,6 @@ public class ItemSpawner : MonoBehaviour
             Random.Range(-spawnArea.z * 0.5f, spawnArea.z * 0.5f)
         );
 
-        // Full random rotation
         Quaternion rot = randomRotation
             ? Quaternion.Euler(
                 Random.Range(0f, 360f),
@@ -40,7 +58,7 @@ public class ItemSpawner : MonoBehaviour
               )
             : Quaternion.identity;
 
-        GameObject spawned = Instantiate(prefab, pos, rot);
+        GameObject spawned = Instantiate(prefab, pos, rot, itemsParent); // 🔹 parent toegevoegd
 
         PrefabReferenceAuto prefabRef = spawned.GetComponent<PrefabReferenceAuto>();
         if (prefabRef == null) prefabRef = spawned.AddComponent<PrefabReferenceAuto>();
@@ -65,7 +83,7 @@ public class ItemSpawner : MonoBehaviour
               )
             : Quaternion.identity;
 
-        GameObject spawned = Instantiate(prefab, position, rotation);
+        GameObject spawned = Instantiate(prefab, position, rotation, itemsParent); // 🔹 parent toegevoegd
 
         PrefabReferenceAuto prefabRef = spawned.GetComponent<PrefabReferenceAuto>();
         if (prefabRef == null)
@@ -83,9 +101,9 @@ public class ItemSpawner : MonoBehaviour
     // ================= GIZMO =================
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = new Color(1f, 1f, 0f, 0.25f); // geel transparant
+        Gizmos.color = new Color(1f, 1f, 0f, 0.25f);
         Vector3 center = transform.position + new Vector3(0, yOffset, 0);
-        Vector3 size = new Vector3(spawnArea.x, 0.1f, spawnArea.z); // dunne hoogte
+        Vector3 size = new Vector3(spawnArea.x, 0.1f, spawnArea.z);
         Gizmos.DrawCube(center, size);
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(center, size);

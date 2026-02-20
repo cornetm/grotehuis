@@ -1,9 +1,9 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class StaticObjectSpawner : MonoBehaviour
 {
     [Header("Objects to Spawn")]
-    public GameObject[] objectPrefabs; // tafels, stoelen, piano's, kasten
+    public GameObject[] objectPrefabs;
     public int spawnCount = 5;
 
     [Header("Spawn Area")]
@@ -11,11 +11,23 @@ public class StaticObjectSpawner : MonoBehaviour
     public float yOffset = 0f;
 
     [Header("Placement Settings")]
-    public int maxAttempts = 50;      // aantal pogingen per object
-    public float clearance = 0.1f;    // extra afstand tussen objecten
+    public int maxAttempts = 50;
+    public float clearance = 0.1f;
+
+    private Transform objectsParent;
 
     void Start()
     {
+        // 🔹 Zoek of maak Objects parent
+        GameObject parentObj = GameObject.Find("Objects");
+
+        if (parentObj == null)
+        {
+            parentObj = new GameObject("Objects");
+        }
+
+        objectsParent = parentObj.transform;
+
         SpawnObjects();
     }
 
@@ -38,17 +50,14 @@ public class StaticObjectSpawner : MonoBehaviour
             {
                 attempts++;
 
-                // Kies een random prefab
                 GameObject prefab = objectPrefabs[Random.Range(0, objectPrefabs.Length)];
 
-                // Bereken random positie
                 Vector3 pos = transform.position + new Vector3(
                     Random.Range(-spawnArea.x * 0.5f, spawnArea.x * 0.5f),
                     yOffset,
                     Random.Range(-spawnArea.z * 0.5f, spawnArea.z * 0.5f)
                 );
 
-                // Bepaal prefab bounds
                 Collider prefabCollider = prefab.GetComponent<Collider>();
                 if (prefabCollider == null)
                 {
@@ -58,12 +67,15 @@ public class StaticObjectSpawner : MonoBehaviour
 
                 Vector3 halfExtents = prefabCollider.bounds.extents + Vector3.one * clearance;
 
-                // Check overlap met Physics
                 Collider[] overlaps = Physics.OverlapBox(pos, halfExtents, prefab.transform.rotation);
+
                 if (overlaps.Length == 0)
                 {
-                    // Plaats object
                     GameObject spawnedObj = Instantiate(prefab, pos, prefab.transform.rotation);
+
+                    // 🔹 FORCE parent to Objects
+                    spawnedObj.transform.SetParent(objectsParent);
+
                     placed = true;
                     spawned++;
                 }
@@ -77,10 +89,9 @@ public class StaticObjectSpawner : MonoBehaviour
         }
     }
 
-    // ================= GIZMO =================
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = new Color(0f, 1f, 1f, 0.25f); // cyaan transparant
+        Gizmos.color = new Color(0f, 1f, 1f, 0.25f);
         Vector3 center = transform.position + new Vector3(0, yOffset, 0);
         Vector3 size = new Vector3(spawnArea.x, 0.1f, spawnArea.z);
         Gizmos.DrawCube(center, size);

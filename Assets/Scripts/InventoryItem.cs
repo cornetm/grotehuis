@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class InventorySlotItem : MonoBehaviour
 {
@@ -7,17 +8,22 @@ public class InventorySlotItem : MonoBehaviour
     public GameObject prefab;
 
     [Header("States")]
-    public bool isEquipped = false;       // zichtbaar in Inspector
-    public bool activated = false;        // zichtbaar in Inspector
+    public bool isEquipped = false;
+    public bool activated = false;
 
     [HideInInspector]
     public PrefabReferenceAuto prefabRef;
 
+    [Header("Flashlight Battery")]
+    public float flashlightPower = 60f;
+    public float batteryDrainPerSecond = 1f;
+
     [Header("Optional Components")]
-    public Light flashlightLight;         // Wordt automatisch gekoppeld als dit een flashlight is
+    public Light flashlightLight;
 
     TextMeshProUGUI slotText;
     InventorySystem inventorySystem;
+    ItemUse itemUse;
 
     public void Initialize(GameObject prefab, InventorySystem system)
     {
@@ -25,6 +31,7 @@ public class InventorySlotItem : MonoBehaviour
         inventorySystem = system;
 
         prefabRef = prefab.GetComponent<PrefabReferenceAuto>();
+        itemUse = GameObject.FindObjectOfType<ItemUse>();
 
         slotText = GetComponentInChildren<TextMeshProUGUI>();
         if (slotText != null)
@@ -35,18 +42,18 @@ public class InventorySlotItem : MonoBehaviour
 
         activated = false;
 
-        // ===== AUTOMATISCH FLASHLIGHT LIGHT COMPONENT OPHALEN =====
-        if (prefabRef != null && prefabRef.category == PrefabReferenceAuto.ItemCategory.Temporary)
+        if (prefabRef != null &&
+            prefabRef.category == PrefabReferenceAuto.ItemCategory.Temporary &&
+            prefabRef.temporaryType == PrefabReferenceAuto.TemporaryType.Flashlight)
         {
-            if (prefabRef.temporaryType == PrefabReferenceAuto.TemporaryType.Flashlight)
+            if (itemUse != null)
             {
-                // Zoek ItemUse in scene
-                ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
-                if (itemUse != null)
+                flashlightLight = itemUse.flashlightLight;
+
+                if (itemUse.flashlightPowerSlider != null)
                 {
-                    flashlightLight = itemUse.flashlightLight;
-                    if (flashlightLight != null)
-                        flashlightLight.enabled = false; // standaard uit
+                    itemUse.flashlightPowerSlider.maxValue = flashlightPower;
+                    itemUse.flashlightPowerSlider.value = flashlightPower;
                 }
             }
         }
@@ -54,21 +61,31 @@ public class InventorySlotItem : MonoBehaviour
 
     void Update()
     {
-        // Alleen reageren als dit item equipped is
         if (isEquipped)
         {
-            // Linkermuisknop toggled activated
             if (Input.GetMouseButtonDown(0))
             {
                 activated = !activated;
 
-                // Als het een zaklamp is, zet dan het Light component aan/uit
-                if (prefabRef != null && prefabRef.category == PrefabReferenceAuto.ItemCategory.Temporary)
+                if (flashlightLight != null && flashlightPower > 0)
+                    flashlightLight.enabled = activated;
+            }
+
+            // ===== BATTERY DRAIN =====
+            if (activated && flashlightPower > 0)
+            {
+                flashlightPower -= batteryDrainPerSecond * Time.deltaTime;
+
+                if (itemUse != null && itemUse.flashlightPowerSlider != null)
+                    itemUse.flashlightPowerSlider.value = flashlightPower;
+
+                if (flashlightPower <= 0)
                 {
-                    if (prefabRef.temporaryType == PrefabReferenceAuto.TemporaryType.Flashlight && flashlightLight != null)
-                    {
-                        flashlightLight.enabled = activated;
-                    }
+                    flashlightPower = 0;
+                    activated = false;
+
+                    if (flashlightLight != null)
+                        flashlightLight.enabled = false;
                 }
             }
         }
@@ -77,57 +94,95 @@ public class InventorySlotItem : MonoBehaviour
     public void Equip()
     {
         if (isEquipped) return;
-        isEquipped = true;
-        if (slotText != null) slotText.gameObject.SetActive(true);
 
-        if (prefabRef != null)
+        isEquipped = true;
+
+        if (slotText != null)
+            slotText.gameObject.SetActive(true);
+
+        if (prefabRef != null && itemUse != null)
         {
-            ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
-            if (itemUse != null)
+            itemUse.EquipItem(prefabRef.category, GetEnumFromCategory(prefabRef));
+
+            // 🔹 Update flashlight slider naar deze flashlight power
+            if (prefabRef.category == PrefabReferenceAuto.ItemCategory.Temporary &&
+                prefabRef.temporaryType == PrefabReferenceAuto.TemporaryType.Flashlight &&
+                itemUse.flashlightPowerSlider != null)
             {
-                itemUse.EquipItem(prefabRef.category, GetEnumFromCategory(prefabRef));
+                itemUse.flashlightPowerSlider.value = flashlightPower;
             }
         }
     }
 
+    // 🔥 FIXED UNEQUIP (Optie A)
     public void Unequip()
     {
         if (!isEquipped) return;
-        isEquipped = false;
-        if (slotText != null) slotText.gameObject.SetActive(false);
 
-        if (prefabRef != null)
+        isEquipped = false;
+
+        if (slotText != null)
+            slotText.gameObject.SetActive(false);
+
+        // Check of er nog een ander slot met hetzelfde item equipped is
+        bool otherSameItemEquipped = false;
+
+        if (inventorySystem != null)
         {
-            ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
-            if (itemUse != null)
+            foreach (var slot in inventorySystem.slotComponents)
             {
-                itemUse.UnequipItem(prefabRef.category, GetEnumFromCategory(prefabRef));
+                if (slot != this &&
+                    slot.isEquipped &&
+                    slot.prefabRef != null &&
+                    prefabRef != null &&
+                    slot.prefabRef.category == prefabRef.category &&
+                    slot.GetEnumFromCategory(slot.prefabRef)
+                        .Equals(GetEnumFromCategory(prefabRef)))
+                {
+                    otherSameItemEquipped = true;
+                    break;
+                }
             }
         }
 
-        activated = false;
+        // Alleen uitzetten als er geen andere dezelfde actief is
+        if (!otherSameItemEquipped)
+        {
+            if (prefabRef != null && itemUse != null)
+                itemUse.UnequipItem(prefabRef.category, GetEnumFromCategory(prefabRef));
 
-        if (flashlightLight != null)
-            flashlightLight.enabled = false;
+            activated = false;
+
+            if (flashlightLight != null)
+                flashlightLight.enabled = false;
+        }
     }
 
     public object GetEnumFromCategory(PrefabReferenceAuto prefabRef)
     {
         switch (prefabRef.category)
         {
-            case PrefabReferenceAuto.ItemCategory.Weapons: return prefabRef.weaponType;
-            case PrefabReferenceAuto.ItemCategory.Temporary: return prefabRef.temporaryType;
-            case PrefabReferenceAuto.ItemCategory.Limited: return prefabRef.limitedType;
+            case PrefabReferenceAuto.ItemCategory.Weapons:
+                return prefabRef.weaponType;
+
+            case PrefabReferenceAuto.ItemCategory.Temporary:
+                return prefabRef.temporaryType;
+
+            case PrefabReferenceAuto.ItemCategory.Limited:
+                return prefabRef.limitedType;
         }
+
         return null;
     }
 
     public void Drop()
     {
         if (!isEquipped || inventorySystem == null) return;
+
         inventorySystem.DropSlotItem(this);
 
         activated = false;
+
         if (flashlightLight != null)
             flashlightLight.enabled = false;
     }

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
 
 public class ItemUse : MonoBehaviour
@@ -11,21 +12,30 @@ public class ItemUse : MonoBehaviour
     [Header("Temporary Objects")]
     public GameObject flashlightObject;
     public Light flashlightLight;
+
+    [Header("Flashlight Battery")]
+    public Slider flashlightPowerSlider;   // NIEUW
+    public float maxFlashlightPower = 60f; // NIEUW
+
     public GameObject luciferObject;
     public GameObject candleObject;
 
     [Header("Limited Objects")]
     public GameObject pillsObject;
 
-    // Alleen nog activation state voor toggle items (zoals flashlight)
     private Dictionary<string, bool> activatedState = new Dictionary<string, bool>();
 
     void Start()
     {
         SetAllOff();
+
+        if (flashlightPowerSlider != null)
+        {
+            flashlightPowerSlider.maxValue = maxFlashlightPower;
+            flashlightPowerSlider.value = maxFlashlightPower;
+        }
     }
 
-    // ================= EQUIP =================
     public void EquipItem(PrefabReferenceAuto.ItemCategory category, object typeEnum)
     {
         SetState(category, typeEnum, true);
@@ -35,7 +45,6 @@ public class ItemUse : MonoBehaviour
         if (!activatedState.ContainsKey(key))
             activatedState[key] = false;
 
-        // Flashlight standaard uit bij equip
         if (category == PrefabReferenceAuto.ItemCategory.Temporary &&
             typeEnum.Equals(PrefabReferenceAuto.TemporaryType.Flashlight))
         {
@@ -44,7 +53,6 @@ public class ItemUse : MonoBehaviour
         }
     }
 
-    // ================= UNEQUIP =================
     public void UnequipItem(PrefabReferenceAuto.ItemCategory category, object typeEnum)
     {
         SetState(category, typeEnum, false);
@@ -62,7 +70,6 @@ public class ItemUse : MonoBehaviour
         }
     }
 
-    // ================= TOGGLE (bijv flashlight) =================
     public void ToggleActivated(PrefabReferenceAuto.ItemCategory category, object typeEnum)
     {
         string key = GetKey(category, typeEnum);
@@ -85,7 +92,6 @@ public class ItemUse : MonoBehaviour
         return category.ToString() + "_" + typeEnum.ToString();
     }
 
-    // ================= SET STATE =================
     public void SetState(PrefabReferenceAuto.ItemCategory category, object typeEnum, bool state)
     {
         switch (category)
@@ -134,7 +140,6 @@ public class ItemUse : MonoBehaviour
         }
     }
 
-    // ================= RESET =================
     public void SetAllOff()
     {
         if (butcherKnifeObject != null) butcherKnifeObject.SetActive(false);

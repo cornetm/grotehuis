@@ -3390,6 +3390,7 @@ MonoBehaviour:
   dropDistance: 1
   chargeSpeed: 1.5
   maxThrowForce: 20
+  playerCamera: {fileID: 1823688466}
   itemSpawner: {fileID: 1246576264}
   slotComponents: []
 --- !u!1 &1119380556
@@ -5492,7 +5493,7 @@ MonoBehaviour:
   flashlightObject: {fileID: 1865681120}
   flashlightLight: {fileID: 1865681123}
   flashlightPowerSlider: {fileID: 1810528761}
-  power: 100
+  maxFlashlightPower: 60
   luciferObject: {fileID: 0}
   candleObject: {fileID: 0}
   pillsObject: {fileID: 0}

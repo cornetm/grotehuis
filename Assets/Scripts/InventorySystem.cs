@@ -25,6 +25,7 @@ public class InventorySystem : MonoBehaviour
     [Header("Throw Settings")]
     public float chargeSpeed = 1.5f;
     public float maxThrowForce = 20f;
+    public Camera playerCamera; // 📌 Voeg hier je Camera toe in de inspector
 
     [Header("Spawner")]
     public ItemSpawner itemSpawner;
@@ -90,7 +91,6 @@ public class InventorySystem : MonoBehaviour
     }
 
     // ================= PUBLIC FUNCTIONS =================
-
     public bool IsFull() => slots.Count >= maxItems;
 
     public bool HasEquippedItem()
@@ -124,7 +124,6 @@ public class InventorySystem : MonoBehaviour
     }
 
     // ================= ADD ITEM =================
-
     public void AddItem(GameObject prefab, Texture icon = null, int index = -1)
     {
         if (index < 0 && slots.Count >= maxItems) return;
@@ -155,13 +154,11 @@ public class InventorySystem : MonoBehaviour
     }
 
     // ================= DROP ITEM =================
-
     public void DropSlotItem(InventorySlotItem slotItem)
     {
         int index = slotComponents.IndexOf(slotItem);
         if (index < 0) return;
 
-        // Zet object uit
         if (slotItem.prefabRef != null)
         {
             ItemUse itemUse = GameObject.FindObjectOfType<ItemUse>();
@@ -169,14 +166,13 @@ public class InventorySystem : MonoBehaviour
                 itemUse.SetState(slotItem.prefabRef.category, slotItem.GetEnumFromCategory(slotItem.prefabRef), false);
         }
 
-        Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
+        Vector3 spawnPos = playerTransform.position + playerCamera.transform.forward * dropDistance;
         itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, false);
 
         RemoveSlot(index);
     }
 
     // ================= THROW ITEM =================
-
     public void ThrowSlotItem(InventorySlotItem slotItem, float force)
     {
         int index = slotComponents.IndexOf(slotItem);
@@ -189,18 +185,18 @@ public class InventorySystem : MonoBehaviour
                 itemUse.SetState(slotItem.prefabRef.category, slotItem.GetEnumFromCategory(slotItem.prefabRef), false);
         }
 
-        Vector3 spawnPos = playerTransform.position + playerTransform.forward * dropDistance;
+        Vector3 spawnPos = playerTransform.position + playerCamera.transform.forward * dropDistance;
 
         GameObject obj = itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, false);
 
         // ==== PER ITEM THROW ROTATION ====
         Vector3 offset = slotItem.prefabRef != null ? slotItem.prefabRef.throwRotationOffset : Vector3.zero;
-        obj.transform.rotation = Quaternion.LookRotation(playerTransform.forward) * Quaternion.Euler(offset);
+        obj.transform.rotation = Quaternion.LookRotation(playerCamera.transform.forward) * Quaternion.Euler(offset);
 
         Rigidbody rb = obj.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            Vector3 throwDir = (playerTransform.forward + Vector3.up * 0.1f).normalized;
+            Vector3 throwDir = playerCamera.transform.forward.normalized;
             rb.AddForce(throwDir * force, ForceMode.Impulse);
         }
 
@@ -217,7 +213,6 @@ public class InventorySystem : MonoBehaviour
     }
 
     // ================= SLOT SELECT / UNEQUIP =================
-
     void ToggleSlot(int index)
     {
         if (index >= slots.Count) return;
@@ -251,7 +246,6 @@ public class InventorySystem : MonoBehaviour
     }
 
     // ================= POSITION =================
-
     void RepositionSlots()
     {
         float startX = -(slots.Count - 1) * spacing * 0.5f;

@@ -21,6 +21,11 @@ public class InventorySlotItem : MonoBehaviour
     [Header("Optional Components")]
     public Light flashlightLight;
 
+    [Header("Weapon Stats (from prefab)")]
+    public float weaponDamage;
+    public float weaponSpeed;
+    public float weaponRange;
+
     TextMeshProUGUI slotText;
     InventorySystem inventorySystem;
     ItemUse itemUse;
@@ -41,6 +46,14 @@ public class InventorySlotItem : MonoBehaviour
         }
 
         activated = false;
+
+        // 🔹 Haal weapon stats van prefabRef over
+        if (prefabRef != null && prefabRef.category == PrefabReferenceAuto.ItemCategory.Weapons)
+        {
+            weaponDamage = prefabRef.damage;
+            weaponSpeed = prefabRef.speed;
+            weaponRange = prefabRef.range;
+        }
 
         if (prefabRef != null &&
             prefabRef.category == PrefabReferenceAuto.ItemCategory.Temporary &&
@@ -104,7 +117,6 @@ public class InventorySlotItem : MonoBehaviour
         {
             itemUse.EquipItem(prefabRef.category, GetEnumFromCategory(prefabRef));
 
-            // 🔹 Update flashlight slider naar deze flashlight power
             if (prefabRef.category == PrefabReferenceAuto.ItemCategory.Temporary &&
                 prefabRef.temporaryType == PrefabReferenceAuto.TemporaryType.Flashlight &&
                 itemUse.flashlightPowerSlider != null)
@@ -114,7 +126,6 @@ public class InventorySlotItem : MonoBehaviour
         }
     }
 
-    // 🔥 FIXED UNEQUIP (Optie A)
     public void Unequip()
     {
         if (!isEquipped) return;
@@ -124,7 +135,6 @@ public class InventorySlotItem : MonoBehaviour
         if (slotText != null)
             slotText.gameObject.SetActive(false);
 
-        // Check of er nog een ander slot met hetzelfde item equipped is
         bool otherSameItemEquipped = false;
 
         if (inventorySystem != null)
@@ -145,7 +155,6 @@ public class InventorySlotItem : MonoBehaviour
             }
         }
 
-        // Alleen uitzetten als er geen andere dezelfde actief is
         if (!otherSameItemEquipped)
         {
             if (prefabRef != null && itemUse != null)

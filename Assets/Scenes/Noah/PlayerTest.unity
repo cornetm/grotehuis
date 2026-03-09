@@ -1437,6 +1437,59 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 523099297}
   m_CullTransparentMesh: 1
+--- !u!1 &565346347
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 565346348}
+  - component: {fileID: 565346349}
+  m_Layer: 0
+  m_Name: RoomGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &565346348
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 565346347}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -9.44, y: 11.19541, z: 13.12106}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &565346349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 565346347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b97eb508ea2440448f511d76706c978, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  RoomCount: 0
+  MaxRooms: 5
+  StartCooldown: 2
+  Rooms:
+  - {fileID: 7118247295230548040, guid: 7381bf0703576624e90070c4701256db, type: 3}
+  - {fileID: 1284144822229841588, guid: f8691cecf8151bd4bba5fa4e47d9c039, type: 3}
+  - {fileID: 393751000154447445, guid: d1a261ba4e8cfb64bb7279b31f8929fa, type: 3}
+  - {fileID: 5576979392219531433, guid: 34438998046d99f44852ccb5812477c1, type: 3}
+  - {fileID: 5576979392219531433, guid: 8aab0f1dc5b961f429c0f444d5d700b7, type: 3}
 --- !u!1 &582697665
 GameObject:
   m_ObjectHideFlags: 0
@@ -5356,9 +5409,6 @@ MonoBehaviour:
   damageMax: 75
   speedMax: 20
   rangeMax: 10
-  damageText: {fileID: 0}
-  speedText: {fileID: 0}
-  rangeText: {fileID: 0}
   inventorySystem: {fileID: 1014915896}
 --- !u!1 &1519288464
 GameObject:
@@ -8003,3 +8053,4 @@ SceneRoots:
   - {fileID: 341551903}
   - {fileID: 1246576263}
   - {fileID: 1420084255}
+  - {fileID: 565346348}

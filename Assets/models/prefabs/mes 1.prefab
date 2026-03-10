@@ -193,7 +193,7 @@ MonoBehaviour:
   limitedType: 0
   throwRotationOffset: {x: 0, y: -90, z: 0}
   damage: 35
-  speed: 5
+  speed: 7
   range: 3.5
   lifespan: 0
   number: 0

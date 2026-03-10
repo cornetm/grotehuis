@@ -1482,8 +1482,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   RoomCount: 0
-  MaxRooms: 5
-  StartCooldown: 2
+  MinRooms: 10
+  MaxRooms: 20
+  StartCooldown: 1
   Rooms:
   - {fileID: 7118247295230548040, guid: 7381bf0703576624e90070c4701256db, type: 3}
   - {fileID: 1284144822229841588, guid: f8691cecf8151bd4bba5fa4e47d9c039, type: 3}
@@ -5408,7 +5409,7 @@ MonoBehaviour:
   rangeSlider: {fileID: 1519288466}
   damageMax: 75
   speedMax: 20
-  rangeMax: 10
+  rangeMax: 20
   inventorySystem: {fileID: 1014915896}
 --- !u!1 &1519288464
 GameObject:

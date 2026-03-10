@@ -6,6 +6,7 @@ public class RoomGenerator : MonoBehaviour
 {
     [Header("RoomSpawn")]
     public int RoomCount;
+    public int MinRooms;
     public int MaxRooms;
     public float StartCooldown;
 
@@ -13,11 +14,13 @@ public class RoomGenerator : MonoBehaviour
     public GameObject[] Rooms;
 
     private Transform RoomParent; // 🔹 Parent reference
+
     void Start()
     {
         SetupParent();
         StartCoroutine(StartRoomSpawn());
     }
+
     private void SetupParent()
     {
         GameObject parentObj = GameObject.Find("Room");
@@ -29,15 +32,21 @@ public class RoomGenerator : MonoBehaviour
 
         RoomParent = parentObj.transform;
     }
+
     IEnumerator StartRoomSpawn()
     {
-        yield return new WaitForSeconds(StartCooldown); // wacht eerst
-        RoomSpawn(); // daarna uitvoeren
+        yield return new WaitForSeconds(StartCooldown);
+        RoomSpawn();
     }
 
     public void RoomSpawn()
     {
-        for (int i = 0; i < MaxRooms; i++) SpawnRoom();
+        int randomRoomAmount = Random.Range(MinRooms, MaxRooms + 1); // 🔹 random aantal rooms
+
+        for (int i = 0; i < randomRoomAmount; i++)
+        {
+            SpawnRoom();
+        }
     }
 
     public void SpawnRoom()
@@ -46,5 +55,7 @@ public class RoomGenerator : MonoBehaviour
 
         int index = Random.Range(0, Rooms.Length);
         GameObject prefab = Rooms[index];
+
+        Instantiate(prefab, transform.position, Quaternion.identity, RoomParent);
     }
 }

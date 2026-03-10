@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Interaction
   - Screen
+  - Room
   layers:
   - Default
   - TransparentFX

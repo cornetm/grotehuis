@@ -10,7 +10,7 @@ public class WeaponStatsUI : MonoBehaviour
 
     [Header("Slider Max Values (set in Inspector)")]
     public float damageMax = 100f;
-    public float speedMax = 10f;
+    public float speedMax = 20f;
     public float rangeMax = 20f;
 
     [Header("Inventory System Reference")]

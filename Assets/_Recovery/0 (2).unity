@@ -1481,8 +1481,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b97eb508ea2440448f511d76706c978, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  MinRooms: 25
-  MaxRooms: 50
+  MinRooms: 10
+  MaxRooms: 10
   StartCooldown: 1
   MaxTryPerRoom: 10
   Rooms:

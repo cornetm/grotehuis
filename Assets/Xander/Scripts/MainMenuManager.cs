@@ -8,7 +8,7 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private GameObject secondaryObject;   // settings/credits/etc (default inactive)
 
     [Header("Player Look (must be NeckLook)")]
-    [SerializeField] private NeckLook neckLook;            // <- now strictly NeckLook
+    [SerializeField] private NeckLook neckLook;            // strictly NeckLook
 
     [Header("Crosshair")]
     [SerializeField] private Image crosshairDefault;       // dot
@@ -18,7 +18,10 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private Camera rayCamera;
     [SerializeField] private float rayDistance = 3f;
     [SerializeField] private LayerMask interactLayers = ~0;
+
+    [Tooltip("Tag that the raycast target collider must have to be interactable (e.g. Screen, Start, Settings).")]
     [SerializeField] private string interactTag = "Screen";
+
     [SerializeField] private bool allowTriggerColliders = false;
 
     [Header("Anti-flicker")]
@@ -29,8 +32,14 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private KeyCode openKey = KeyCode.Mouse0; // LMB
     [SerializeField] private KeyCode closeKey = KeyCode.Escape;
 
+    [Header("Cooldown")]
+    [Tooltip("Cooldown (seconds) after opening/closing where LMB/ESC are ignored.")]
+    [SerializeField] private float switchCooldownSeconds = 0.25f;
+
     private bool isHovering;
     private float lastHoverTime;
+
+    private float nextAllowedSwitchTime = 0f;
 
     private bool SecondaryOpen => secondaryObject != null && secondaryObject.activeSelf;
 
@@ -50,23 +59,31 @@ public class MainMenuManager : MonoBehaviour
 
         if (neckLook != null)
             neckLook.enabled = true;
+
+        // allow immediate input on start
+        nextAllowedSwitchTime = 0f;
     }
 
     void Update()
     {
+        // Cooldown: blokkeer LMB/ESC en ook crosshair “interact” updates (voelt rustiger)
+        bool inCooldown = Time.unscaledTime < nextAllowedSwitchTime;
+
         if (SecondaryOpen)
         {
-            if (Input.GetKeyDown(closeKey))
+            if (!inCooldown && Input.GetKeyDown(closeKey))
                 CloseSecondary();
+
             return;
         }
 
-        bool hitNow = IsLookingAtTaggedBox(interactTag);
+        // Alleen hover-check als we niet in cooldown zitten
+        bool hitNow = !inCooldown && IsLookingAtTaggedBox(interactTag);
 
         if (hitNow)
             lastHoverTime = Time.unscaledTime;
 
-        bool wantHover = hitNow || (Time.unscaledTime - lastHoverTime) <= hoverGraceTime;
+        bool wantHover = hitNow || (!inCooldown && (Time.unscaledTime - lastHoverTime) <= hoverGraceTime);
 
         if (wantHover != isHovering)
         {
@@ -74,7 +91,7 @@ public class MainMenuManager : MonoBehaviour
             SetCrosshairMode(isHovering);
         }
 
-        if (isHovering && Input.GetKeyDown(openKey))
+        if (!inCooldown && isHovering && Input.GetKeyDown(openKey))
             OpenSecondary();
     }
 
@@ -97,6 +114,8 @@ public class MainMenuManager : MonoBehaviour
 
     private void OpenSecondary()
     {
+        if (Time.unscaledTime < nextAllowedSwitchTime) return;
+
         SetPanels(mainActive: false);
 
         // Crosshair off + cursor on
@@ -106,10 +125,14 @@ public class MainMenuManager : MonoBehaviour
         // Disable neck look while in secondary menu
         if (neckLook != null)
             neckLook.enabled = false;
+
+        StartCooldown();
     }
 
     private void CloseSecondary()
     {
+        if (Time.unscaledTime < nextAllowedSwitchTime) return;
+
         SetPanels(mainActive: true);
 
         // Crosshair on + cursor off/locked
@@ -124,6 +147,15 @@ public class MainMenuManager : MonoBehaviour
         // Re-enable neck look
         if (neckLook != null)
             neckLook.enabled = true;
+
+        StartCooldown();
+    }
+
+    private void StartCooldown()
+    {
+        // clamp zodat negatieve values niet raar doen
+        float cd = Mathf.Max(0f, switchCooldownSeconds);
+        nextAllowedSwitchTime = Time.unscaledTime + cd;
     }
 
     private void SetPanels(bool mainActive)

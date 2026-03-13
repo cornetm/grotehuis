@@ -4331,6 +4331,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TileTest
       objectReference: {fileID: 0}
+    - target: {fileID: 1118072708958352246, guid: c72b1eb79d9603245a90251e15504017, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7733328492403829519, guid: c72b1eb79d9603245a90251e15504017, type: 3}
       propertyPath: m_LocalPosition.x
       value: -146.4

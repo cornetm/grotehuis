@@ -45,6 +45,37 @@ public class RoomGenerator : MonoBehaviour
     // Recursive backtracking generator
     bool GenerateDungeonRecursive(int targetRooms, int currentIndex)
     {
+        // Eerste kamer altijd Forward
+        if (currentIndex == 0)
+        {
+            GameObject forwardPrefab = null;
+            foreach (GameObject prefab in Rooms)
+            {
+                RoomInfo info = prefab.GetComponent<RoomInfo>();
+                if (info != null && info.roomdirection == RoomInfo.RoomDirection.forward)
+                {
+                    forwardPrefab = prefab;
+                    break;
+                }
+            }
+
+            if (forwardPrefab == null)
+            {
+                Debug.LogError("Geen Forward prefab gevonden voor de eerste kamer!");
+                return false;
+            }
+
+            GameObject firstRoom = Instantiate(forwardPrefab, Vector3.zero, Quaternion.identity, RoomParent);
+            RoomInfo firstInfo = firstRoom.GetComponent<RoomInfo>();
+            PlaceRoom(firstRoom, firstInfo);
+            placedRooms.Add(firstRoom);
+            lastRoomDirection = firstInfo.roomdirection;
+            leftStreak = 0;
+
+            // Recursive call voor de rest
+            return GenerateDungeonRecursive(targetRooms, currentIndex + 1);
+        }
+
         if (currentIndex >= targetRooms)
             return true; // Alle kamers geplaatst
 
@@ -182,7 +213,6 @@ public class RoomGenerator : MonoBehaviour
 
     void RecalculateGeneratorState()
     {
-        // Update lastRoomDirection en leftStreak
         if (placedRooms.Count == 0)
         {
             lastRoomDirection = null;

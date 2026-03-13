@@ -2,8 +2,11 @@ using UnityEngine;
 
 public class RoomInfo : MonoBehaviour
 {
-    [Header("Room Direction")]
+    [Header("Room Info")]
     public RoomDirection roomdirection;
+
+    public Transform StartPoint;
+    public Transform EndPoint;
 
     public enum RoomDirection
     {
@@ -13,8 +16,4 @@ public class RoomInfo : MonoBehaviour
         upstairs,
         downstairs
     }
-
-    [Header("Room Connectors")]
-    public Transform StartPoint;
-    public Transform EndPoint;
 }

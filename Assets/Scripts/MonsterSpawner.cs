@@ -13,30 +13,17 @@ public class MonsterSpawner : MonoBehaviour
     public Transform[] SpawnPoints;
 
     [Header("Respawn Boundary (drag your BoxCollider here)")]
-    public Collider RoomBoundary;  // sleep hier de box collider van de kamer in
+    public Collider RoomBoundary;
     public float boundaryActiveTime = 5f;
 
     private GameObject spawnedMonster;
-    private bool hasSpawned = false;
-    private bool playerInRange = false;
     private Transform monsterParent;
 
     void Awake()
     {
-        // Trigger collider voor spawn
-        Collider col = GetComponent<Collider>();
-        if (col != null) col.isTrigger = true;
-
         // Zorg dat boundary collider trigger is
         if (RoomBoundary != null)
             RoomBoundary.isTrigger = true;
-    }
-
-    void Update()
-    {
-        // Spawn pas als speler in de trigger is
-        if (!playerInRange || hasSpawned || monsterParent == null) return;
-        TrySpawn(monsterParent);
     }
 
     public void SetParent(Transform parent)
@@ -44,29 +31,22 @@ public class MonsterSpawner : MonoBehaviour
         monsterParent = parent;
     }
 
-    public void TrySpawn(Transform parent, bool force = false)
+    // Handmatige spawn methode
+    public void TrySpawn(bool force = false)
     {
-        if (hasSpawned) return;
+        if (spawnedMonster != null) return;
         if (!force && Random.Range(0f, 100f) > SpawnChance) return;
-
         if (MonsterPrefabs.Length == 0) return;
 
         GameObject prefab = MonsterPrefabs[Random.Range(0, MonsterPrefabs.Length)];
         Transform chosenPoint = (SpawnPoints.Length > 0) ? SpawnPoints[Random.Range(0, SpawnPoints.Length)] : transform;
 
-        spawnedMonster = Instantiate(prefab, chosenPoint.position, chosenPoint.rotation, parent);
-
-        hasSpawned = true;
+        spawnedMonster = Instantiate(prefab, chosenPoint.position, chosenPoint.rotation, monsterParent);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = true;
-        }
-
-        // Monster raakt zijn respawn boundary
+        // Alleen check voor respawn boundary
         if (RoomBoundary != null && other.gameObject == spawnedMonster)
         {
             RespawnMonster();
@@ -82,7 +62,6 @@ public class MonsterSpawner : MonoBehaviour
         spawnedMonster.transform.position = chosenPoint.position;
         spawnedMonster.transform.rotation = chosenPoint.rotation;
 
-        // Reset velocity als Rigidbody
         Rigidbody rb = spawnedMonster.GetComponent<Rigidbody>();
         if (rb != null)
         {
@@ -90,7 +69,6 @@ public class MonsterSpawner : MonoBehaviour
             rb.angularVelocity = Vector3.zero;
         }
 
-        // Zet boundary uit na delay
         if (RoomBoundary != null)
             StartCoroutine(DisableBoundaryAfterSeconds());
     }

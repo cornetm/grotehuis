@@ -160,23 +160,23 @@ public class RoomGenerator : MonoBehaviour
         int minMonsters = Mathf.CeilToInt((float)placedRooms.Count / RoomsPerMonster) * MonstersPerRooms;
         int spawned = 0;
 
-        // Geef elke spawner de parent, maar spawn wacht op player
+        // Geef elke spawner de parent
         foreach (var spawner in spawnerList)
         {
             spawner.SetParent(MonsterParent);
         }
 
-        // Force spawn tot minimaal aantal (wachten op player)
+        // Force spawn tot minimaal aantal
         for (int i = 0; i < spawnerList.Count && spawned < minMonsters; i++)
         {
-            spawnerList[i].TrySpawn(MonsterParent, true);
+            spawnerList[i].TrySpawn(true);  // <-- compatibel met nieuwe MonsterSpawner
             spawned++;
         }
 
         // Extra monsters verspreid random
         for (int i = spawned; i < spawnerList.Count; i++)
         {
-            spawnerList[i].TrySpawn(MonsterParent, false);
+            spawnerList[i].TrySpawn(false);
         }
 
         Debug.Log($"Monsters toegewezen: {spawned}/{spawnerList.Count} kamers (minimaal {minMonsters})");

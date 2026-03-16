@@ -81,10 +81,13 @@ PrefabInstance:
       addedObject: {fileID: 2926754286988417998}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1b149936eb327e84ab18401862ac124e, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1786332057950179603}
+      addedObject: {fileID: 1298516619097210329}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1b149936eb327e84ab18401862ac124e, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1298516619097210329}
+      addedObject: {fileID: 3743614572253896131}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1b149936eb327e84ab18401862ac124e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5506848011256001929}
   m_SourcePrefab: {fileID: 100100000, guid: 1b149936eb327e84ab18401862ac124e, type: 3}
 --- !u!1 &9144495848727502488 stripped
 GameObject:
@@ -105,41 +108,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterSimpleAI
   walkSpeed: 0.5
   sprintSpeed: 1
-  wanderRadius: 15
-  wanderInterval: 4
+  wanderInterval: 2
   chaseRadius: 10
-  verticalRange: 1
-  horizontalRays: 50
-  verticalRays: 5
   viewHeightOffset: 1.5
-  verticalAngle: 15
---- !u!54 &1786332057950179603
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9144495848727502488}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
+  wallCheckDistance: 0.25
 --- !u!65 &1298516619097210329
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -155,9 +127,48 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 0.57724214, y: 1.8123822, z: 2.195747}
   m_Center: {x: -0.00000013411045, y: 0.9079381, z: -0.23795307}
+--- !u!114 &3743614572253896131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9144495848727502488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47857f6309c9bee49bf3963ffb8b7d93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  damage: 10
+  damageCooldown: 1
+--- !u!143 &5506848011256001929
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9144495848727502488}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 90
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0.73, z: 0}

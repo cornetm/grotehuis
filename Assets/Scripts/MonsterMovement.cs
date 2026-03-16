@@ -1,8 +1,9 @@
-using UnityEngine;
+﻿using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
+[RequireComponent(typeof(Rigidbody))]
 public class MonsterSimpleAI : MonoBehaviour
 {
     [Header("Movement")]
@@ -15,18 +16,25 @@ public class MonsterSimpleAI : MonoBehaviour
 
     [Header("Detection")]
     public float chaseRadius = 10f;
-    public int rayCount = 120;
+    public float verticalRange = 3f;      // afstand tussen onderste en bovenste layer
+    public int horizontalRays = 36;       // aantal rays rondom 360 graden
+    public int verticalRays = 3;          // aantal lagen van onder naar boven
     public float viewHeightOffset = 1.5f;
+    public float verticalAngle = 15f;     // hoek omhoog/omlaag voor onderste/bovenste layer
 
     private Transform player;
     private Vector3 targetPosition;
     private float timer;
     private bool chasing;
 
-    private Vector3[] rayPoints;
+    private Rigidbody rb;
 
     void Start()
     {
+        rb = GetComponent<Rigidbody>();
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        rb.useGravity = true;
+
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
             player = playerObj.transform;
@@ -47,9 +55,7 @@ public class MonsterSimpleAI : MonoBehaviour
         else
         {
             chasing = false;
-
             timer += Time.deltaTime;
-
             if (timer >= wanderInterval || Vector3.Distance(transform.position, targetPosition) < 1f)
                 PickNewDestination();
 
@@ -59,115 +65,93 @@ public class MonsterSimpleAI : MonoBehaviour
 
     void MoveTowards(Vector3 target, float speed)
     {
-        Vector3 direction = (target - transform.position).normalized;
+        Vector3 direction = target - transform.position;
+        direction.y = 0;
+        if (direction.sqrMagnitude < 0.01f) return;
 
-        if (direction != Vector3.zero)
-        {
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                Quaternion.LookRotation(direction),
-                5f * Time.deltaTime
-            );
-        }
+        Vector3 move = direction.normalized * speed * Time.deltaTime;
+        rb.MovePosition(transform.position + move);
 
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            target,
-            speed * Time.deltaTime
-        );
+        Quaternion lookRotation = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, 5f * Time.deltaTime);
     }
 
     void PickNewDestination()
     {
         timer = 0f;
-
         Vector2 random = Random.insideUnitCircle * wanderRadius;
-
-        targetPosition = new Vector3(
-            transform.position.x + random.x,
-            transform.position.y,
-            transform.position.z + random.y
-        );
+        targetPosition = new Vector3(transform.position.x + random.x, transform.position.y, transform.position.z + random.y);
     }
 
     bool IsPlayerInRadius()
     {
-        Vector3 monsterEye = transform.position + Vector3.up * viewHeightOffset;
-        Vector3 playerPos = player.position + Vector3.up * 0.5f;
+        if (player == null) return false;
 
-        float dist = Vector3.Distance(monsterEye, playerPos);
+        Vector3 eyePos = transform.position + Vector3.up * viewHeightOffset;
 
-        if (dist > chaseRadius)
-            return false;
-
-        RaycastHit[] hits = Physics.RaycastAll(monsterEye, (playerPos - monsterEye).normalized, chaseRadius);
-        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-
-        foreach (RaycastHit hit in hits)
+        for (int v = 0; v < verticalRays; v++)
         {
-            if (hit.collider.isTrigger)
-                continue;
+            float yOffset = -verticalRange / 2f + v * (verticalRange / (verticalRays - 1));
+            Vector3 layerOrigin = eyePos + Vector3.up * yOffset;
 
-            if (hit.collider.CompareTag("Room"))
-                return false;
+            float layerAngle = 0f;
+            if (v == 0) layerAngle = verticalAngle;      // onderste layer → schuin omhoog
+            if (v == 2) layerAngle = -verticalAngle;     // bovenste layer → schuin omlaag
+            // middelste layer 1 → horizontaal (angle = 0)
 
-            if (hit.transform == player)
-                return true;
+            for (int h = 0; h < horizontalRays; h++)
+            {
+                float angle = h * 360f / horizontalRays;
+                Vector3 dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), 0, Mathf.Sin(angle * Mathf.Deg2Rad)).normalized;
+                dir = Quaternion.AngleAxis(layerAngle, Vector3.Cross(Vector3.up, dir)) * dir; // kantel omhoog/omlaag
+
+                RaycastHit hit;
+                if (Physics.Raycast(layerOrigin, dir, out hit, chaseRadius))
+                {
+                    if (hit.collider.isTrigger)
+                        continue;
+
+                    if (hit.transform == player)
+                        return true;
+                }
+            }
         }
 
         return false;
     }
 
-    void UpdateRayPoints()
-    {
-        Vector3 center = transform.position + Vector3.up * viewHeightOffset;
-        rayPoints = new Vector3[rayCount];
-
-        for (int i = 0; i < rayCount; i++)
-        {
-            float angle = i * 360f / rayCount;
-            Vector3 dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), 0, Mathf.Sin(angle * Mathf.Deg2Rad));
-
-            RaycastHit[] hits = Physics.RaycastAll(center, dir, chaseRadius);
-            System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-
-            bool hitRoom = false;
-
-            foreach (RaycastHit hit in hits)
-            {
-                if (hit.collider.isTrigger)
-                    continue;
-
-                if (hit.collider.CompareTag("Room"))
-                {
-                    rayPoints[i] = hit.point;
-                    hitRoom = true;
-                    break;
-                }
-            }
-
-            if (!hitRoom)
-                rayPoints[i] = center + dir * chaseRadius;
-        }
-    }
-
     void OnDrawGizmosSelected()
     {
-        UpdateRayPoints();
-        if (rayPoints == null || rayPoints.Length == 0) return;
+        if (!Application.isPlaying) return;
 
+        Vector3 eyePos = transform.position + Vector3.up * viewHeightOffset;
         Gizmos.color = Color.red;
 
-        for (int i = 0; i < rayPoints.Length; i++)
+        for (int v = 0; v < verticalRays; v++)
         {
-            Vector3 from = rayPoints[i];
-            Vector3 to = rayPoints[(i + 1) % rayPoints.Length];
-            Gizmos.DrawLine(from, to);
-        }
+            float yOffset = -verticalRange / 2f + v * (verticalRange / (verticalRays - 1));
+            Vector3 layerOrigin = eyePos + Vector3.up * yOffset;
 
-#if UNITY_EDITOR
-        Handles.color = new Color(1f, 0f, 0f, 0.1f);
-        Handles.DrawAAConvexPolygon(rayPoints);
-#endif
+            float layerAngle = 0f;
+            if (v == 0) layerAngle = verticalAngle;
+            if (v == 2) layerAngle = -verticalAngle;
+
+            for (int h = 0; h < horizontalRays; h++)
+            {
+                float angle = h * 360f / horizontalRays;
+                Vector3 dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), 0, Mathf.Sin(angle * Mathf.Deg2Rad)).normalized;
+                dir = Quaternion.AngleAxis(layerAngle, Vector3.Cross(Vector3.up, dir)) * dir;
+
+                RaycastHit hit;
+                Vector3 end = layerOrigin + dir * chaseRadius;
+                if (Physics.Raycast(layerOrigin, dir, out hit, chaseRadius))
+                {
+                    if (!hit.collider.isTrigger)
+                        end = hit.point;
+                }
+
+                Gizmos.DrawLine(layerOrigin, end);
+            }
+        }
     }
 }

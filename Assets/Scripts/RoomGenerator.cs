@@ -9,26 +9,34 @@ public class RoomGenerator : MonoBehaviour
     public float StartCooldown = 1f;
 
     [Header("Room Prefabs")]
-    public GameObject[] Rooms; // forward, left, right, upstairs, downstairs
+    public GameObject[] Rooms;
+
+    [Header("Monster Settings (X monsters per X kamers)")]
+    public int MonstersPerRooms = 1;
+    public int RoomsPerMonster = 10;
 
     private Transform RoomParent;
+    private Transform MonsterParent;
     private List<GameObject> placedRooms = new List<GameObject>();
+
     private RoomInfo.RoomDirection? lastRoomDirection = null;
     private int leftStreak = 0;
 
     void Start()
     {
-        SetupParent();
+        SetupParents();
         Invoke(nameof(StartDungeonGeneration), StartCooldown);
     }
 
-    void SetupParent()
+    void SetupParents()
     {
-        GameObject parentObj = GameObject.Find("Rooms");
-        if (parentObj == null)
-            parentObj = new GameObject("Rooms");
+        GameObject roomObj = GameObject.Find("Rooms");
+        if (roomObj == null) roomObj = new GameObject("Rooms");
+        RoomParent = roomObj.transform;
 
-        RoomParent = parentObj.transform;
+        GameObject monsterObj = GameObject.Find("Monsters");
+        if (monsterObj == null) monsterObj = new GameObject("Monsters");
+        MonsterParent = monsterObj.transform;
     }
 
     void StartDungeonGeneration()
@@ -37,15 +45,18 @@ public class RoomGenerator : MonoBehaviour
         bool success = GenerateDungeonRecursive(targetRooms, 0);
 
         if (success)
+        {
             Debug.Log($"Dungeon succesvol gegenereerd met {placedRooms.Count} kamers!");
+            SpawnMonsters();
+        }
         else
-            Debug.LogError("Dungeon generatie mislukt! (Dit mag niet gebeuren als de kamers fysiek passen.)");
+        {
+            Debug.LogError("Dungeon generatie mislukt!");
+        }
     }
 
-    // Recursive backtracking generator
     bool GenerateDungeonRecursive(int targetRooms, int currentIndex)
     {
-        // Eerste kamer altijd Forward
         if (currentIndex == 0)
         {
             GameObject forwardPrefab = null;
@@ -61,7 +72,7 @@ public class RoomGenerator : MonoBehaviour
 
             if (forwardPrefab == null)
             {
-                Debug.LogError("Geen Forward prefab gevonden voor de eerste kamer!");
+                Debug.LogError("Geen Forward prefab gevonden!");
                 return false;
             }
 
@@ -69,17 +80,15 @@ public class RoomGenerator : MonoBehaviour
             RoomInfo firstInfo = firstRoom.GetComponent<RoomInfo>();
             PlaceRoom(firstRoom, firstInfo);
             placedRooms.Add(firstRoom);
+
             lastRoomDirection = firstInfo.roomdirection;
             leftStreak = 0;
 
-            // Recursive call voor de rest
             return GenerateDungeonRecursive(targetRooms, currentIndex + 1);
         }
 
-        if (currentIndex >= targetRooms)
-            return true; // Alle kamers geplaatst
+        if (currentIndex >= targetRooms) return true;
 
-        // Shuffle de prefab lijst zodat we elke prefab 1x proberen
         List<GameObject> availablePrefabs = new List<GameObject>(Rooms);
         ShuffleList(availablePrefabs);
 
@@ -93,7 +102,6 @@ public class RoomGenerator : MonoBehaviour
                 continue;
             }
 
-            // Vertical room check: nooit 2x vertical achter elkaar
             if (LastRoomWasVertical() &&
                 (info.roomdirection == RoomInfo.RoomDirection.upstairs || info.roomdirection == RoomInfo.RoomDirection.downstairs))
             {
@@ -101,7 +109,6 @@ public class RoomGenerator : MonoBehaviour
                 continue;
             }
 
-            // Max 3x left check
             if (info.roomdirection == RoomInfo.RoomDirection.left && leftStreak >= 2)
             {
                 if (!(lastRoomDirection == RoomInfo.RoomDirection.upstairs || lastRoomDirection == RoomInfo.RoomDirection.downstairs))
@@ -111,58 +118,73 @@ public class RoomGenerator : MonoBehaviour
                 }
             }
 
-            // Plaats kamer correct
             PlaceRoom(newRoom, info);
 
-            // Overlap check
             if (RoomOverlaps(newRoom))
             {
                 Destroy(newRoom);
                 continue;
             }
 
-            // Chain check: start moet matchen met vorige end
             if (placedRooms.Count > 0)
             {
                 RoomInfo prev = placedRooms[placedRooms.Count - 1].GetComponent<RoomInfo>();
-                float dist = Vector3.Distance(prev.EndPoint.position, info.StartPoint.position);
-                if (dist > 0.01f)
+                if (Vector3.Distance(prev.EndPoint.position, info.StartPoint.position) > 0.01f)
                 {
                     Destroy(newRoom);
                     continue;
                 }
             }
 
-            // ✅ Plaats definitief
             placedRooms.Add(newRoom);
             lastRoomDirection = info.roomdirection;
             leftStreak = (info.roomdirection == RoomInfo.RoomDirection.left) ? leftStreak + 1 : 0;
 
-            // Recursieve call: probeer volgende kamer
             bool result = GenerateDungeonRecursive(targetRooms, currentIndex + 1);
-            if (result)
-            {
-                Debug.Log($"Room geplaatst: {newRoom.name} ({info.roomdirection})");
-                return true;
-            }
-            else
-            {
-                // Backtrack: verwijder kamer en probeer volgende prefab
-                placedRooms.RemoveAt(placedRooms.Count - 1);
-                Destroy(newRoom);
-                RecalculateGeneratorState();
-                Debug.Log($"Backtrack: verwijderen kamer '{prefab.name}' op index {currentIndex}");
-            }
+            if (result) return true;
+
+            placedRooms.RemoveAt(placedRooms.Count - 1);
+            Destroy(newRoom);
+            RecalculateGeneratorState();
         }
 
-        // Geen prefab past → terug naar vorige kamer
         return false;
+    }
+
+    void SpawnMonsters()
+    {
+        MonsterSpawner[] spawners = RoomParent.GetComponentsInChildren<MonsterSpawner>();
+        List<MonsterSpawner> spawnerList = new List<MonsterSpawner>(spawners);
+        ShuffleList(spawnerList);
+
+        int minMonsters = Mathf.CeilToInt((float)placedRooms.Count / RoomsPerMonster) * MonstersPerRooms;
+        int spawned = 0;
+
+        // Geef elke spawner de parent, maar spawn wacht op player
+        foreach (var spawner in spawnerList)
+        {
+            spawner.SetParent(MonsterParent);
+        }
+
+        // Force spawn tot minimaal aantal (wachten op player)
+        for (int i = 0; i < spawnerList.Count && spawned < minMonsters; i++)
+        {
+            spawnerList[i].TrySpawn(MonsterParent, true);
+            spawned++;
+        }
+
+        // Extra monsters verspreid random
+        for (int i = spawned; i < spawnerList.Count; i++)
+        {
+            spawnerList[i].TrySpawn(MonsterParent, false);
+        }
+
+        Debug.Log($"Monsters toegewezen: {spawned}/{spawnerList.Count} kamers (minimaal {minMonsters})");
     }
 
     void PlaceRoom(GameObject room, RoomInfo info)
     {
         Vector3 startOffset = info.StartPoint.localPosition;
-
         Transform lastEnd = (placedRooms.Count > 0) ? placedRooms[placedRooms.Count - 1].GetComponent<RoomInfo>().EndPoint : null;
 
         if (lastEnd == null)
@@ -173,15 +195,9 @@ public class RoomGenerator : MonoBehaviour
         }
 
         Vector3 forwardDir = lastEnd.forward;
-
-        if (info.roomdirection == RoomInfo.RoomDirection.upstairs || info.roomdirection == RoomInfo.RoomDirection.downstairs)
-        {
-            room.transform.rotation = Quaternion.LookRotation(forwardDir, Vector3.up);
-        }
-        else
-        {
-            room.transform.rotation = lastEnd.rotation;
-        }
+        room.transform.rotation = (info.roomdirection == RoomInfo.RoomDirection.upstairs || info.roomdirection == RoomInfo.RoomDirection.downstairs)
+            ? Quaternion.LookRotation(forwardDir, Vector3.up)
+            : lastEnd.rotation;
 
         Vector3 worldOffset = room.transform.TransformPoint(startOffset) - room.transform.position;
         room.transform.position = lastEnd.position - worldOffset;
@@ -204,9 +220,7 @@ public class RoomGenerator : MonoBehaviour
                 myCollider, room.transform.position, room.transform.rotation,
                 otherCol, other.transform.position, other.transform.rotation,
                 out direction, out distance))
-            {
                 return true;
-            }
         }
         return false;
     }
@@ -227,8 +241,7 @@ public class RoomGenerator : MonoBehaviour
             for (int i = placedRooms.Count - 1; i >= 0; i--)
             {
                 RoomInfo r = placedRooms[i].GetComponent<RoomInfo>();
-                if (r.roomdirection == RoomInfo.RoomDirection.left)
-                    leftStreak++;
+                if (r.roomdirection == RoomInfo.RoomDirection.left) leftStreak++;
                 else break;
             }
         }

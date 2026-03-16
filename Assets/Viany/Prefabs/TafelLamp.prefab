@@ -249,6 +249,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6738368510952773856}
+  - component: {fileID: 7859613856487336670}
   - component: {fileID: 6034402616045453487}
   - component: {fileID: 8044945360178062754}
   - component: {fileID: 8739147548950139227}
@@ -275,6 +276,23 @@ Transform:
   - {fileID: 2955241215434526856}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7859613856487336670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4738041355579688161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a92c7bbc7bbd84e9c0f3a970fbdc3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EditorLightToggle
+  isOn: 1
+  targetLight: {fileID: 2940092681221769801}
+  targetRenderer: {fileID: 8044945360178062754}
+  onMaterial: {fileID: 2100000, guid: 1adbf4a4335ae8d48848b118334363a0, type: 2}
+  offMaterial: {fileID: 2100000, guid: 1adbf4a4335ae8d48848b118334363a0, type: 2}
 --- !u!33 &6034402616045453487
 MeshFilter:
   m_ObjectHideFlags: 0

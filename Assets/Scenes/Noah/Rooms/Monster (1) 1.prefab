@@ -117,7 +117,7 @@ MonoBehaviour:
   idleDurationMin: 3
   idleDurationMax: 5
   chaseRadius: 10
-  viewHeightOffset: 1.5
+  viewHeightOffset: 1.2
   wallCheckDistance: 0.1
   animator: {fileID: 6747190337303980136}
 --- !u!65 &2700971607913931420

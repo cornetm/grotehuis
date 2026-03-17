@@ -11,7 +11,7 @@ public class MonsterSimpleAI : MonoBehaviour
 
     [Header("Wander")]
     public float wanderInterval = 4f;
-    public float idleChance = 0.3f; // kans om even stil te staan
+    public float idleChance = 0.3f;
     public float idleDurationMin = 1f;
     public float idleDurationMax = 3f;
 
@@ -23,7 +23,7 @@ public class MonsterSimpleAI : MonoBehaviour
     public float wallCheckDistance = 1f;
 
     [Header("Animator")]
-    public Animator animator; // sleep je Animator component hier
+    public Animator animator;
 
     private Transform player;
     private Vector3 targetPosition;
@@ -45,7 +45,8 @@ public class MonsterSimpleAI : MonoBehaviour
         if (animator == null) animator = GetComponent<Animator>();
 
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null) player = playerObj.transform;
+        if (playerObj != null)
+            player = playerObj.transform;
 
         PickDestinationInCurrentOrAnotherRoom();
     }
@@ -56,7 +57,6 @@ public class MonsterSimpleAI : MonoBehaviour
 
         float currentSpeed = 0f;
 
-        // Check of monster de speler ziet
         if (IsPlayerInRadius())
         {
             chasing = true;
@@ -84,7 +84,6 @@ public class MonsterSimpleAI : MonoBehaviour
                 timer += Time.deltaTime;
                 currentSpeed = walkSpeed;
 
-                // Random kans om even idle te gaan
                 if (Random.value < idleChance * Time.deltaTime)
                 {
                     isIdling = true;
@@ -110,7 +109,6 @@ public class MonsterSimpleAI : MonoBehaviour
         if (dir.sqrMagnitude < 0.01f || speed <= 0f) return;
         dir.Normalize();
 
-        // Wall check gebaseerd op BoxCollider
         Vector3 rayOrigin = transform.position + Vector3.up * boxCollider.bounds.extents.y;
         float rayDistance = wallCheckDistance + boxCollider.bounds.extents.x;
 
@@ -179,17 +177,68 @@ public class MonsterSimpleAI : MonoBehaviour
         if (player == null) return false;
 
         Vector3 eyePos = transform.position + Vector3.up * viewHeightOffset;
-        Vector3 dir = player.position - eyePos;
-        dir.y = 0;
 
-        if (dir.magnitude > chaseRadius) return false;
+        // Automatische spelerhoogte
+        float playerHeight = 2f;
+        Collider col = player.GetComponent<Collider>();
+        if (col != null)
+            playerHeight = col.bounds.size.y;
 
-        if (Physics.Linecast(eyePos, player.position, out RaycastHit hit))
+        // Horizontale afstand voor radius check
+        Vector3 horizontalDir = player.position - eyePos;
+        horizontalDir.y = 0;
+        if (horizontalDir.magnitude > chaseRadius) return false;
+
+        // Line-of-sight met meerdere verticale raycasts
+        int verticalSteps = 3;
+        for (int i = 0; i < verticalSteps; i++)
         {
-            if (!hit.collider.isTrigger && hit.collider.CompareTag("Room"))
-                return false;
+            float y = (playerHeight / (verticalSteps - 1)) * i;
+            Vector3 target = player.position + Vector3.up * y;
+
+            if (Physics.Linecast(eyePos, target, out RaycastHit hit))
+            {
+                if (!hit.collider.isTrigger && hit.collider.CompareTag("Room"))
+                    continue; // muur blokkeert
+            }
+
+            return true; // één ray kan speler raken
         }
 
-        return true;
+        return false;
+    }
+
+    // -------------------------
+    // Gizmos voor inspectie
+    // -------------------------
+    void OnDrawGizmosSelected()
+    {
+        if (!Application.isPlaying) return;
+
+        DrawDetectionRange(chaseRadius, Color.red);
+    }
+
+    void DrawDetectionRange(float radius, Color color)
+    {
+        Gizmos.color = color;
+        Vector3 eyePos = transform.position + Vector3.up * viewHeightOffset;
+
+        int steps = 60;
+        float angleStep = 360f / steps;
+
+        for (int i = 0; i < steps; i++)
+        {
+            float angle = i * angleStep;
+            Vector3 dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), 0, Mathf.Sin(angle * Mathf.Deg2Rad));
+            Vector3 endPoint = eyePos + dir * radius;
+
+            if (Physics.Raycast(eyePos, dir, out RaycastHit hit, radius))
+            {
+                if (!hit.collider.isTrigger && hit.collider.CompareTag("Room"))
+                    endPoint = hit.point;
+            }
+
+            Gizmos.DrawLine(eyePos, endPoint);
+        }
     }
 }

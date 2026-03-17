@@ -45,9 +45,9 @@ public class PrefabReferenceAutoEditor : Editor
                 break;
 
             case PrefabReferenceAuto.ItemCategory.Limited:
-                item.limitedType = PrefabReferenceAuto.LimitedType.Pills;
-
-                EditorGUILayout.LabelField("Limited Item: Pills");
+                // Dropdown voor LimitedType
+                item.limitedType = (PrefabReferenceAuto.LimitedType)
+                    EditorGUILayout.EnumPopup("Limited Type", item.limitedType);
 
                 EditorGUILayout.Space();
                 EditorGUILayout.LabelField("Limited Stats", EditorStyles.boldLabel);

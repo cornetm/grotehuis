@@ -26,8 +26,12 @@ public class InventorySlotItem : MonoBehaviour
     public float weaponSpeed;
     public float weaponRange;
 
+    // 🔹 medkitUsed is niet meer nodig voor direct gebruik
+    // private bool medkitUsed = false;
+
     TextMeshProUGUI slotText;
-    InventorySystem inventorySystem;
+    [HideInInspector]
+    public InventorySystem inventorySystem;
     ItemUse itemUse;
 
     public void Initialize(GameObject prefab, InventorySystem system)
@@ -47,7 +51,6 @@ public class InventorySlotItem : MonoBehaviour
 
         activated = false;
 
-        // 🔹 Haal weapon stats van prefabRef over
         if (prefabRef != null && prefabRef.category == PrefabReferenceAuto.ItemCategory.Weapons)
         {
             weaponDamage = prefabRef.damage;
@@ -76,15 +79,20 @@ public class InventorySlotItem : MonoBehaviour
     {
         if (isEquipped)
         {
+            // ===== Flashlight & andere acties =====
             if (Input.GetMouseButtonDown(0))
             {
-                activated = !activated;
+                if (prefabRef.category != PrefabReferenceAuto.ItemCategory.Limited ||
+                    prefabRef.limitedType != PrefabReferenceAuto.LimitedType.Medkit)
+                {
+                    activated = !activated;
 
-                if (flashlightLight != null && flashlightPower > 0)
-                    flashlightLight.enabled = activated;
+                    if (flashlightLight != null && flashlightPower > 0)
+                        flashlightLight.enabled = activated;
+                }
             }
 
-            // ===== BATTERY DRAIN =====
+            // ===== BATTERY DRAIN voor flashlight =====
             if (activated && flashlightPower > 0)
             {
                 flashlightPower -= batteryDrainPerSecond * Time.deltaTime;
@@ -101,6 +109,8 @@ public class InventorySlotItem : MonoBehaviour
                         flashlightLight.enabled = false;
                 }
             }
+
+            // 🔹 Medkit logica volledig via ItemUse; niets hier direct gebruiken
         }
     }
 
@@ -115,7 +125,8 @@ public class InventorySlotItem : MonoBehaviour
 
         if (prefabRef != null && itemUse != null)
         {
-            itemUse.EquipItem(prefabRef.category, GetEnumFromCategory(prefabRef));
+            // Geef deze slot door voor medkit logic in ItemUse
+            itemUse.EquipItem(prefabRef.category, GetEnumFromCategory(prefabRef), this);
 
             if (prefabRef.category == PrefabReferenceAuto.ItemCategory.Temporary &&
                 prefabRef.temporaryType == PrefabReferenceAuto.TemporaryType.Flashlight &&

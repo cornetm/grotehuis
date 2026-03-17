@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class RoomGenerator : MonoBehaviour
@@ -10,6 +11,9 @@ public class RoomGenerator : MonoBehaviour
 
     [Header("Room Prefabs")]
     public GameObject[] Rooms;
+
+    [Header("End Room Prefab")]
+    public GameObject EndRoomPrefab;
 
     [Header("Monster Settings (X monsters per X kamers)")]
     public int MonstersPerRooms = 1;
@@ -46,6 +50,9 @@ public class RoomGenerator : MonoBehaviour
 
         if (success)
         {
+            // Plaats de eindkamer als laatste
+            PlaceEndRoom();
+
             Debug.Log($"Dungeon succesvol gegenereerd met {placedRooms.Count} kamers!");
             SpawnMonsters();
         }
@@ -53,6 +60,30 @@ public class RoomGenerator : MonoBehaviour
         {
             Debug.LogError("Dungeon generatie mislukt!");
         }
+    }
+
+    void PlaceEndRoom()
+    {
+        if (EndRoomPrefab == null) return;
+
+        GameObject lastRoom = placedRooms[placedRooms.Count - 1];
+        RoomInfo lastInfo = lastRoom.GetComponent<RoomInfo>();
+
+        GameObject endRoom = Instantiate(EndRoomPrefab, Vector3.zero, Quaternion.identity, RoomParent);
+        RoomInfo endInfo = endRoom.GetComponent<RoomInfo>();
+        PlaceRoom(endRoom, endInfo);
+
+        placedRooms.Add(endRoom);
+
+        // Voeg trigger component toe om te detecteren dat speler gewonnen heeft
+        EndRoomTrigger trigger = endRoom.AddComponent<EndRoomTrigger>();
+        trigger.RoomGenerator = this;
+    }
+
+    public void PlayerReachedEnd()
+    {
+        Debug.Log("Je hebt de eindkamer bereikt! Je hebt gewonnen!");
+        // Hier kun je scene switch, UI of win state triggeren
     }
 
     bool GenerateDungeonRecursive(int targetRooms, int currentIndex)
@@ -153,33 +184,52 @@ public class RoomGenerator : MonoBehaviour
 
     void SpawnMonsters()
     {
-        MonsterSpawner[] spawners = RoomParent.GetComponentsInChildren<MonsterSpawner>();
-        List<MonsterSpawner> spawnerList = new List<MonsterSpawner>(spawners);
+        List<MonsterSpawner> spawnerList = new List<MonsterSpawner>();
+
+        // Voeg alleen spawners van kamers vanaf index 5 toe
+        for (int i = 5; i < placedRooms.Count; i++)
+        {
+            MonsterSpawner spawner = placedRooms[i].GetComponentInChildren<MonsterSpawner>();
+            if (spawner != null)
+                spawnerList.Add(spawner);
+        }
+
         ShuffleList(spawnerList);
 
         int minMonsters = Mathf.CeilToInt((float)placedRooms.Count / RoomsPerMonster) * MonstersPerRooms;
         int spawned = 0;
 
-        // Geef elke spawner de parent
-        foreach (var spawner in spawnerList)
-        {
-            spawner.SetParent(MonsterParent);
-        }
+        List<int> usedIndices = new List<int>();
 
-        // Force spawn tot minimaal aantal
+        // Force spawn minimaal aantal monsters zonder dat ze naast elkaar staan
         for (int i = 0; i < spawnerList.Count && spawned < minMonsters; i++)
         {
-            spawnerList[i].TrySpawn(true);  // <-- compatibel met nieuwe MonsterSpawner
+            if (IsAdjacentUsed(i, usedIndices)) continue;
+
+            spawnerList[i].SetParent(MonsterParent);
+            spawnerList[i].TrySpawn(MonsterParent, true);
+            usedIndices.Add(i);
             spawned++;
         }
 
-        // Extra monsters verspreid random
-        for (int i = spawned; i < spawnerList.Count; i++)
+        // Extra monsters verspreid random, nog steeds niet naast elkaar
+        for (int i = 0; i < spawnerList.Count; i++)
         {
-            spawnerList[i].TrySpawn(false);
+            if (spawned >= spawnerList.Count) break;
+
+            if (usedIndices.Contains(i) || IsAdjacentUsed(i, usedIndices)) continue;
+
+            spawnerList[i].TrySpawn(MonsterParent, false);
+            usedIndices.Add(i);
+            spawned++;
         }
 
         Debug.Log($"Monsters toegewezen: {spawned}/{spawnerList.Count} kamers (minimaal {minMonsters})");
+    }
+
+    private bool IsAdjacentUsed(int index, List<int> usedIndices)
+    {
+        return usedIndices.Contains(index - 1) || usedIndices.Contains(index + 1);
     }
 
     void PlaceRoom(GameObject room, RoomInfo info)
@@ -262,6 +312,22 @@ public class RoomGenerator : MonoBehaviour
             int rand = Random.Range(i, list.Count);
             list[i] = list[rand];
             list[rand] = temp;
+        }
+    }
+}
+
+/// <summary>
+/// Trigger voor einde kamer.
+/// </summary>
+public class EndRoomTrigger : MonoBehaviour
+{
+    public RoomGenerator RoomGenerator;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            RoomGenerator.PlayerReachedEnd();
         }
     }
 }

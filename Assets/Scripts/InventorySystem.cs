@@ -203,7 +203,7 @@ public class InventorySystem : MonoBehaviour
         RemoveSlot(index);
     }
 
-    void RemoveSlot(int index)
+    public void RemoveSlot(int index)
     {
         Destroy(slots[index].gameObject);
         slots.RemoveAt(index);

@@ -6,7 +6,7 @@ public class PrefabReferenceAuto : MonoBehaviour
     public enum ItemCategory { Weapons, Temporary, Limited }
     public enum WeaponType { ButcherKnife, KitchenKnife, ButterKnife }
     public enum TemporaryType { Flashlight, Lucifer, Candle }
-    public enum LimitedType { Pills }
+    public enum LimitedType { Pills, Medkit } // <-- Medkit toegevoegd
 
     // ================= PREFAB REFERENCE =================
     [Header("Prefab Reference")]
@@ -23,7 +23,7 @@ public class PrefabReferenceAuto : MonoBehaviour
 
     // ================= THROW SETTINGS =================
     [Header("Throw Settings")]
-    public Vector3 throwRotationOffset = Vector3.zero; // Stel per item in Inspector in
+    public Vector3 throwRotationOffset = Vector3.zero;
 
     // ================= WEAPON STATS =================
     [Header("Weapon Stats")]

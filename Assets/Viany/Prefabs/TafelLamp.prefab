@@ -44,7 +44,7 @@ Light:
   serializedVersion: 12
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 6460.4263
+  m_Intensity: 16.055603
   m_Range: 10
   m_SpotAngle: 179
   m_InnerSpotAngle: 100.20813
@@ -95,7 +95,7 @@ Light:
   m_ForceVisible: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
-  m_LightUnit: 2
+  m_LightUnit: 0
   m_LuxAtDistance: 2.6
   m_EnableSpotReflector: 1
 --- !u!114 &7944898799314349005
@@ -122,7 +122,7 @@ MonoBehaviour:
   m_ShapeHeight: -1
   m_AspectRatio: -1
   m_SpotIESCutoffPercent: 100
-  m_LightDimmer: 0.7
+  m_LightDimmer: 0.5
   m_VolumetricDimmer: 16
   m_FadeDistance: 10000
   m_VolumetricFadeDistance: 10000
@@ -289,7 +289,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EditorLightToggle
   isOn: 1
-  targetLight: {fileID: 2940092681221769801}
+  useMultipleLights: 0
+  singleLight: {fileID: 2940092681221769801}
+  multipleLights: []
   targetRenderer: {fileID: 8044945360178062754}
   onMaterial: {fileID: 2100000, guid: 1adbf4a4335ae8d48848b118334363a0, type: 2}
   offMaterial: {fileID: 2100000, guid: 1adbf4a4335ae8d48848b118334363a0, type: 2}

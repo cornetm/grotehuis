@@ -4,7 +4,12 @@ using UnityEngine;
 public class EditorLightToggle : MonoBehaviour
 {
     [SerializeField] private bool isOn = true;
-    [SerializeField] private Light targetLight;
+
+    [SerializeField] private bool useMultipleLights;
+
+    [SerializeField] private Light singleLight;
+    [SerializeField] private Light[] multipleLights;
+
     [SerializeField] private Renderer targetRenderer;
     [SerializeField] private Material onMaterial;
     [SerializeField] private Material offMaterial;
@@ -16,21 +21,18 @@ public class EditorLightToggle : MonoBehaviour
 
     private void ApplyState()
     {
-        if (targetLight != null)
+        if (useMultipleLights)
         {
-            targetLight.enabled = isOn;
+            for (int i = 0; i < multipleLights.Length; i++)
+            {
+                multipleLights[i].enabled = isOn;
+            }
+        }
+        else
+        {
+            singleLight.enabled = isOn;
         }
 
-        if (targetRenderer != null)
-        {
-            if (isOn && onMaterial != null)
-            {
-                targetRenderer.sharedMaterial = onMaterial;
-            }
-            else if (!isOn && offMaterial != null)
-            {
-                targetRenderer.sharedMaterial = offMaterial;
-            }
-        }
+        targetRenderer.sharedMaterial = isOn ? onMaterial : offMaterial;
     }
 }

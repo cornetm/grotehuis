@@ -3,18 +3,16 @@ using UnityEngine;
 public class MonsterStats : MonoBehaviour
 {
     [Header("Monster Settings")]
-    public int damage = 10;                // Hoeveel schade het monster doet
-    public float damageCooldown = 1f;      // Tijd tussen schade momenten
+    public int damage = 10;
+    public float damageCooldown = 1f;
 
-    private float lastDamageTime = -Mathf.Infinity; // Houdt bij wanneer speler voor het laatst schade kreeg
+    private float lastDamageTime = -Mathf.Infinity;
 
-    // Voor triggers
     private void OnTriggerStay(Collider other)
     {
         TryDamagePlayer(other.gameObject);
     }
 
-    // Voor colliders
     private void OnCollisionStay(Collision collision)
     {
         TryDamagePlayer(collision.gameObject);
@@ -31,7 +29,7 @@ public class MonsterStats : MonoBehaviour
         if (playerHealth != null)
         {
             playerHealth.TakeDamage(damage);
-            lastDamageTime = Time.time; // reset cooldown
+            lastDamageTime = Time.time;
         }
     }
 }

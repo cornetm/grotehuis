@@ -604,6 +604,63 @@ MonoBehaviour:
   m_Size: {x: 1, y: 1, z: 1}
   m_FadeFactor: 0.597
   m_Version: 3
+--- !u!1001 &236604559
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 7320261773845877998, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_Name
+      value: Plafond Lamp
+      objectReference: {fileID: 0}
+    - target: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.8200004
+      objectReference: {fileID: 0}
+    - target: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a39a4cb211937464795ee28226137e51, type: 3}
 --- !u!1 &238705928 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3331085621883574078, guid: e1b1958027445fb4d8e6a37e28dd88ca, type: 3}
@@ -4019,7 +4076,7 @@ Light:
   serializedVersion: 12
   m_Type: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 1
+  m_Intensity: 0.6
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -4178,8 +4235,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 1, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1767240370}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1483410023
@@ -4973,11 +5029,11 @@ Transform:
   m_GameObject: {fileID: 1767240369}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.80402, y: -0.95, z: 8.16467}
+  m_LocalPosition: {x: -0.80402, y: 0.050000012, z: -1.83533}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1483410022}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1767240371
 MonoBehaviour:
@@ -7003,7 +7059,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.27999997
+      value: -1.34
       objectReference: {fileID: 0}
     - target: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
       propertyPath: m_LocalPosition.y
@@ -8027,6 +8083,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1483410022}
+  - {fileID: 1767240370}
   - {fileID: 1463320598}
   - {fileID: 543450652873191887}
   - {fileID: 1239887874}
@@ -8045,6 +8102,7 @@ SceneRoots:
   - {fileID: 2612220985457471812}
   - {fileID: 8107741498584383638}
   - {fileID: 4842517406995285640}
+  - {fileID: 236604559}
   - {fileID: 8478171281128717054}
   - {fileID: 4539199371272175336}
   - {fileID: 1389959374}

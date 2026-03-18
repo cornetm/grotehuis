@@ -1,7 +1,15 @@
 fileFormatVersion: 2
 guid: e1529106d4d0d954e8a0d88b091b95c5
+AssetOrigin:
+  serializedVersion: 1
+  productId: 318366
+  packageName: 3D_Game_Assets_Flora
+  packageVersion: 1.0.0
+  assetPath: Assets/3D_Game_Assets_Flora/Models/Flowers on the ground/Model/Flowers
+    on the ground.fbx
+  uploadId: 751987
 ModelImporter:
-  serializedVersion: 22200
+  serializedVersion: 24200
   internalIDToNameTable: []
   externalObjects: {}
   materials:
@@ -56,6 +64,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 1
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
@@ -105,11 +116,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 318366
-  packageName: 3D_Game_Assets_Flora
-  packageVersion: 1.0.0
-  assetPath: Assets/3D_Game_Assets_Flora/Models/Flowers on the ground/Model/Flowers
-    on the ground.fbx
-  uploadId: 751987

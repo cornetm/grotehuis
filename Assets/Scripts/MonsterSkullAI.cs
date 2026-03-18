@@ -108,7 +108,6 @@ public class MonsterSkullAI : MonoBehaviour
     {
         if (player == null) return;
         Vector3 dir = player.position - transform.position;
-        dir.y = 0;
         if (dir.sqrMagnitude < 0.001f) return;
         Quaternion targetRotation = Quaternion.LookRotation(dir);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 5f * Time.deltaTime);
@@ -118,37 +117,27 @@ public class MonsterSkullAI : MonoBehaviour
     {
         if (player == null || controller == null) return;
 
-        Vector3 dir = player.position - transform.position;
-        dir.y = 0;
-        if (dir.sqrMagnitude < 0.01f) return;
-        dir.Normalize();
+        // Volledige 3D richting (inclusief Y)
+        Vector3 dir = (player.position - transform.position).normalized;
+        Vector3 velocity = dir * moveSpeed;
 
-        Vector3 horizontalVelocity = dir * moveSpeed;
-        if (controller.isGrounded)
-            verticalVelocity.y = -1f;
-        else
-            verticalVelocity.y += Physics.gravity.y * Time.deltaTime;
+        // Voeg gravity toe als de skull niet grounded is
+        if (!controller.isGrounded)
+            velocity.y += Physics.gravity.y * Time.deltaTime;
 
-        Vector3 totalVelocity = horizontalVelocity + verticalVelocity;
-        CollisionFlags flags = controller.Move(totalVelocity * Time.deltaTime);
+        controller.Move(velocity * Time.deltaTime);
 
-        if ((flags & CollisionFlags.CollidedSides) != 0)
-            CheckHitPlayer();
-
-        Quaternion lookRot = Quaternion.LookRotation(dir);
+        // Kijk altijd naar speler
+        Quaternion lookRot = Quaternion.LookRotation(player.position - transform.position);
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRot, 5f * Time.deltaTime);
+
+        // Check continue of speler geraakt is
+        if (Vector3.Distance(transform.position, player.position) < 1.5f)
+            TryHitPlayer(player.gameObject);
     }
 
     private void OnTriggerEnter(Collider other) => TryHitPlayer(other.gameObject);
     private void OnCollisionEnter(Collision collision) => TryHitPlayer(collision.gameObject);
-
-    void CheckHitPlayer()
-    {
-        if (player == null) return;
-        float distance = Vector3.Distance(transform.position, player.position);
-        if (distance < 1.5f)
-            TryHitPlayer(player.gameObject);
-    }
 
     void TryHitPlayer(GameObject other)
     {
@@ -176,7 +165,6 @@ public class MonsterSkullAI : MonoBehaviour
         return true;
     }
 
-    // Speel geluid vanaf een bepaald tijdstip
     void PlayAttackSoundFromTime(float startTime)
     {
         if (attackSound == null) return;
@@ -187,7 +175,7 @@ public class MonsterSkullAI : MonoBehaviour
         AudioSource src = soundObj.AddComponent<AudioSource>();
         src.clip = attackSound;
         src.spatialBlend = 1f;
-        src.time = startTime;      // start vanaf 0.3s
+        src.time = startTime;
         src.Play();
 
         Destroy(soundObj, attackSound.length - startTime);

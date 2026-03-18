@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Collider))]
 public class MonsterStats : MonoBehaviour
 {
     [Header("Monster Settings")]
@@ -8,24 +9,27 @@ public class MonsterStats : MonoBehaviour
 
     private float lastDamageTime = -Mathf.Infinity;
 
+    private void Awake()
+    {
+        Collider col = GetComponent<Collider>();
+        if (col != null)
+        {
+            col.isTrigger = true; // box collider als trigger
+        }
+    }
+
     private void OnTriggerStay(Collider other)
     {
         TryDamagePlayer(other.gameObject);
     }
 
-    private void OnCollisionStay(Collision collision)
+    private void TryDamagePlayer(GameObject target)
     {
-        TryDamagePlayer(collision.gameObject);
-    }
+        if (!target.CompareTag("Player")) return;
 
-    private void TryDamagePlayer(GameObject player)
-    {
-        if (!player.CompareTag("Player")) return;
-
-        // Check cooldown
         if (Time.time - lastDamageTime < damageCooldown) return;
 
-        PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
+        PlayerHealth playerHealth = target.GetComponent<PlayerHealth>();
         if (playerHealth != null)
         {
             playerHealth.TakeDamage(damage);

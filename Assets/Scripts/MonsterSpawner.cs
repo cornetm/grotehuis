@@ -5,16 +5,22 @@ using System.Collections;
 public class MonsterSpawner : MonoBehaviour
 {
     [Header("Spawn Settings")]
-    public GameObject[] MonsterPrefabs;
+    public GameObject[] MonsterPrefabs;  // Alle normale monsters
     [Range(0, 100)]
     public float SpawnChance = 30f;
 
     [Header("Optional Spawn Points")]
     public Transform[] SpawnPoints;
 
+    [Header("Special Skull Monster")]
+    public GameObject SkullMonsterPrefab;  // Speciaal veld voor doodshoofd
+    public Transform SkullSpawnPoint;      // Speciaal spawnpoint voor doodshoofd
+
     [Header("Respawn Boundary (drag your BoxCollider here)")]
-    public Collider RoomBoundary;  // sleep hier de box collider van de kamer in
+    public Collider RoomBoundary;
     public float boundaryActiveTime = 5f;
+
+    [HideInInspector] public bool RoomHasMonster = false;
 
     private GameObject spawnedMonster;
     private bool hasSpawned = false;
@@ -22,7 +28,6 @@ public class MonsterSpawner : MonoBehaviour
 
     void Awake()
     {
-        // Zorg dat trigger collider actief is
         Collider col = GetComponent<Collider>();
         if (col != null) col.isTrigger = true;
 
@@ -35,25 +40,64 @@ public class MonsterSpawner : MonoBehaviour
         monsterParent = parent;
     }
 
-    // TrySpawn ondersteunt nu 2 argumenten: parent + force
-    public void TrySpawn(Transform parent, bool force = false)
+    /// <summary>
+    /// Spawn een monster.
+    /// force = true garandeert spawn.
+    /// isForwardRoom = true betekent 50/50 kans Skull of normaal monster.
+    /// forceSkull = true spawnt gegarandeerd Skull.
+    /// </summary>
+    public void TrySpawn(Transform parent, bool force = false, bool isForwardRoom = false, bool forceSkull = false)
     {
-        if (hasSpawned) return;
-        if (!force && Random.Range(0f, 100f) > SpawnChance) return;
+        if (hasSpawned || RoomHasMonster) return;
 
-        if (MonsterPrefabs.Length == 0) return;
+        GameObject prefabToSpawn = null;
+        Transform spawnPoint = transform;
 
-        GameObject prefab = MonsterPrefabs[Random.Range(0, MonsterPrefabs.Length)];
-        Transform chosenPoint = (SpawnPoints.Length > 0) ? SpawnPoints[Random.Range(0, SpawnPoints.Length)] : transform;
+        if (forceSkull && SkullMonsterPrefab != null && SkullSpawnPoint != null)
+        {
+            // Altijd Skull spawnen
+            prefabToSpawn = SkullMonsterPrefab;
+            spawnPoint = SkullSpawnPoint;
+        }
+        else if (isForwardRoom && SkullMonsterPrefab != null && SkullSpawnPoint != null && MonsterPrefabs.Length > 0)
+        {
+            // 50/50 kans tussen Skull en normaal monster
+            if (Random.value < 0.5f)
+            {
+                prefabToSpawn = SkullMonsterPrefab;
+                spawnPoint = SkullSpawnPoint;
+            }
+            else
+            {
+                prefabToSpawn = MonsterPrefabs[Random.Range(0, MonsterPrefabs.Length)];
+                spawnPoint = (SpawnPoints.Length > 0) ? SpawnPoints[Random.Range(0, SpawnPoints.Length)] : transform;
+            }
+        }
+        else if (SkullMonsterPrefab != null && SkullSpawnPoint != null && MonsterPrefabs.Length == 0)
+        {
+            // Alleen Skull beschikbaar
+            prefabToSpawn = SkullMonsterPrefab;
+            spawnPoint = SkullSpawnPoint;
+        }
+        else if (MonsterPrefabs.Length > 0)
+        {
+            if (!force && Random.Range(0f, 100f) > SpawnChance) return;
+            prefabToSpawn = MonsterPrefabs[Random.Range(0, MonsterPrefabs.Length)];
+            spawnPoint = (SpawnPoints.Length > 0) ? SpawnPoints[Random.Range(0, SpawnPoints.Length)] : transform;
+        }
+        else
+        {
+            Debug.LogWarning($"MonsterSpawner in {gameObject.name} heeft geen monsters ingesteld!");
+            return;
+        }
 
-        spawnedMonster = Instantiate(prefab, chosenPoint.position, chosenPoint.rotation, parent);
-
+        spawnedMonster = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation, parent);
         hasSpawned = true;
+        RoomHasMonster = true;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        // Monster raakt boundary → respawn
         if (RoomBoundary != null && other.gameObject == spawnedMonster)
         {
             RespawnMonster();
@@ -69,7 +113,6 @@ public class MonsterSpawner : MonoBehaviour
         spawnedMonster.transform.position = chosenPoint.position;
         spawnedMonster.transform.rotation = chosenPoint.rotation;
 
-        // Reset velocity als Rigidbody aanwezig
         Rigidbody rb = spawnedMonster.GetComponent<Rigidbody>();
         if (rb != null)
         {
@@ -77,7 +120,6 @@ public class MonsterSpawner : MonoBehaviour
             rb.angularVelocity = Vector3.zero;
         }
 
-        // Zet boundary uit na delay
         if (RoomBoundary != null)
             StartCoroutine(DisableBoundaryAfterSeconds());
     }

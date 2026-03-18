@@ -398,6 +398,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 517332857136906175}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3705079546327984508
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 157227153241031743}
+  m_Layer: 0
+  m_Name: MonsterSpawnpointSkull
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &157227153241031743
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3705079546327984508}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2, z: 3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 517332857136906175}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3713070563435195808
 GameObject:
   m_ObjectHideFlags: 0
@@ -880,6 +911,7 @@ Transform:
   - {fileID: 9211341054078612293}
   - {fileID: 2610148405131217468}
   - {fileID: 8886874943047694609}
+  - {fileID: 157227153241031743}
   - {fileID: 6709741269376359587}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -933,11 +965,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterSpawner
   MonsterPrefabs:
   - {fileID: 6182365833429473102, guid: b4b2061468b7fd543910a7aa9b315405, type: 3}
-  SpawnChance: 5
+  SpawnChance: 20
   SpawnPoints:
   - {fileID: 8886874943047694609}
+  SkullMonsterPrefab: {fileID: 4307292652228760917, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
+  SkullSpawnPoint: {fileID: 157227153241031743}
   RoomBoundary: {fileID: 7131489236039741462}
   boundaryActiveTime: 5
+  RoomHasMonster: 0
 --- !u!1 &5501628913508650474
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,9 +15,12 @@ public class RoomGenerator : MonoBehaviour
     [Header("End Room Prefab")]
     public GameObject EndRoomPrefab;
 
-    [Header("Monster Settings (X monsters per X kamers)")]
+    [Header("Monster Settings")]
     public int MonstersPerRooms = 1;
     public int RoomsPerMonster = 10;
+
+    [Header("Start Object")]
+    public Transform StartObject;
 
     private Transform RoomParent;
     private Transform MonsterParent;
@@ -50,9 +53,7 @@ public class RoomGenerator : MonoBehaviour
 
         if (success)
         {
-            // Plaats de eindkamer als laatste
             PlaceEndRoom();
-
             Debug.Log($"Dungeon succesvol gegenereerd met {placedRooms.Count} kamers!");
             SpawnMonsters();
         }
@@ -66,16 +67,12 @@ public class RoomGenerator : MonoBehaviour
     {
         if (EndRoomPrefab == null) return;
 
-        GameObject lastRoom = placedRooms[placedRooms.Count - 1];
-        RoomInfo lastInfo = lastRoom.GetComponent<RoomInfo>();
-
         GameObject endRoom = Instantiate(EndRoomPrefab, Vector3.zero, Quaternion.identity, RoomParent);
         RoomInfo endInfo = endRoom.GetComponent<RoomInfo>();
         PlaceRoom(endRoom, endInfo);
 
         placedRooms.Add(endRoom);
 
-        // Voeg trigger component toe om te detecteren dat speler gewonnen heeft
         EndRoomTrigger trigger = endRoom.AddComponent<EndRoomTrigger>();
         trigger.RoomGenerator = this;
     }
@@ -83,7 +80,6 @@ public class RoomGenerator : MonoBehaviour
     public void PlayerReachedEnd()
     {
         Debug.Log("Je hebt de eindkamer bereikt! Je hebt gewonnen!");
-        // Hier kun je scene switch, UI of win state triggeren
     }
 
     bool GenerateDungeonRecursive(int targetRooms, int currentIndex)
@@ -157,6 +153,24 @@ public class RoomGenerator : MonoBehaviour
                 continue;
             }
 
+            if (StartObject != null)
+            {
+                Collider roomCol = newRoom.GetComponent<Collider>();
+                Collider startCol = StartObject.GetComponent<Collider>();
+                if (roomCol != null && startCol != null)
+                {
+                    Vector3 direction;
+                    float distance;
+                    if (Physics.ComputePenetration(roomCol, newRoom.transform.position, newRoom.transform.rotation,
+                                                   startCol, StartObject.position, StartObject.rotation,
+                                                   out direction, out distance))
+                    {
+                        Destroy(newRoom);
+                        continue;
+                    }
+                }
+            }
+
             if (placedRooms.Count > 0)
             {
                 RoomInfo prev = placedRooms[placedRooms.Count - 1].GetComponent<RoomInfo>();
@@ -184,52 +198,50 @@ public class RoomGenerator : MonoBehaviour
 
     void SpawnMonsters()
     {
-        List<MonsterSpawner> spawnerList = new List<MonsterSpawner>();
+        List<MonsterSpawner> allSpawners = new List<MonsterSpawner>();
 
-        // Voeg alleen spawners van kamers vanaf index 5 toe
-        for (int i = 5; i < placedRooms.Count; i++)
+        for (int i = 0; i < placedRooms.Count; i++)
         {
             MonsterSpawner spawner = placedRooms[i].GetComponentInChildren<MonsterSpawner>();
             if (spawner != null)
-                spawnerList.Add(spawner);
+                allSpawners.Add(spawner);
         }
 
-        ShuffleList(spawnerList);
+        ShuffleList(allSpawners);
 
         int minMonsters = Mathf.CeilToInt((float)placedRooms.Count / RoomsPerMonster) * MonstersPerRooms;
         int spawned = 0;
+        bool skullSpawned = false;
 
-        List<int> usedIndices = new List<int>();
-
-        // Force spawn minimaal aantal monsters zonder dat ze naast elkaar staan
-        for (int i = 0; i < spawnerList.Count && spawned < minMonsters; i++)
+        // --- 1. Force één Skull spawn ---
+        for (int i = 0; i < allSpawners.Count && !skullSpawned; i++)
         {
-            if (IsAdjacentUsed(i, usedIndices)) continue;
+            MonsterSpawner spawner = allSpawners[i];
+            if (spawner.SkullMonsterPrefab != null && spawner.SkullSpawnPoint != null)
+            {
+                spawner.SetParent(MonsterParent);
+                spawner.TrySpawn(MonsterParent, force: true, isForwardRoom: false, forceSkull: true);
+                skullSpawned = true;
+                spawned++;
+            }
+        }
 
-            spawnerList[i].SetParent(MonsterParent);
-            spawnerList[i].TrySpawn(MonsterParent, true);
-            usedIndices.Add(i);
+        // --- 2. Spawn rest van de monsters om minimaal aantal te halen ---
+        for (int i = 0; i < allSpawners.Count && spawned < minMonsters; i++)
+        {
+            if (allSpawners[i].RoomHasMonster) continue;
+
+            MonsterSpawner spawner = allSpawners[i];
+            spawner.SetParent(MonsterParent);
+
+            bool isForward = spawner.GetComponentInParent<RoomInfo>().roomdirection == RoomInfo.RoomDirection.forward;
+
+            spawner.TrySpawn(MonsterParent, force: true, isForwardRoom: isForward);
+
             spawned++;
         }
 
-        // Extra monsters verspreid random, nog steeds niet naast elkaar
-        for (int i = 0; i < spawnerList.Count; i++)
-        {
-            if (spawned >= spawnerList.Count) break;
-
-            if (usedIndices.Contains(i) || IsAdjacentUsed(i, usedIndices)) continue;
-
-            spawnerList[i].TrySpawn(MonsterParent, false);
-            usedIndices.Add(i);
-            spawned++;
-        }
-
-        Debug.Log($"Monsters toegewezen: {spawned}/{spawnerList.Count} kamers (minimaal {minMonsters})");
-    }
-
-    private bool IsAdjacentUsed(int index, List<int> usedIndices)
-    {
-        return usedIndices.Contains(index - 1) || usedIndices.Contains(index + 1);
+        Debug.Log($"Monsters toegewezen: {spawned}/{allSpawners.Count} kamers (minimaal {minMonsters}), Skull aanwezig: {skullSpawned}");
     }
 
     void PlaceRoom(GameObject room, RoomInfo info)
@@ -316,9 +328,6 @@ public class RoomGenerator : MonoBehaviour
     }
 }
 
-/// <summary>
-/// Trigger voor einde kamer.
-/// </summary>
 public class EndRoomTrigger : MonoBehaviour
 {
     public RoomGenerator RoomGenerator;

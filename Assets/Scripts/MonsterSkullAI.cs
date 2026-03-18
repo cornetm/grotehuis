@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 [ExecuteAlways]
 public class MonsterSkullAI : MonoBehaviour
@@ -11,7 +12,7 @@ public class MonsterSkullAI : MonoBehaviour
     [Header("Animator")]
     public Animator animator;
     public string alertTrigger = "AlertTrigger";
-    public string attackTrigger = "AttackTrigger";
+    public string attackBool = "IsAttacking";
 
     [Header("Chase Settings")]
     public float moveSpeed = 3.5f;
@@ -32,6 +33,8 @@ public class MonsterSkullAI : MonoBehaviour
 
     private CharacterController controller;
     private Vector3 verticalVelocity;
+
+    private bool isAttackingNow = false;
 
     void Start()
     {
@@ -70,44 +73,54 @@ public class MonsterSkullAI : MonoBehaviour
         if (!attackTriggered)
             LookAtPlayer();
 
-        // Attack trigger
+        // Attack starten (nieuwe volgorde)
         if (distance <= chaseRadius && canSeePlayer && !attackTriggered)
         {
-            animator.speed = 1f;
-            animator.SetTrigger(attackTrigger);
             attackTriggered = true;
+
+            // 1. Attack animatie direct AAN
+            if (animator != null)
+                animator.SetBool(attackBool, true);
+
+            // 2. Alert UIT
             alertEnabled = false;
 
-            // Speel geluid vanaf 0.3s en begin meteen te bewegen
-            PlayAttackSoundFromTime(0.3f);
+            // 3. Start coroutine voor sound + delay + movement
+            StartCoroutine(StartAttackWithDelay());
         }
 
-        // Alert trigger
+        // Alert trigger 1x (alleen als attack nog niet bezig is)
         if (alertEnabled && distance <= alertRadius && canSeePlayer && !alertTriggered)
         {
-            animator.speed = 1f;
-            animator.SetTrigger(alertTrigger);
             alertTriggered = true;
             alertEnabled = false;
+
+            if (animator != null)
+                animator.SetTrigger(alertTrigger);
         }
 
-        // Freeze alert animatie
-        if (alertTriggered && !attackTriggered)
-        {
-            AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
-            if (state.IsName("Alert") && state.normalizedTime >= 1f)
-                animator.speed = 0f;
-        }
-
-        // Beweeg continu als attack gestart is (niet afhankelijk van animatie)
-        if (attackTriggered)
+        // 4. Beweeg pas NA delay
+        if (attackTriggered && isAttackingNow)
             MoveTowardsPlayer();
+    }
+
+    IEnumerator StartAttackWithDelay()
+    {
+        // 3. Speel geluid
+        PlayAttackSoundFromTime(0.5f);
+
+        // Wacht 0.25 sec
+        yield return new WaitForSeconds(0.25f);
+
+        // 4. Movement starten
+        isAttackingNow = true;
     }
 
     void LookAtPlayer()
     {
         if (player == null) return;
         Vector3 dir = player.position - transform.position;
+        dir.y = 0;
         if (dir.sqrMagnitude < 0.001f) return;
         Quaternion targetRotation = Quaternion.LookRotation(dir);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 5f * Time.deltaTime);
@@ -117,27 +130,34 @@ public class MonsterSkullAI : MonoBehaviour
     {
         if (player == null || controller == null) return;
 
-        // Volledige 3D richting (inclusief Y)
-        Vector3 dir = (player.position - transform.position).normalized;
-        Vector3 velocity = dir * moveSpeed;
+        Vector3 dir = player.position - transform.position;
+        dir.Normalize();
 
-        // Voeg gravity toe als de skull niet grounded is
-        if (!controller.isGrounded)
-            velocity.y += Physics.gravity.y * Time.deltaTime;
+        Vector3 horizontalVelocity = new Vector3(dir.x, 0, dir.z) * moveSpeed;
+        if (controller.isGrounded)
+            verticalVelocity.y = -1f;
+        else
+            verticalVelocity.y += Physics.gravity.y * Time.deltaTime;
 
-        controller.Move(velocity * Time.deltaTime);
+        Vector3 totalVelocity = horizontalVelocity + verticalVelocity;
+        controller.Move(totalVelocity * Time.deltaTime);
 
-        // Kijk altijd naar speler
-        Quaternion lookRot = Quaternion.LookRotation(player.position - transform.position);
+        CheckHitPlayer();
+
+        Quaternion lookRot = Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRot, 5f * Time.deltaTime);
-
-        // Check continue of speler geraakt is
-        if (Vector3.Distance(transform.position, player.position) < 1.5f)
-            TryHitPlayer(player.gameObject);
     }
 
     private void OnTriggerEnter(Collider other) => TryHitPlayer(other.gameObject);
     private void OnCollisionEnter(Collision collision) => TryHitPlayer(collision.gameObject);
+
+    void CheckHitPlayer()
+    {
+        if (player == null) return;
+        float distance = Vector3.Distance(transform.position, player.position);
+        if (distance < 1.5f)
+            TryHitPlayer(player.gameObject);
+    }
 
     void TryHitPlayer(GameObject other)
     {
@@ -154,7 +174,8 @@ public class MonsterSkullAI : MonoBehaviour
         Vector3 dir = (playerPos - from).normalized;
         float distance = Vector3.Distance(from, playerPos);
 
-        if (Physics.Raycast(from, dir, out RaycastHit hit, distance))
+        RaycastHit[] hits = Physics.RaycastAll(from, dir, distance);
+        foreach (var hit in hits)
         {
             if (hit.collider.CompareTag("Player"))
                 return true;
@@ -185,31 +206,10 @@ public class MonsterSkullAI : MonoBehaviour
     {
         Vector3 eyePos = transform.position + Vector3.up * viewHeightOffset;
 
-        // 🟡 Gele ray (alert)
         Gizmos.color = Color.yellow;
-        Vector3 yellowEnd = eyePos + transform.forward * alertRadius;
-        if (Physics.Raycast(eyePos, transform.forward, out RaycastHit hitAlert, alertRadius))
-        {
-            if (hitAlert.collider.isTrigger)
-                Gizmos.DrawLine(eyePos, yellowEnd);
-            else
-                Gizmos.DrawLine(eyePos, hitAlert.point);
-        }
-        else
-            Gizmos.DrawLine(eyePos, yellowEnd);
+        Gizmos.DrawLine(eyePos, eyePos + transform.forward * alertRadius);
 
-        // 🔴 Rode ray (chase/attack)
         Gizmos.color = Color.red;
-        Vector3 forwardDir = transform.forward;
-        float attackLength = chaseRadius;
-        if (Physics.Raycast(eyePos, forwardDir, out RaycastHit hitAttack, attackLength))
-        {
-            if (hitAttack.collider.isTrigger)
-                Gizmos.DrawLine(eyePos, eyePos + forwardDir * attackLength);
-            else
-                Gizmos.DrawLine(eyePos, hitAttack.point);
-        }
-        else
-            Gizmos.DrawLine(eyePos, eyePos + forwardDir * attackLength);
+        Gizmos.DrawLine(eyePos, eyePos + transform.forward * chaseRadius);
     }
 }

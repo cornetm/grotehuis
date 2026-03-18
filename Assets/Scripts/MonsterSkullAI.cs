@@ -16,15 +16,37 @@ public class MonsterSkullAI : MonoBehaviour
 
     [Header("Chase Settings")]
     public float moveSpeed = 3.5f;
+    public float wallCheckDistance = 0.5f;
 
     [Header("Damage Settings")]
     public int damage = 10;
+
+    [Header("Jumpscare Settings")]
+    [Tooltip("Hoelang de skull zichtbaar blijft nadat hij de speler raakt")]
+    public float lingerTime = 2.5f;
+    [Tooltip("Schaalfactor van de skull voor jumpscare effect")]
+    public float jumpscareScale = 0.5f;
+    [Tooltip("Afstand vóór de speler/camera waar de skull blijft hangen")]
+    public float stopOffset = 2f;
+    [Tooltip("Snelheid waarmee de skull de camera volgt")]
+    public float followSpeed = 20f;
+    [Tooltip("Amplitude van links/rechts kantelen (graden)")]
+    public float tiltAngle = 15f;
+    [Tooltip("Snelheid van kantelen")]
+    public float tiltSpeed = 10f;
+
+    [Header("Eye Contact Settings")]
+    [Tooltip("Max hoek in graden voor oogcontact")]
+    public float eyeContactAngle = 20f;
+    [Tooltip("Tijd in seconden dat oogcontact moet duren om alert te triggeren")]
+    public float eyeContactTimeThreshold = 2f;
 
     [Header("Audio")]
     public AudioClip attackSound;
     private AudioSource audioSource;
 
     private Transform player;
+    private Camera playerCamera;
     private float playerHeight = 2f;
 
     private bool alertTriggered = false;
@@ -35,6 +57,10 @@ public class MonsterSkullAI : MonoBehaviour
     private Vector3 verticalVelocity;
 
     private bool isAttackingNow = false;
+    private bool jumpscareActive = false;
+
+    private float tiltTimer = 0f;
+    private float eyeContactTimer = 0f;
 
     void Start()
     {
@@ -51,6 +77,7 @@ public class MonsterSkullAI : MonoBehaviour
         if (playerObj != null)
         {
             player = playerObj.transform;
+            playerCamera = Camera.main;
             Collider col = player.GetComponent<Collider>();
             if (col != null)
                 playerHeight = col.bounds.size.y;
@@ -63,56 +90,55 @@ public class MonsterSkullAI : MonoBehaviour
         if (player == null || animator == null) return;
 
         Vector3 eyePos = transform.position + Vector3.up * viewHeightOffset;
-        Vector3 horizontalDir = player.position - eyePos;
-        horizontalDir.y = 0;
-        float distance = horizontalDir.magnitude;
+        float distance = Vector3.Distance(transform.position, player.position);
 
         bool canSeePlayer = HasLineOfSight(eyePos, player.position);
 
-        // Altijd naar player kijken als niet attack
         if (!attackTriggered)
             LookAtPlayer();
 
-        // Attack starten (nieuwe volgorde)
+        // Attack starten (voorrang)
         if (distance <= chaseRadius && canSeePlayer && !attackTriggered)
         {
             attackTriggered = true;
+            StopAllCoroutines();
+            alertTriggered = false;
+            alertEnabled = false;
 
-            // 1. Attack animatie direct AAN
             if (animator != null)
                 animator.SetBool(attackBool, true);
 
-            // 2. Alert UIT
-            alertEnabled = false;
-
-            // 3. Start coroutine voor sound + delay + movement
             StartCoroutine(StartAttackWithDelay());
         }
 
-        // Alert trigger 1x (alleen als attack nog niet bezig is)
-        if (alertEnabled && distance <= alertRadius && canSeePlayer && !alertTriggered)
+        // ---------------- Eye Contact Alert ----------------
+        if (alertEnabled && distance <= alertRadius && !alertTriggered)
         {
-            alertTriggered = true;
-            alertEnabled = false;
-
-            if (animator != null)
-                animator.SetTrigger(alertTrigger);
+            if (IsPlayerLookingAtSkull())
+            {
+                eyeContactTimer += Time.deltaTime;
+                if (eyeContactTimer >= eyeContactTimeThreshold)
+                {
+                    alertTriggered = true;
+                    alertEnabled = false;
+                    if (animator != null)
+                        animator.SetTrigger(alertTrigger);
+                }
+            }
+            else
+            {
+                eyeContactTimer = 0f;
+            }
         }
 
-        // 4. Beweeg pas NA delay
-        if (attackTriggered && isAttackingNow)
+        if (attackTriggered && isAttackingNow && !jumpscareActive)
             MoveTowardsPlayer();
     }
 
     IEnumerator StartAttackWithDelay()
     {
-        // 3. Speel geluid
         PlayAttackSoundFromTime(0.5f);
-
-        // Wacht 0.25 sec
         yield return new WaitForSeconds(0.25f);
-
-        // 4. Movement starten
         isAttackingNow = true;
     }
 
@@ -122,8 +148,8 @@ public class MonsterSkullAI : MonoBehaviour
         Vector3 dir = player.position - transform.position;
         dir.y = 0;
         if (dir.sqrMagnitude < 0.001f) return;
-        Quaternion targetRotation = Quaternion.LookRotation(dir);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 5f * Time.deltaTime);
+        Quaternion targetRotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 5f * Time.deltaTime);
+        transform.rotation = targetRotation;
     }
 
     void MoveTowardsPlayer()
@@ -133,14 +159,24 @@ public class MonsterSkullAI : MonoBehaviour
         Vector3 dir = player.position - transform.position;
         dir.Normalize();
 
-        Vector3 horizontalVelocity = new Vector3(dir.x, 0, dir.z) * moveSpeed;
+        // Wall avoidance
+        Vector3 rayOrigin = transform.position + Vector3.up * controller.height * 0.5f;
+        if (Physics.Raycast(rayOrigin, dir, out RaycastHit hit, wallCheckDistance))
+        {
+            if (!hit.collider.isTrigger && hit.collider.CompareTag("Room"))
+            {
+                dir += Vector3.up * 0.5f;
+                dir.Normalize();
+            }
+        }
+
+        Vector3 horizontalVelocity = dir * moveSpeed;
         if (controller.isGrounded)
             verticalVelocity.y = -1f;
         else
             verticalVelocity.y += Physics.gravity.y * Time.deltaTime;
 
-        Vector3 totalVelocity = horizontalVelocity + verticalVelocity;
-        controller.Move(totalVelocity * Time.deltaTime);
+        controller.Move((horizontalVelocity + verticalVelocity) * Time.deltaTime);
 
         CheckHitPlayer();
 
@@ -162,10 +198,48 @@ public class MonsterSkullAI : MonoBehaviour
     void TryHitPlayer(GameObject other)
     {
         if (!other.CompareTag("Player")) return;
+
         PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
         if (playerHealth != null)
             playerHealth.TakeDamage(damage);
 
+        isAttackingNow = false;
+        jumpscareActive = true;
+        transform.localScale = Vector3.one * jumpscareScale;
+
+        StartCoroutine(JumpscareFollowCamera());
+        StartCoroutine(StayBeforeDestroy(lingerTime));
+    }
+
+    IEnumerator JumpscareFollowCamera()
+    {
+        tiltTimer = 0f;
+
+        while (jumpscareActive)
+        {
+            if (playerCamera != null)
+            {
+                Vector3 targetPos = playerCamera.transform.position + playerCamera.transform.forward * stopOffset;
+                transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * followSpeed);
+
+                Vector3 lookDir = playerCamera.transform.position - transform.position;
+                if (lookDir.sqrMagnitude > 0.001f)
+                {
+                    Quaternion baseRot = Quaternion.LookRotation(lookDir);
+
+                    tiltTimer += Time.deltaTime * tiltSpeed;
+                    float tiltZ = Mathf.Sin(tiltTimer) * tiltAngle;
+                    transform.rotation = Quaternion.Euler(baseRot.eulerAngles.x, baseRot.eulerAngles.y, tiltZ);
+                }
+            }
+            yield return null;
+        }
+    }
+
+    IEnumerator StayBeforeDestroy(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        jumpscareActive = false;
         Destroy(gameObject);
     }
 
@@ -184,6 +258,16 @@ public class MonsterSkullAI : MonoBehaviour
         }
 
         return true;
+    }
+
+    bool IsPlayerLookingAtSkull()
+    {
+        if (playerCamera == null) return false;
+
+        Vector3 toSkull = (transform.position - playerCamera.transform.position).normalized;
+        float angle = Vector3.Angle(playerCamera.transform.forward, toSkull);
+
+        return angle <= eyeContactAngle;
     }
 
     void PlayAttackSoundFromTime(float startTime)

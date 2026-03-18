@@ -200,48 +200,105 @@ public class RoomGenerator : MonoBehaviour
     {
         List<MonsterSpawner> allSpawners = new List<MonsterSpawner>();
 
-        for (int i = 0; i < placedRooms.Count; i++)
+        foreach (GameObject room in placedRooms)
         {
-            MonsterSpawner spawner = placedRooms[i].GetComponentInChildren<MonsterSpawner>();
+            MonsterSpawner spawner = room.GetComponentInChildren<MonsterSpawner>();
             if (spawner != null)
                 allSpawners.Add(spawner);
         }
 
         ShuffleList(allSpawners);
 
+        // --- FIX: blokkeer eerste 3 kamers ---
+        HashSet<MonsterSpawner> blockedSpawners = new HashSet<MonsterSpawner>();
+        for (int i = 0; i < Mathf.Min(3, placedRooms.Count); i++)
+        {
+            var s = placedRooms[i].GetComponentInChildren<MonsterSpawner>();
+            if (s != null) blockedSpawners.Add(s);
+        }
+
         int minMonsters = Mathf.CeilToInt((float)placedRooms.Count / RoomsPerMonster) * MonstersPerRooms;
+
         int spawned = 0;
         bool skullSpawned = false;
 
-        // --- 1. Force één Skull spawn ---
-        for (int i = 0; i < allSpawners.Count && !skullSpawned; i++)
+        // 1. FORCE SKULL (1x)
+        for (int i = 0; i < allSpawners.Count; i++)
         {
-            MonsterSpawner spawner = allSpawners[i];
+            var spawner = allSpawners[i];
+            if (blockedSpawners.Contains(spawner)) continue;
+            if (skullSpawned) break;
+
             if (spawner.SkullMonsterPrefab != null && spawner.SkullSpawnPoint != null)
             {
                 spawner.SetParent(MonsterParent);
-                spawner.TrySpawn(MonsterParent, force: true, isForwardRoom: false, forceSkull: true);
+                spawner.TrySpawn(MonsterParent, force: true, forceSkull: true);
+
                 skullSpawned = true;
                 spawned++;
             }
         }
 
-        // --- 2. Spawn rest van de monsters om minimaal aantal te halen ---
-        for (int i = 0; i < allSpawners.Count && spawned < minMonsters; i++)
+        // 2. MINIMALE MONSTERS (niet naast elkaar)
+        for (int i = 0; i < allSpawners.Count; i++)
         {
-            if (allSpawners[i].RoomHasMonster) continue;
+            var spawner = allSpawners[i];
+            if (blockedSpawners.Contains(spawner)) continue;
+            if (spawned >= minMonsters) break;
+            if (spawner.RoomHasMonster) continue;
+            if (HasNeighborMonster(spawner)) continue;
 
-            MonsterSpawner spawner = allSpawners[i];
             spawner.SetParent(MonsterParent);
-
             bool isForward = spawner.GetComponentInParent<RoomInfo>().roomdirection == RoomInfo.RoomDirection.forward;
-
             spawner.TrySpawn(MonsterParent, force: true, isForwardRoom: isForward);
 
             spawned++;
         }
 
-        Debug.Log($"Monsters toegewezen: {spawned}/{allSpawners.Count} kamers (minimaal {minMonsters}), Skull aanwezig: {skullSpawned}");
+        // 3. EXTRA MONSTERS in “veilige” kamers
+        for (int i = 0; i < allSpawners.Count; i++)
+        {
+            var spawner = allSpawners[i];
+            if (blockedSpawners.Contains(spawner)) continue;
+            if (spawner.RoomHasMonster) continue;
+            if (HasNeighborMonster(spawner)) continue;
+
+            spawner.SetParent(MonsterParent);
+            bool isForward = spawner.GetComponentInParent<RoomInfo>().roomdirection == RoomInfo.RoomDirection.forward;
+            spawner.TrySpawn(MonsterParent, force: false, isForwardRoom: isForward);
+        }
+
+        Debug.Log($"Monsters verdeeld: {spawned}/{allSpawners.Count}, minimaal nodig: {minMonsters}");
+    }
+
+    bool HasNeighborMonster(MonsterSpawner current)
+    {
+        int index = GetSpawnerIndex(current);
+        if (index == -1) return false;
+
+        if (index > 0)
+        {
+            var prev = placedRooms[index - 1].GetComponentInChildren<MonsterSpawner>();
+            if (prev != null && prev.RoomHasMonster) return true;
+        }
+
+        if (index < placedRooms.Count - 1)
+        {
+            var next = placedRooms[index + 1].GetComponentInChildren<MonsterSpawner>();
+            if (next != null && next.RoomHasMonster) return true;
+        }
+
+        return false;
+    }
+
+    int GetSpawnerIndex(MonsterSpawner spawner)
+    {
+        for (int i = 0; i < placedRooms.Count; i++)
+        {
+            var s = placedRooms[i].GetComponentInChildren<MonsterSpawner>();
+            if (s == spawner) return i;
+        }
+        return -1;
     }
 
     void PlaceRoom(GameObject room, RoomInfo info)

@@ -40,12 +40,6 @@ public class MonsterSpawner : MonoBehaviour
         monsterParent = parent;
     }
 
-    /// <summary>
-    /// Spawn een monster.
-    /// force = true garandeert spawn.
-    /// isForwardRoom = true betekent 50/50 kans Skull of normaal monster.
-    /// forceSkull = true spawnt gegarandeerd Skull.
-    /// </summary>
     public void TrySpawn(Transform parent, bool force = false, bool isForwardRoom = false, bool forceSkull = false)
     {
         if (hasSpawned || RoomHasMonster) return;
@@ -55,13 +49,11 @@ public class MonsterSpawner : MonoBehaviour
 
         if (forceSkull && SkullMonsterPrefab != null && SkullSpawnPoint != null)
         {
-            // Altijd Skull spawnen
             prefabToSpawn = SkullMonsterPrefab;
             spawnPoint = SkullSpawnPoint;
         }
         else if (isForwardRoom && SkullMonsterPrefab != null && SkullSpawnPoint != null && MonsterPrefabs.Length > 0)
         {
-            // 50/50 kans tussen Skull en normaal monster
             if (Random.value < 0.5f)
             {
                 prefabToSpawn = SkullMonsterPrefab;
@@ -75,7 +67,6 @@ public class MonsterSpawner : MonoBehaviour
         }
         else if (SkullMonsterPrefab != null && SkullSpawnPoint != null && MonsterPrefabs.Length == 0)
         {
-            // Alleen Skull beschikbaar
             prefabToSpawn = SkullMonsterPrefab;
             spawnPoint = SkullSpawnPoint;
         }

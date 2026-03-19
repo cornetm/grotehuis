@@ -8,6 +8,7 @@ TagManager:
   - Screen
   - Room
   - StartGame
+  - Skull
   layers:
   - Default
   - TransparentFX

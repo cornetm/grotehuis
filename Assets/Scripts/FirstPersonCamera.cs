@@ -18,7 +18,12 @@ public class FirstPersonCamera : MonoBehaviour
     public float jumpTilt = 3f;
     public float jumpSwaySpeed = 5f;
 
-    [Header("Raycast Settings")]
+    [Header("Eye Raycast (NEW)")]
+    public float eyeRayDistance = 8f;
+    public float eyeSphereRadius = 0.4f;
+    public float eyeRaycastOffset = 0.6f;
+
+    [Header("Interaction Raycast")]
     public float rayDistance = 5f;
     public float sphereRadius = 0.3f;
     public float raycastEyeOffset = 0.6f;
@@ -39,6 +44,8 @@ public class FirstPersonCamera : MonoBehaviour
     GameObject currentPrefab;
     Texture currentIcon;
 
+    private bool isEyeContact = false;
+
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -53,6 +60,7 @@ public class FirstPersonCamera : MonoBehaviour
     void Update()
     {
         HandleCameraRotation();
+        HandleEyeRaycast();
         HandleRaycast();
         HandleInteractionInput();
     }
@@ -76,7 +84,7 @@ public class FirstPersonCamera : MonoBehaviour
 
         Quaternion targetRot;
 
-        if (!moving)
+        if (!moving && !isEyeContact)
         {
             eyeTimer += Time.deltaTime * eyeSwaySpeed;
             float swayX = Mathf.Sin(eyeTimer * 0.7f) * eyeSwayAmount;
@@ -86,7 +94,9 @@ public class FirstPersonCamera : MonoBehaviour
         else
         {
             targetRot = Quaternion.Euler(xRotation, 0f, 0f);
-            eyeTimer = 0f;
+
+            if (!isEyeContact)
+                eyeTimer = 0f;
         }
 
         float horizontal = Input.GetAxis("Horizontal");
@@ -102,7 +112,58 @@ public class FirstPersonCamera : MonoBehaviour
             Time.deltaTime * rotationSmoothSpeed);
     }
 
-    // ================= RAYCAST =================
+    // ================= EYE RAYCAST FIXED =================
+
+    void HandleEyeRaycast()
+    {
+        Vector3 origin =
+            playerBody.position +
+            Vector3.up * eyeRaycastOffset;
+
+        Vector3 direction = transform.forward;
+
+        RaycastHit[] hits = Physics.SphereCastAll(
+            origin,
+            eyeSphereRadius,
+            direction,
+            eyeRayDistance
+        );
+
+        Debug.DrawRay(origin, direction * eyeRayDistance, Color.cyan);
+
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        bool seesSkull = false;
+
+        foreach (RaycastHit hit in hits)
+        {
+            if (hit.collider.CompareTag("Player"))
+                continue;
+
+            // ✅ SKULL found
+            if (hit.collider.CompareTag("Skull"))
+            {
+                seesSkull = true;
+                break;
+            }
+
+            // ✅ Room trigger walls are ignored (no blocking)
+            if (hit.collider.CompareTag("Room") && hit.collider.isTrigger)
+            {
+                continue;
+            }
+
+            // ❌ Solid wall blocks vision
+            if (!hit.collider.isTrigger)
+            {
+                break;
+            }
+        }
+
+        isEyeContact = seesSkull;
+    }
+
+    // ================= INTERACTION RAYCAST =================
 
     void HandleRaycast()
     {
@@ -122,11 +183,9 @@ public class FirstPersonCamera : MonoBehaviour
 
         foreach (RaycastHit hit in hits)
         {
-            // Skip eigen player
             if (hit.collider.CompareTag("Player"))
                 continue;
 
-            // Alleen interaction accepteren
             if (!hit.collider.CompareTag("Interaction"))
                 continue;
 

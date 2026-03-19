@@ -770,7 +770,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3498526651116851183, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2
+      value: 2.5
       objectReference: {fileID: 0}
     - target: {fileID: 3498526651116851183, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
       propertyPath: m_LocalPosition.z
@@ -818,7 +818,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6694380008497196883, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
       propertyPath: lingerTime
-      value: 1.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6694380008497196883, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
       propertyPath: stopOffset
@@ -2617,7 +2617,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 8f680aa61a6d01b488ceba52ababdb33, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.5
+  m_Volume: 0.7
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -3242,6 +3242,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 986220836}
   - {fileID: 595808306}
   - {fileID: 126891395}
   - {fileID: 1031396301}
@@ -3690,12 +3691,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 986220832}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.5, z: -4.5}
   m_LocalScale: {x: 20, y: 1, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 960256371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &986220837
 BoxCollider:
@@ -4719,7 +4720,7 @@ RectTransform:
   m_GameObject: {fileID: 1231191079}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.35, y: 0.35, z: 0.35}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1624439871}
@@ -6988,7 +6989,10 @@ MonoBehaviour:
   tiltSmooth: 4
   jumpTilt: 0.05
   jumpSwaySpeed: 5
-  rayDistance: 5
+  eyeRayDistance: 300
+  eyeSphereRadius: 0.4
+  eyeRaycastOffset: 0.6
+  rayDistance: 3
   sphereRadius: 0.25
   raycastEyeOffset: 0.6
   crosshairImage: {fileID: 1231191083}
@@ -8026,7 +8030,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 960256371}
   - {fileID: 2013410475}
-  - {fileID: 986220836}
   - {fileID: 670264219}
   - {fileID: 341551903}
   - {fileID: 1246576263}

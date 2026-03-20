@@ -2584,14 +2584,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de5b64b5477bb2a4bb0f9fd01dc95285, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  alertRadius: 25
+  alertRadius: 30
   chaseRadius: 12.5
   viewHeightOffset: 0
   animator: {fileID: 9078314007705426820}
   alertTrigger: Alert
   attackBool: Attack
-  moveSpeed: 50
+  moveSpeed: 75
   wallCheckDistance: 0.5
+  eyeContactAngle: 20
+  eyeContactTimeThreshold: 2.5
   damage: 50
   lingerTime: 1
   jumpscareScale: 1
@@ -2599,8 +2601,6 @@ MonoBehaviour:
   followSpeed: 100
   tiltAngle: 15
   tiltSpeed: 50
-  eyeContactAngle: 20
-  eyeContactTimeThreshold: 2.5
   attackSound: {fileID: 8300000, guid: 9e6f7bab4c64d62448ca9681c12dedfe, type: 3}
 --- !u!143 &8948997072015083445
 CharacterController:

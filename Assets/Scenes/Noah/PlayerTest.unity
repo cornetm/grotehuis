@@ -756,95 +756,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!1001 &298813236
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3498526651116851183, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 3498526651116851183, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 2.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 3498526651116851183, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 12.74
-      objectReference: {fileID: 0}
-    - target: {fileID: 3498526651116851183, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3498526651116851183, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3498526651116851183, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3498526651116851183, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3498526651116851183, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3498526651116851183, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 180
-      objectReference: {fileID: 0}
-    - target: {fileID: 3498526651116851183, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4307292652228760917, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: m_Name
-      value: skull 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6694380008497196883, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: moveSpeed
-      value: 75
-      objectReference: {fileID: 0}
-    - target: {fileID: 6694380008497196883, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: tiltSpeed
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 6694380008497196883, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: lingerTime
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6694380008497196883, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: stopOffset
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6694380008497196883, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: alertRadius
-      value: 25
-      objectReference: {fileID: 0}
-    - target: {fileID: 6694380008497196883, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: chaseRadius
-      value: 12.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6694380008497196883, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: maxEyeAngle
-      value: 25
-      objectReference: {fileID: 0}
-    - target: {fileID: 6694380008497196883, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
-      propertyPath: jumpscareScale
-      value: 0.75
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
 --- !u!1 &308251687
 GameObject:
   m_ObjectHideFlags: 0
@@ -6989,16 +6900,8 @@ MonoBehaviour:
   tiltSmooth: 4
   jumpTilt: 0.05
   jumpSwaySpeed: 5
-  eyeRayDistance: 300
-  eyeSphereRadius: 0.4
-  eyeRaycastOffset: 0.6
-  rayDistance: 3
-  sphereRadius: 0.25
-  raycastEyeOffset: 0.6
   crosshairImage: {fileID: 1231191083}
   defaultCrossColor: {r: 1, g: 0, b: 0, a: 1}
-  highlightColor: {r: 1, g: 1, b: 1, a: 1}
-  inventorySystem: {fileID: 1014915896}
 --- !u!114 &1823688470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8035,4 +7938,3 @@ SceneRoots:
   - {fileID: 1246576263}
   - {fileID: 1420084255}
   - {fileID: 565346348}
-  - {fileID: 298813236}

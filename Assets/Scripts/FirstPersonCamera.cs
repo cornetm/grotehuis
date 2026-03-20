@@ -32,6 +32,18 @@ public class FirstPersonCamera : MonoBehaviour
 
     private bool isEyeContact = false;
 
+    // ================= INTERACTION =================
+    public float rayDistance = 5f;
+    public float sphereRadius = 0.3f;
+    public float raycastEyeOffset = 0.6f;
+
+    public InventorySystem inventorySystem;
+
+    Highlight currentHighlight;
+    GameObject currentInteractObject;
+    GameObject currentPrefab;
+    Texture currentIcon;
+
     void Start()
     {
         Instance = this;
@@ -48,6 +60,8 @@ public class FirstPersonCamera : MonoBehaviour
     void Update()
     {
         HandleCameraRotation();
+        HandleRaycast();
+        HandleInteractionInput();
     }
 
     public void SetEyeContact(bool value)
@@ -100,5 +114,125 @@ public class FirstPersonCamera : MonoBehaviour
             Quaternion.Slerp(transform.localRotation,
             targetRot * Quaternion.Euler(0, 0, currentTilt),
             Time.deltaTime * rotationSmoothSpeed);
+    }
+
+    // ================= FIXED RAYCAST =================
+    void HandleRaycast()
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return;
+
+        Vector3 screenCenter =
+            crosshairImage != null
+            ? crosshairImage.rectTransform.position
+            : new Vector3(Screen.width / 2f, Screen.height / 2f, 0);
+
+        Ray ray = cam.ScreenPointToRay(screenCenter);
+
+        Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.green);
+
+        // ❗ BLOCKING CHECK (NIEUWE FIX)
+        if (Physics.Raycast(ray, out RaycastHit blockHit, rayDistance))
+        {
+            if (!blockHit.collider.CompareTag("Interaction"))
+            {
+                ResetHighlight();
+                return;
+            }
+        }
+
+        RaycastHit[] hits = Physics.SphereCastAll(ray.origin, sphereRadius, ray.direction, rayDistance);
+
+        RaycastHit? bestHit = null;
+        float closest = Mathf.Infinity;
+
+        foreach (RaycastHit hit in hits)
+        {
+            if (hit.collider.CompareTag("Player")) continue;
+            if (!hit.collider.CompareTag("Interaction")) continue;
+
+            if (hit.distance < closest)
+            {
+                closest = hit.distance;
+                bestHit = hit;
+            }
+        }
+
+        if (bestHit.HasValue)
+        {
+            RaycastHit hit = bestHit.Value;
+
+            if (crosshairImage)
+                crosshairImage.color = Color.white;
+
+            Highlight h = hit.collider.GetComponent<Highlight>();
+
+            if (h && h != currentHighlight)
+            {
+                if (currentHighlight) currentHighlight.DisableHighlight();
+
+                h.EnableHighlight();
+                currentHighlight = h;
+                currentInteractObject = hit.collider.gameObject;
+
+                PrefabReferenceAuto prefabRef =
+                    currentInteractObject.GetComponent<PrefabReferenceAuto>();
+
+                if (prefabRef)
+                {
+                    currentPrefab = prefabRef.prefab;
+                    currentIcon = prefabRef.icon;
+                }
+            }
+        }
+        else
+        {
+            ResetHighlight();
+        }
+    }
+
+    void ResetHighlight()
+    {
+        if (currentHighlight)
+            currentHighlight.DisableHighlight();
+
+        currentHighlight = null;
+        currentInteractObject = null;
+        currentPrefab = null;
+        currentIcon = null;
+
+        if (crosshairImage)
+            crosshairImage.color = defaultCrossColor;
+    }
+
+    // ================= INTERACTION INPUT =================
+    void HandleInteractionInput()
+    {
+        if (currentInteractObject && Input.GetKeyDown(KeyCode.E))
+        {
+            OpenDOor door = currentInteractObject.GetComponent<OpenDOor>();
+
+            if (door != null)
+            {
+                door.ToggleDoor();
+                return;
+            }
+
+            if (inventorySystem && currentPrefab)
+            {
+                if (!inventorySystem.IsFull())
+                {
+                    inventorySystem.AddItem(currentPrefab, currentIcon);
+                    Destroy(currentInteractObject);
+                }
+                else if (inventorySystem.HasEquippedItem())
+                {
+                    inventorySystem.ReplaceEquippedItem(currentPrefab, currentIcon);
+                    Destroy(currentInteractObject);
+                }
+
+                ResetHighlight();
+            }
+        }
     }
 }

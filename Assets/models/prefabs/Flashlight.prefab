@@ -10,15 +10,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 1537233f8dc786b409068172fb944bcf, type: 3}
       propertyPath: m_LocalScale.x
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1537233f8dc786b409068172fb944bcf, type: 3}
       propertyPath: m_LocalScale.y
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1537233f8dc786b409068172fb944bcf, type: 3}
       propertyPath: m_LocalScale.z
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1537233f8dc786b409068172fb944bcf, type: 3}
       propertyPath: m_LocalRotation.w
@@ -111,6 +111,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1537233f8dc786b409068172fb944bcf, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6118296261709792092}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1537233f8dc786b409068172fb944bcf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6163176770477068974}
   m_SourcePrefab: {fileID: 100100000, guid: 1537233f8dc786b409068172fb944bcf, type: 3}
 --- !u!1 &1186311130547273802 stripped
 GameObject:
@@ -162,6 +165,7 @@ MonoBehaviour:
   weaponType: 0
   temporaryType: 0
   limitedType: 0
+  throwRotationOffset: {x: 0, y: 0, z: 0}
   damage: 0
   speed: 0
   range: 0
@@ -253,5 +257,26 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.048, y: 0.045, z: 0.155}
+  m_Size: {x: 0.048, y: 0.05, z: 0.175}
   m_Center: {x: 0, y: 0.002, z: -0.02}
+--- !u!65 &6163176770477068974
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1186311130547273802}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.2, y: 0.2, z: 0.4}
+  m_Center: {x: 0, y: 0.002, z: -0.002}

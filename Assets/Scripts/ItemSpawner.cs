@@ -6,49 +6,98 @@ public class ItemSpawner : MonoBehaviour
     public GameObject[] itemPrefabs;
     public Texture[] itemIcons;
 
+    [Header("Spawn Points")]
+    public Transform[] spawnPoints;
+
     [Header("Spawn Settings")]
-    public int spawnCount = 5;
-    public Vector3 spawnArea = new Vector3(5f, 0f, 5f);
     public float yOffset = 0.5f;
     public bool randomRotation = true;
 
-    private Transform itemsParent; // 🔹 Parent reference
+    private Transform itemsParent;
+
+    // 🔹 Max 2 items per spawnpoint
+    private int[] spawnCounts;
+    private const int maxPerSpawnPoint = 2;
 
     void Start()
     {
         SetupParent();
-        SpawnInitialItems();
+
+        if (spawnPoints == null || spawnPoints.Length == 0)
+        {
+            Debug.LogWarning("No spawn points assigned!");
+            return;
+        }
+
+        spawnCounts = new int[spawnPoints.Length];
+
+        SpawnAllItems();
     }
 
-    // 🔹 Zorgt dat er een "Items" parent bestaat
     private void SetupParent()
     {
         GameObject parentObj = GameObject.Find("Items");
 
         if (parentObj == null)
-        {
             parentObj = new GameObject("Items");
-        }
 
         itemsParent = parentObj.transform;
     }
 
-    private void SpawnInitialItems()
+    // 🔹 vult ALLE spawnpoints (max 2 per point)
+    private void SpawnAllItems()
     {
-        if (itemPrefabs.Length == 0) { Debug.LogWarning("No prefabs assigned!"); return; }
-        for (int i = 0; i < spawnCount; i++) SpawnRandomItem();
+        if (itemPrefabs == null || itemPrefabs.Length == 0)
+        {
+            Debug.LogWarning("No prefabs assigned!");
+            return;
+        }
+
+        bool spawnedSomething = true;
+
+        // 🔹 blijft proberen tot alles vol zit
+        while (spawnedSomething)
+        {
+            spawnedSomething = SpawnRandomItem();
+        }
     }
 
-    private void SpawnRandomItem()
+    private bool SpawnRandomItem()
     {
-        int index = Random.Range(0, itemPrefabs.Length);
-        GameObject prefab = itemPrefabs[index];
+        int spawnIndex = -1;
+        int attempts = 0;
 
-        Vector3 pos = transform.position + new Vector3(
-            Random.Range(-spawnArea.x * 0.5f, spawnArea.x * 0.5f),
-            yOffset,
-            Random.Range(-spawnArea.z * 0.5f, spawnArea.z * 0.5f)
+        // 🔹 zoek spawnpoint met ruimte
+        while (attempts < 20)
+        {
+            int randomIndex = Random.Range(0, spawnPoints.Length);
+
+            if (spawnCounts[randomIndex] < maxPerSpawnPoint)
+            {
+                spawnIndex = randomIndex;
+                break;
+            }
+
+            attempts++;
+        }
+
+        if (spawnIndex == -1)
+            return false; // alles vol
+
+        spawnCounts[spawnIndex]++;
+
+        Transform spawnPoint = spawnPoints[spawnIndex];
+
+        int prefabIndex = Random.Range(0, itemPrefabs.Length);
+        GameObject prefab = itemPrefabs[prefabIndex];
+
+        Vector3 offset = new Vector3(
+            Random.Range(-0.3f, 0.3f),
+            0,
+            Random.Range(-0.3f, 0.3f)
         );
+
+        Vector3 pos = spawnPoint.position + new Vector3(0, yOffset, 0) + offset;
 
         Quaternion rot = randomRotation
             ? Quaternion.Euler(
@@ -56,21 +105,26 @@ public class ItemSpawner : MonoBehaviour
                 Random.Range(0f, 360f),
                 Random.Range(0f, 360f)
               )
-            : Quaternion.identity;
+            : spawnPoint.rotation;
 
-        GameObject spawned = Instantiate(prefab, pos, rot, itemsParent); // 🔹 parent toegevoegd
+        GameObject spawned = Instantiate(prefab, pos, rot, itemsParent);
 
         PrefabReferenceAuto prefabRef = spawned.GetComponent<PrefabReferenceAuto>();
-        if (prefabRef == null) prefabRef = spawned.AddComponent<PrefabReferenceAuto>();
+        if (prefabRef == null)
+            prefabRef = spawned.AddComponent<PrefabReferenceAuto>();
 
         prefabRef.prefab = prefab;
-        if (itemIcons.Length > index) prefabRef.icon = itemIcons[index];
+
+        if (itemIcons.Length > prefabIndex)
+            prefabRef.icon = itemIcons[prefabIndex];
 
         if (!spawned.CompareTag("Interaction"))
             spawned.tag = "Interaction";
+
+        return true;
     }
 
-    // ================= SPAWN DROPPED ITEM =================
+    // ================= DROPPED ITEM =================
     public GameObject SpawnDroppedItem(GameObject prefab, Vector3 position, bool randomRotationForDrop = true)
     {
         if (prefab == null) return null;
@@ -83,7 +137,7 @@ public class ItemSpawner : MonoBehaviour
               )
             : Quaternion.identity;
 
-        GameObject spawned = Instantiate(prefab, position, rotation, itemsParent); // 🔹 parent toegevoegd
+        GameObject spawned = Instantiate(prefab, position, rotation, itemsParent);
 
         PrefabReferenceAuto prefabRef = spawned.GetComponent<PrefabReferenceAuto>();
         if (prefabRef == null)
@@ -96,16 +150,5 @@ public class ItemSpawner : MonoBehaviour
             spawned.tag = "Interaction";
 
         return spawned;
-    }
-
-    // ================= GIZMO =================
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = new Color(1f, 1f, 0f, 0.25f);
-        Vector3 center = transform.position + new Vector3(0, yOffset, 0);
-        Vector3 size = new Vector3(spawnArea.x, 0.1f, spawnArea.z);
-        Gizmos.DrawCube(center, size);
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(center, size);
     }
 }

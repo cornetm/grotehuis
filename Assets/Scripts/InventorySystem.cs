@@ -166,7 +166,7 @@ public class InventorySystem : MonoBehaviour
                 itemUse.SetState(slotItem.prefabRef.category, slotItem.GetEnumFromCategory(slotItem.prefabRef), false);
         }
 
-        Vector3 spawnPos = playerTransform.position + playerCamera.transform.forward * dropDistance;
+        Vector3 spawnPos = playerCamera.transform.position + playerCamera.transform.forward * dropDistance;
         itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, false);
 
         RemoveSlot(index);
@@ -185,7 +185,7 @@ public class InventorySystem : MonoBehaviour
                 itemUse.SetState(slotItem.prefabRef.category, slotItem.GetEnumFromCategory(slotItem.prefabRef), false);
         }
 
-        Vector3 spawnPos = playerTransform.position + playerCamera.transform.forward * dropDistance;
+        Vector3 spawnPos = playerCamera.transform.position + playerCamera.transform.forward * dropDistance;
 
         GameObject obj = itemSpawner.SpawnDroppedItem(slotItem.prefab, spawnPos, false);
 

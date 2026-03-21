@@ -9,6 +9,7 @@ TagManager:
   - Room
   - StartGame
   - Skull
+  - Outside
   layers:
   - Default
   - TransparentFX

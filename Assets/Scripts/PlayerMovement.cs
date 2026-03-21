@@ -33,6 +33,9 @@ public class PlayerMovement : MonoBehaviour
     public float sprintInterval = 0.3f;
     public float crouchInterval = 0.7f;
 
+    [Header("Outside")]
+    public float outsideSpeedMultiplier = 2f;
+
     [HideInInspector] public CharacterController controller;
     [HideInInspector] public bool isCrouching;
     [HideInInspector] public bool isSprinting;
@@ -44,8 +47,8 @@ public class PlayerMovement : MonoBehaviour
     float currentSprint;
     float footstepTimer = 0f;
 
-    // Flag om te voorkomen dat jump afgaat bij uncrouch
     private bool justUncrouched = false;
+    private bool onOutsideGround;
 
     void Start()
     {
@@ -54,7 +57,6 @@ public class PlayerMovement : MonoBehaviour
         targetHeight = standingHeight;
         currentSprint = maxSprint;
 
-        // Init beide sliders
         if (sprintSlider1)
         {
             sprintSlider1.maxValue = maxSprint;
@@ -80,8 +82,8 @@ public class PlayerMovement : MonoBehaviour
         HandleSprint();
         HandleFootsteps();
         UpdateUI();
+        CheckGroundTag();
 
-        // Reset flag voor volgende frame
         justUncrouched = false;
     }
 
@@ -93,7 +95,6 @@ public class PlayerMovement : MonoBehaviour
             isCrouching = !isCrouching;
             targetHeight = isCrouching ? crouchHeight : standingHeight;
         }
-
 
         if (Input.GetButtonDown("Jump") && isCrouching)
         {
@@ -118,7 +119,13 @@ public class PlayerMovement : MonoBehaviour
         float z = Input.GetAxis("Vertical");
 
         Vector3 move = transform.right * x + transform.forward * z;
+
         float speed = moveSpeed;
+
+        if (onOutsideGround)
+        {
+            speed *= outsideSpeedMultiplier;
+        }
 
         if (isCrouching) speed *= crouchMultiplier;
         if (isSprinting) speed *= sprintMultiplier;
@@ -131,7 +138,6 @@ public class PlayerMovement : MonoBehaviour
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
-        // ================= CEILING CHECK =================
         if ((controller.collisionFlags & CollisionFlags.Above) != 0 && verticalVelocity > 0)
         {
             verticalVelocity = 0f;
@@ -206,5 +212,20 @@ public class PlayerMovement : MonoBehaviour
     {
         if (sprintSlider1) sprintSlider1.value = currentSprint;
         if (sprintSlider2) sprintSlider2.value = currentSprint;
+    }
+
+    // ================= OUTSIDE CHECK =================
+    void CheckGroundTag()
+    {
+        onOutsideGround = false;
+
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, 5f))
+        {
+            if (hit.collider.CompareTag("Outside"))
+            {
+                onOutsideGround = true;
+            }
+        }
     }
 }

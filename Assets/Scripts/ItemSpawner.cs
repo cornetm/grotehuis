@@ -44,7 +44,6 @@ public class ItemSpawner : MonoBehaviour
         itemsParent = parentObj.transform;
     }
 
-    // 🔹 vult ALLE spawnpoints (max 2 per point)
     private void SpawnAllItems()
     {
         if (itemPrefabs == null || itemPrefabs.Length == 0)
@@ -55,7 +54,6 @@ public class ItemSpawner : MonoBehaviour
 
         bool spawnedSomething = true;
 
-        // 🔹 blijft proberen tot alles vol zit
         while (spawnedSomething)
         {
             spawnedSomething = SpawnRandomItem();
@@ -67,7 +65,6 @@ public class ItemSpawner : MonoBehaviour
         int spawnIndex = -1;
         int attempts = 0;
 
-        // 🔹 zoek spawnpoint met ruimte
         while (attempts < 20)
         {
             int randomIndex = Random.Range(0, spawnPoints.Length);
@@ -82,7 +79,7 @@ public class ItemSpawner : MonoBehaviour
         }
 
         if (spawnIndex == -1)
-            return false; // alles vol
+            return false;
 
         spawnCounts[spawnIndex]++;
 
@@ -144,7 +141,11 @@ public class ItemSpawner : MonoBehaviour
             prefabRef = spawned.AddComponent<PrefabReferenceAuto>();
 
         prefabRef.prefab = prefab;
-        prefabRef.icon = null;
+
+        // 🔥 FIX: gebruik prefab default icon (NIET null maken)
+        PrefabReferenceAuto prefabData = prefab.GetComponent<PrefabReferenceAuto>();
+        if (prefabData != null)
+            prefabRef.icon = prefabData.icon;
 
         if (!spawned.CompareTag("Interaction"))
             spawned.tag = "Interaction";

@@ -30,18 +30,24 @@ public class PlayerMovement : MonoBehaviour
     [Header("Outside")]
     public float outsideSpeed = 10f;
 
+    // 🔥 ONLY ADDITION
+    [Header("Runner Strafing")]
+    public float runnerStrafeSpeedMultiplier = 0.6f;
+
+    [Header("Camera")]
+    public Transform cameraTransform;
+
     [HideInInspector] public CharacterController controller;
     [HideInInspector] public bool isCrouching;
     [HideInInspector] public bool isSprinting;
 
     float targetHeight;
     float heightVelocity;
+
     float verticalVelocity;
     float currentSprint;
 
     private bool justUncrouched = false;
-
-    // 🔥 STABLE STATE
     private bool isRunnerMode;
     private float runnerExitTimer;
 
@@ -69,16 +75,17 @@ public class PlayerMovement : MonoBehaviour
             runnerExitTimer -= Time.deltaTime;
         else
             isRunnerMode = false;
+
+        CheckOutsideBelow();
     }
 
     void HandleMovement()
     {
-        Vector3 move = Vector3.zero;
+        Vector3 horizontalMove = Vector3.zero;
 
+        // ================= RUNNER MODE =================
         if (isRunnerMode)
         {
-            // ================= RUNNER MODE =================
-
             float xInput = 0f;
 
             if (Input.GetKey(KeyCode.A))
@@ -87,66 +94,71 @@ public class PlayerMovement : MonoBehaviour
             if (Input.GetKey(KeyCode.D))
                 xInput = 1f;
 
-            Vector3 forward = Vector3.forward * outsideSpeed;
-            Vector3 side = Vector3.right * xInput * outsideSpeed;
+            Vector3 forward = cameraTransform.forward;
+            forward.y = 0;
+            forward.Normalize();
 
-            Vector3 horizontalMove = forward + side;
+            Vector3 right = cameraTransform.right;
+            right.y = 0;
+            right.Normalize();
 
-            // Jump logic
-            if (controller.isGrounded)
-            {
-                if (verticalVelocity < 0)
-                    verticalVelocity = -2f;
-
-                if (Input.GetButtonDown("Jump") && !justUncrouched)
-                    verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            }
-
-            verticalVelocity += gravity * Time.deltaTime;
-
-            // 🔥 FIX: combine correctly
-            move = horizontalMove;
-            move.y = verticalVelocity;
-
-            controller.Move(move * Time.deltaTime);
-            return;
+            // 🔥 ONLY CHANGE: strafing is now slower
+            horizontalMove =
+                forward * outsideSpeed +
+                right * xInput * outsideSpeed * runnerStrafeSpeedMultiplier;
         }
         else
         {
             // ================= NORMAL MODE =================
-
             float x = Input.GetAxis("Horizontal");
             float z = Input.GetAxis("Vertical");
 
-            Vector3 normalMove = transform.right * x + transform.forward * z;
+            Vector3 forward = cameraTransform.forward;
+            forward.y = 0;
+            forward.Normalize();
+
+            Vector3 right = cameraTransform.right;
+            right.y = 0;
+            right.Normalize();
+
+            Vector3 normalMove = forward * z + right * x;
 
             float speed = moveSpeed;
 
             if (isCrouching) speed *= crouchMultiplier;
             if (isSprinting) speed *= sprintMultiplier;
 
-            if (controller.isGrounded)
-            {
-                if (verticalVelocity < 0)
-                    verticalVelocity = -2f;
-
-                if (Input.GetButtonDown("Jump") && !isCrouching && !justUncrouched)
-                    verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            }
-
-            if (!controller.isGrounded)
-            {
-                if (verticalVelocity < 0)
-                    verticalVelocity += gravity * fallMultiplier * Time.deltaTime;
-                else
-                    verticalVelocity += gravity * lowJumpMultiplier * Time.deltaTime;
-            }
-
-            move = normalMove * speed;
+            horizontalMove = normalMove * speed;
         }
 
-        move.y = verticalVelocity;
-        controller.Move(move * Time.deltaTime);
+        // ================= JUMP + GRAVITY =================
+
+        if (controller.isGrounded)
+        {
+            if (verticalVelocity < 0)
+                verticalVelocity = -2f;
+
+            bool canJump = !isCrouching && !justUncrouched;
+
+            if (Input.GetButtonDown("Jump") && canJump)
+            {
+                verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            }
+        }
+        else
+        {
+            if (verticalVelocity < 0)
+                verticalVelocity += gravity * fallMultiplier * Time.deltaTime;
+            else
+                verticalVelocity += gravity * lowJumpMultiplier * Time.deltaTime;
+        }
+
+        verticalVelocity += gravity * Time.deltaTime;
+
+        Vector3 finalMove = horizontalMove;
+        finalMove.y = verticalVelocity;
+
+        controller.Move(finalMove * Time.deltaTime);
     }
 
     void HandleCrouch()
@@ -198,6 +210,20 @@ public class PlayerMovement : MonoBehaviour
         {
             isRunnerMode = true;
             runnerExitTimer = 0.2f;
+        }
+    }
+
+    void CheckOutsideBelow()
+    {
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out hit, 10f))
+        {
+            if (hit.collider.CompareTag("Outside"))
+            {
+                isRunnerMode = true;
+                runnerExitTimer = 0.2f;
+            }
         }
     }
 }

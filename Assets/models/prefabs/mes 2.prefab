@@ -159,7 +159,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PrefabReference
   prefab: {fileID: 3289339795620472521}
-  icon: {fileID: 0}
+  icon: {fileID: 2800000, guid: 291bbf33972d148449354b79c5ae8cdb, type: 3}
   category: 0
   weaponType: 2
   temporaryType: 0

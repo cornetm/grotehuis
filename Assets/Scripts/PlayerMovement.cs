@@ -15,6 +15,10 @@ public class PlayerMovement : MonoBehaviour
     public float fallMultiplier = 2.5f;
     public float lowJumpMultiplier = 1.7f;
 
+    // 🔥 ONLY ADDITION
+    [Header("Runner Jump")]
+    public float runnerJumpMultiplier = 1.3f;
+
     [Header("Crouch")]
     public float crouchHeight = 1f;
     public float crouchSmoothTime = 0.2f;
@@ -30,7 +34,6 @@ public class PlayerMovement : MonoBehaviour
     [Header("Outside")]
     public float outsideSpeed = 10f;
 
-    // 🔥 ONLY ADDITION
     [Header("Runner Strafing")]
     public float runnerStrafeSpeedMultiplier = 0.6f;
 
@@ -51,6 +54,11 @@ public class PlayerMovement : MonoBehaviour
     private bool isRunnerMode;
     private float runnerExitTimer;
 
+    // ✅ TOEGEVOEGD
+    [Header("Start Delay")]
+    public float startDelay = 3f;
+    private bool canMove = false;
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -59,10 +67,22 @@ public class PlayerMovement : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        // ✅ TOEGEVOEGD
+        Invoke(nameof(EnableMovement), startDelay);
+    }
+
+    // ✅ TOEGEVOEGD
+    void EnableMovement()
+    {
+        canMove = true;
     }
 
     void Update()
     {
+        // ✅ TOEGEVOEGD
+        if (!canMove) return;
+
         HandleCrouch();
         SmoothCapsule();
         HandleMovement();
@@ -102,7 +122,6 @@ public class PlayerMovement : MonoBehaviour
             right.y = 0;
             right.Normalize();
 
-            // 🔥 ONLY CHANGE: strafing is now slower
             horizontalMove =
                 forward * outsideSpeed +
                 right * xInput * outsideSpeed * runnerStrafeSpeedMultiplier;
@@ -142,7 +161,13 @@ public class PlayerMovement : MonoBehaviour
 
             if (Input.GetButtonDown("Jump") && canJump)
             {
-                verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                float finalJumpHeight = jumpHeight;
+
+                // 🔥 ONLY ADDITION
+                if (isRunnerMode)
+                    finalJumpHeight *= runnerJumpMultiplier;
+
+                verticalVelocity = Mathf.Sqrt(finalJumpHeight * -2f * gravity);
             }
         }
         else
@@ -217,7 +242,7 @@ public class PlayerMovement : MonoBehaviour
     {
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out hit, 10f))
+        if (Physics.Raycast(transform.position + Vector3.up * 1f, Vector3.down, out hit, 10f))
         {
             if (hit.collider.CompareTag("Outside"))
             {

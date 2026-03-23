@@ -27,51 +27,32 @@ public class PlayerMovement : MonoBehaviour
     public Slider sprintSlider1;
     public Slider sprintSlider2;
 
-    [Header("Footstep Audio")]
-    public AudioSource footstepAudio;
-    public float walkInterval = 0.5f;
-    public float sprintInterval = 0.3f;
-    public float crouchInterval = 0.7f;
-
     [Header("Outside")]
-    public float outsideSpeedMultiplier = 2f;
+    public float outsideSpeed = 10f;
 
     [HideInInspector] public CharacterController controller;
     [HideInInspector] public bool isCrouching;
     [HideInInspector] public bool isSprinting;
 
-    float standingHeight;
     float targetHeight;
     float heightVelocity;
     float verticalVelocity;
     float currentSprint;
-    float footstepTimer = 0f;
 
     private bool justUncrouched = false;
-    private bool onOutsideGround;
+
+    // 🔥 STABLE STATE
+    private bool isRunnerMode;
+    private float runnerExitTimer;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        standingHeight = controller.height;
-        targetHeight = standingHeight;
+        targetHeight = controller.height;
         currentSprint = maxSprint;
-
-        if (sprintSlider1)
-        {
-            sprintSlider1.maxValue = maxSprint;
-            sprintSlider1.value = currentSprint;
-        }
-        if (sprintSlider2)
-        {
-            sprintSlider2.maxValue = maxSprint;
-            sprintSlider2.value = currentSprint;
-        }
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
-        if (footstepAudio) footstepAudio.playOnAwake = false;
     }
 
     void Update()
@@ -80,26 +61,106 @@ public class PlayerMovement : MonoBehaviour
         SmoothCapsule();
         HandleMovement();
         HandleSprint();
-        HandleFootsteps();
         UpdateUI();
-        CheckGroundTag();
 
         justUncrouched = false;
+
+        if (runnerExitTimer > 0)
+            runnerExitTimer -= Time.deltaTime;
+        else
+            isRunnerMode = false;
     }
 
-    // ================= CROUCH =================
+    void HandleMovement()
+    {
+        Vector3 move = Vector3.zero;
+
+        if (isRunnerMode)
+        {
+            // ================= RUNNER MODE =================
+
+            float xInput = 0f;
+
+            if (Input.GetKey(KeyCode.A))
+                xInput = -1f;
+
+            if (Input.GetKey(KeyCode.D))
+                xInput = 1f;
+
+            Vector3 forward = Vector3.forward * outsideSpeed;
+            Vector3 side = Vector3.right * xInput * outsideSpeed;
+
+            Vector3 horizontalMove = forward + side;
+
+            // Jump logic
+            if (controller.isGrounded)
+            {
+                if (verticalVelocity < 0)
+                    verticalVelocity = -2f;
+
+                if (Input.GetButtonDown("Jump") && !justUncrouched)
+                    verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            }
+
+            verticalVelocity += gravity * Time.deltaTime;
+
+            // 🔥 FIX: combine correctly
+            move = horizontalMove;
+            move.y = verticalVelocity;
+
+            controller.Move(move * Time.deltaTime);
+            return;
+        }
+        else
+        {
+            // ================= NORMAL MODE =================
+
+            float x = Input.GetAxis("Horizontal");
+            float z = Input.GetAxis("Vertical");
+
+            Vector3 normalMove = transform.right * x + transform.forward * z;
+
+            float speed = moveSpeed;
+
+            if (isCrouching) speed *= crouchMultiplier;
+            if (isSprinting) speed *= sprintMultiplier;
+
+            if (controller.isGrounded)
+            {
+                if (verticalVelocity < 0)
+                    verticalVelocity = -2f;
+
+                if (Input.GetButtonDown("Jump") && !isCrouching && !justUncrouched)
+                    verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            }
+
+            if (!controller.isGrounded)
+            {
+                if (verticalVelocity < 0)
+                    verticalVelocity += gravity * fallMultiplier * Time.deltaTime;
+                else
+                    verticalVelocity += gravity * lowJumpMultiplier * Time.deltaTime;
+            }
+
+            move = normalMove * speed;
+        }
+
+        move.y = verticalVelocity;
+        controller.Move(move * Time.deltaTime);
+    }
+
     void HandleCrouch()
     {
         if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.C))
         {
             isCrouching = !isCrouching;
-            targetHeight = isCrouching ? crouchHeight : standingHeight;
+            targetHeight = isCrouching ? crouchHeight : 1.8f;
         }
 
         if (Input.GetButtonDown("Jump") && isCrouching)
         {
             isCrouching = false;
-            targetHeight = standingHeight;
+            targetHeight = 1.8f;
             justUncrouched = true;
         }
     }
@@ -108,59 +169,9 @@ public class PlayerMovement : MonoBehaviour
     {
         float prevHeight = controller.height;
         controller.height = Mathf.SmoothDamp(controller.height, targetHeight, ref heightVelocity, crouchSmoothTime);
-        float delta = controller.height - prevHeight;
-        controller.center += Vector3.up * (delta / 2f);
+        controller.center += Vector3.up * (controller.height - prevHeight) / 2f;
     }
 
-    // ================= MOVEMENT =================
-    void HandleMovement()
-    {
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
-
-        Vector3 move = transform.right * x + transform.forward * z;
-
-        float speed = moveSpeed;
-
-        if (onOutsideGround)
-        {
-            speed *= outsideSpeedMultiplier;
-        }
-
-        if (isCrouching) speed *= crouchMultiplier;
-        if (isSprinting) speed *= sprintMultiplier;
-
-        if (controller.isGrounded)
-        {
-            if (verticalVelocity < 0) verticalVelocity = -2f;
-
-            if (Input.GetButtonDown("Jump") && !isCrouching && !justUncrouched)
-                verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
-        }
-
-        if ((controller.collisionFlags & CollisionFlags.Above) != 0 && verticalVelocity > 0)
-        {
-            verticalVelocity = 0f;
-        }
-
-        if (!controller.isGrounded)
-        {
-            if (verticalVelocity < 0)
-                verticalVelocity += gravity * fallMultiplier * Time.deltaTime;
-            else
-                verticalVelocity += gravity * lowJumpMultiplier * Time.deltaTime;
-        }
-        else
-        {
-            verticalVelocity += gravity * Time.deltaTime;
-        }
-
-        Vector3 velocity = move * speed;
-        velocity.y = verticalVelocity;
-        controller.Move(velocity * Time.deltaTime);
-    }
-
-    // ================= SPRINT =================
     void HandleSprint()
     {
         bool holdingShift = Input.GetKey(KeyCode.LeftShift);
@@ -179,53 +190,14 @@ public class PlayerMovement : MonoBehaviour
         currentSprint = Mathf.Clamp(currentSprint, 0, maxSprint);
     }
 
-    // ================= FOOTSTEP AUDIO =================
-    void HandleFootsteps()
+    void UpdateUI() { }
+
+    void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (!footstepAudio || !controller.isGrounded) return;
-
-        bool isMoving = Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f ||
-                        Mathf.Abs(Input.GetAxis("Vertical")) > 0.01f;
-
-        if (isMoving)
+        if (hit.collider.CompareTag("Outside"))
         {
-            footstepTimer -= Time.deltaTime;
-
-            float interval = walkInterval;
-            if (isSprinting) interval = sprintInterval;
-            else if (isCrouching) interval = crouchInterval;
-
-            if (footstepTimer <= 0f)
-            {
-                footstepAudio.Play();
-                footstepTimer = interval;
-            }
-        }
-        else
-        {
-            footstepTimer = 0f;
-        }
-    }
-
-    // ================= UI =================
-    void UpdateUI()
-    {
-        if (sprintSlider1) sprintSlider1.value = currentSprint;
-        if (sprintSlider2) sprintSlider2.value = currentSprint;
-    }
-
-    // ================= OUTSIDE CHECK =================
-    void CheckGroundTag()
-    {
-        onOutsideGround = false;
-
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, 5f))
-        {
-            if (hit.collider.CompareTag("Outside"))
-            {
-                onOutsideGround = true;
-            }
+            isRunnerMode = true;
+            runnerExitTimer = 0.2f;
         }
     }
 }

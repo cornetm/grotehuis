@@ -11,7 +11,7 @@ public class BosSpawner : MonoBehaviour
     public int maxBomen = 25;
 
     [Header("Afstand regels")]
-    public float minAfstand = 3f;
+    public float minAfstand = 0.1f;
     public int maxPogingenPerBoom = 20;
 
     [Header("Spawn Area (Box)")]
@@ -72,7 +72,6 @@ public class BosSpawner : MonoBehaviour
             // 🔴 NIEUW: als het niet lukt → STOP hele spawn proces
             if (!placed)
             {
-                Debug.LogWarning("Geen ruimte meer om bomen te plaatsen. Spawning gestopt.");
                 return;
             }
         }

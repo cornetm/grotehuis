@@ -113,8 +113,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 756649b5d64d69f498a7ca348f00632d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterSimpleAI
-  walkSpeed: 0.5
-  sprintSpeed: 1
+  walkSpeed: 1
+  sprintSpeed: 3
   wanderInterval: 7.5
   idleChance: 0.3
   idleDurationMin: 3

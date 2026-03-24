@@ -32,7 +32,6 @@ public class RoomGenerator : MonoBehaviour
     void Start()
     {
         SetupParents();
-        // ❌ VERWIJDERD: Invoke StartDungeonGeneration
     }
 
     void SetupParents()
@@ -46,7 +45,6 @@ public class RoomGenerator : MonoBehaviour
         MonsterParent = monsterObj.transform;
     }
 
-    // ✅ NIEUW: wordt aangeroepen door StartTrigger
     public void BeginGeneration()
     {
         Invoke(nameof(StartDungeonGeneration), StartCooldown);
@@ -76,6 +74,9 @@ public class RoomGenerator : MonoBehaviour
         GameObject endRoom = Instantiate(EndRoomPrefab, Vector3.zero, Quaternion.identity, RoomParent);
         RoomInfo endInfo = endRoom.GetComponent<RoomInfo>();
         PlaceRoom(endRoom, endInfo);
+
+        // ✅ LIGHTING
+        ApplyRoomLighting(endInfo);
 
         placedRooms.Add(endRoom);
 
@@ -112,6 +113,10 @@ public class RoomGenerator : MonoBehaviour
             GameObject firstRoom = Instantiate(forwardPrefab, Vector3.zero, Quaternion.identity, RoomParent);
             RoomInfo firstInfo = firstRoom.GetComponent<RoomInfo>();
             PlaceRoom(firstRoom, firstInfo);
+
+            // ✅ LIGHTING
+            ApplyRoomLighting(firstInfo);
+
             placedRooms.Add(firstRoom);
 
             lastRoomDirection = firstInfo.roomdirection;
@@ -152,6 +157,9 @@ public class RoomGenerator : MonoBehaviour
             }
 
             PlaceRoom(newRoom, info);
+
+            // ✅ LIGHTING
+            ApplyRoomLighting(info);
 
             if (RoomOverlaps(newRoom))
             {
@@ -200,6 +208,20 @@ public class RoomGenerator : MonoBehaviour
         }
 
         return false;
+    }
+
+    // ✅ NIEUW: lighting toepassen
+    void ApplyRoomLighting(RoomInfo info)
+    {
+        if (info == null || info.RoomLights == null) return;
+
+        bool lightsOn = Random.Range(0f, 100f) <= info.LightChance;
+
+        foreach (Light light in info.RoomLights)
+        {
+            if (light != null)
+                light.enabled = lightsOn;
+        }
     }
 
     void SpawnMonsters()

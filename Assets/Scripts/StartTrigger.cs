@@ -15,6 +15,10 @@ public class StartTrigger : MonoBehaviour
     [Header("Start Door")]
     public StartDoor startDoor; // 👉 DEUR HIER SLEPEN
 
+    // 💡 NIEUW: light toevoegen
+    [Header("Start Light")]
+    public Light startLight;
+
     private bool triggered = false;
 
     void OnTriggerEnter(Collider other)
@@ -49,8 +53,13 @@ public class StartTrigger : MonoBehaviour
             // 🚪 DEUR SLUITEN
             if (startDoor != null)
             {
-                // direct trigger door sluiting
                 startDoor.SendMessage("OnTriggerEnter", other, SendMessageOptions.DontRequireReceiver);
+            }
+
+            // 💡 LIGHT AANZETTEN
+            if (startLight != null)
+            {
+                startLight.intensity = 0.1f;
             }
         }
     }

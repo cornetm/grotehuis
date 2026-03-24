@@ -612,6 +612,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 959716407}
     m_Modifications:
+    - target: {fileID: 1993367429553247477, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 892aba2536d4f324bbe473b5fd601209, type: 2}
+    - target: {fileID: 3001919208521835947, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5569697956644280073, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7320261773845877998, guid: a39a4cb211937464795ee28226137e51, type: 3}
       propertyPath: m_Name
       value: Plafond Lamp
@@ -666,6 +678,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
   m_PrefabInstance: {fileID: 236604559}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &236604561 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8108247658090527494, guid: a39a4cb211937464795ee28226137e51, type: 3}
+  m_PrefabInstance: {fileID: 236604559}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a92c7bbc7bbd84e9c0f3a970fbdc3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EditorLightToggle
 --- !u!1 &238705928 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3331085621883574078, guid: e1b1958027445fb4d8e6a37e28dd88ca, type: 3}
@@ -7556,6 +7579,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 959716407}
     m_Modifications:
+    - target: {fileID: 1993367429553247477, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 892aba2536d4f324bbe473b5fd601209, type: 2}
+    - target: {fileID: 3001919208521835947, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5569697956644280073, guid: a39a4cb211937464795ee28226137e51, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7320261773845877998, guid: a39a4cb211937464795ee28226137e51, type: 3}
       propertyPath: m_Name
       value: Plafond Lamp
@@ -7610,6 +7645,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7438993238806752070, guid: a39a4cb211937464795ee28226137e51, type: 3}
   m_PrefabInstance: {fileID: 4842517406995285640}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4842517406995285642 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8108247658090527494, guid: a39a4cb211937464795ee28226137e51, type: 3}
+  m_PrefabInstance: {fileID: 4842517406995285640}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a92c7bbc7bbd84e9c0f3a970fbdc3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EditorLightToggle
 --- !u!1001 &4889073962803853486
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7686,6 +7732,87 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 5726966362839601737}
   m_SourcePrefab: {fileID: 100100000, guid: 5339c99415d4c1a449192ca925237760, type: 3}
+--- !u!1001 &4932365435983919483
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2034292354984837081, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: m_Name
+      value: Licht Knop
+      objectReference: {fileID: 0}
+    - target: {fileID: 2112303506930451560, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: isOn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2112303506930451560, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: targets.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2112303506930451560, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: 'targets.Array.data[0]'
+      value: 
+      objectReference: {fileID: 4842517406995285642}
+    - target: {fileID: 2112303506930451560, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: 'targets.Array.data[1]'
+      value: 
+      objectReference: {fileID: 236604561}
+    - target: {fileID: 4198852352840761445, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.2300012
+      objectReference: {fileID: 0}
+    - target: {fileID: 4198852352840761445, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.203
+      objectReference: {fileID: 0}
+    - target: {fileID: 4198852352840761445, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.12999988
+      objectReference: {fileID: 0}
+    - target: {fileID: 4198852352840761445, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4198852352840761445, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4198852352840761445, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4198852352840761445, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4198852352840761445, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4198852352840761445, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 4198852352840761445, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9064733203202281281, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9064733203202281281, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3962ca341ef93bb49a1b176417e10737, type: 3}
 --- !u!1001 &5039399281391074021
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8526,6 +8653,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 959716407}
     m_Modifications:
+    - target: {fileID: 2940092681221769801, guid: eef1547dfa3b41b409f908d9cdb8945b, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4738041355579688161, guid: eef1547dfa3b41b409f908d9cdb8945b, type: 3}
       propertyPath: m_Name
       value: TafelLamp
@@ -8811,3 +8942,4 @@ SceneRoots:
   - {fileID: 543450652873191887}
   - {fileID: 959716407}
   - {fileID: 1771268143}
+  - {fileID: 4932365435983919483}

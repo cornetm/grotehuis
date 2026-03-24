@@ -35,4 +35,10 @@ public class EditorLightToggle : MonoBehaviour
 
         targetRenderer.sharedMaterial = isOn ? onMaterial : offMaterial;
     }
+
+    public void SetState(bool value)
+    {
+        isOn = value;
+        ApplyState();
+    }
 }

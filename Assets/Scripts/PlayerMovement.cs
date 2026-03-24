@@ -15,7 +15,6 @@ public class PlayerMovement : MonoBehaviour
     public float fallMultiplier = 2.5f;
     public float lowJumpMultiplier = 1.7f;
 
-    // 🔥 ONLY ADDITION
     [Header("Runner Jump")]
     public float runnerJumpMultiplier = 1.3f;
 
@@ -40,6 +39,9 @@ public class PlayerMovement : MonoBehaviour
     [Header("Camera")]
     public Transform cameraTransform;
 
+    [Header("Start Object")]
+    public GameObject startObject;
+
     [HideInInspector] public CharacterController controller;
     [HideInInspector] public bool isCrouching;
     [HideInInspector] public bool isSprinting;
@@ -51,10 +53,8 @@ public class PlayerMovement : MonoBehaviour
     float currentSprint;
 
     private bool justUncrouched = false;
-    private bool isRunnerMode;
-    private float runnerExitTimer;
+    public bool isRunnerMode = true;
 
-    // ✅ TOEGEVOEGD
     [Header("Start Delay")]
     public float startDelay = 3f;
     private bool canMove = false;
@@ -68,11 +68,9 @@ public class PlayerMovement : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        // ✅ TOEGEVOEGD
         Invoke(nameof(EnableMovement), startDelay);
     }
 
-    // ✅ TOEGEVOEGD
     void EnableMovement()
     {
         canMove = true;
@@ -80,7 +78,6 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        // ✅ TOEGEVOEGD
         if (!canMove) return;
 
         HandleCrouch();
@@ -90,13 +87,6 @@ public class PlayerMovement : MonoBehaviour
         UpdateUI();
 
         justUncrouched = false;
-
-        if (runnerExitTimer > 0)
-            runnerExitTimer -= Time.deltaTime;
-        else
-            isRunnerMode = false;
-
-        CheckOutsideBelow();
     }
 
     void HandleMovement()
@@ -163,7 +153,6 @@ public class PlayerMovement : MonoBehaviour
             {
                 float finalJumpHeight = jumpHeight;
 
-                // 🔥 ONLY ADDITION
                 if (isRunnerMode)
                     finalJumpHeight *= runnerJumpMultiplier;
 
@@ -229,26 +218,12 @@ public class PlayerMovement : MonoBehaviour
 
     void UpdateUI() { }
 
-    void OnControllerColliderHit(ControllerColliderHit hit)
+    void OnTriggerEnter(Collider other)
     {
-        if (hit.collider.CompareTag("Outside"))
+        if (startObject != null && other.gameObject == startObject)
         {
-            isRunnerMode = true;
-            runnerExitTimer = 0.2f;
-        }
-    }
-
-    void CheckOutsideBelow()
-    {
-        RaycastHit hit;
-
-        if (Physics.Raycast(transform.position + Vector3.up * 1f, Vector3.down, out hit, 10f))
-        {
-            if (hit.collider.CompareTag("Outside"))
-            {
-                isRunnerMode = true;
-                runnerExitTimer = 0.2f;
-            }
+            isRunnerMode = false;
+            startObject = null; // voorkomt meerdere triggers
         }
     }
 }

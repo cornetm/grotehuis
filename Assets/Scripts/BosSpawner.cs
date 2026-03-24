@@ -69,8 +69,12 @@ public class BosSpawner : MonoBehaviour
                 }
             }
 
+            // 🔴 NIEUW: als het niet lukt → STOP hele spawn proces
             if (!placed)
-                Debug.LogWarning("Kon geen plek vinden (te vol of te kleine area).");
+            {
+                Debug.LogWarning("Geen ruimte meer om bomen te plaatsen. Spawning gestopt.");
+                return;
+            }
         }
     }
 
@@ -83,11 +87,10 @@ public class BosSpawner : MonoBehaviour
         {
             float t = (float)i / (bomenPerRand - 1);
 
-            // 4 randen
-            TrySpawnEdge(new Vector3(Mathf.Lerp(-halfX, halfX, t), 0, -halfZ)); // voorkant
-            TrySpawnEdge(new Vector3(Mathf.Lerp(-halfX, halfX, t), 0, halfZ));  // achterkant
-            TrySpawnEdge(new Vector3(-halfX, 0, Mathf.Lerp(-halfZ, halfZ, t))); // links
-            TrySpawnEdge(new Vector3(halfX, 0, Mathf.Lerp(-halfZ, halfZ, t)));  // rechts
+            TrySpawnEdge(new Vector3(Mathf.Lerp(-halfX, halfX, t), 0, -halfZ));
+            TrySpawnEdge(new Vector3(Mathf.Lerp(-halfX, halfX, t), 0, halfZ));
+            TrySpawnEdge(new Vector3(-halfX, 0, Mathf.Lerp(-halfZ, halfZ, t)));
+            TrySpawnEdge(new Vector3(halfX, 0, Mathf.Lerp(-halfZ, halfZ, t)));
         }
     }
 

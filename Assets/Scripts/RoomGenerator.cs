@@ -32,7 +32,7 @@ public class RoomGenerator : MonoBehaviour
     void Start()
     {
         SetupParents();
-        Invoke(nameof(StartDungeonGeneration), StartCooldown);
+        // ❌ VERWIJDERD: Invoke StartDungeonGeneration
     }
 
     void SetupParents()
@@ -44,6 +44,12 @@ public class RoomGenerator : MonoBehaviour
         GameObject monsterObj = GameObject.Find("Monsters");
         if (monsterObj == null) monsterObj = new GameObject("Monsters");
         MonsterParent = monsterObj.transform;
+    }
+
+    // ✅ NIEUW: wordt aangeroepen door StartTrigger
+    public void BeginGeneration()
+    {
+        Invoke(nameof(StartDungeonGeneration), StartCooldown);
     }
 
     void StartDungeonGeneration()
@@ -209,7 +215,6 @@ public class RoomGenerator : MonoBehaviour
 
         ShuffleList(allSpawners);
 
-        // --- FIX: blokkeer eerste 3 kamers ---
         HashSet<MonsterSpawner> blockedSpawners = new HashSet<MonsterSpawner>();
         for (int i = 0; i < Mathf.Min(3, placedRooms.Count); i++)
         {
@@ -222,7 +227,6 @@ public class RoomGenerator : MonoBehaviour
         int spawned = 0;
         bool skullSpawned = false;
 
-        // 1. FORCE SKULL (1x)
         for (int i = 0; i < allSpawners.Count; i++)
         {
             var spawner = allSpawners[i];
@@ -239,7 +243,6 @@ public class RoomGenerator : MonoBehaviour
             }
         }
 
-        // 2. MINIMALE MONSTERS (niet naast elkaar)
         for (int i = 0; i < allSpawners.Count; i++)
         {
             var spawner = allSpawners[i];
@@ -255,7 +258,6 @@ public class RoomGenerator : MonoBehaviour
             spawned++;
         }
 
-        // 3. EXTRA MONSTERS in “veilige” kamers
         for (int i = 0; i < allSpawners.Count; i++)
         {
             var spawner = allSpawners[i];

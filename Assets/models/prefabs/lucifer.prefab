@@ -78,15 +78,18 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f93a89a5b51c1294bbe4a2e0c1b70dcd, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5621056654980128866}
+      addedObject: {fileID: -970056562341966749}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f93a89a5b51c1294bbe4a2e0c1b70dcd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -4504676542744011041}
   m_SourcePrefab: {fileID: 100100000, guid: f93a89a5b51c1294bbe4a2e0c1b70dcd, type: 3}
 --- !u!1 &5465829734004947527 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: f93a89a5b51c1294bbe4a2e0c1b70dcd, type: 3}
   m_PrefabInstance: {fileID: 5123951779883304726}
   m_PrefabAsset: {fileID: 0}
---- !u!64 &5621056654980128866
-MeshCollider:
+--- !u!65 &-970056562341966749
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -103,7 +106,33 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.00781104, y: 0.00781104, z: 0.06504064}
+  m_Center: {x: -0.000004103756, y: -0.00000129221, z: 0.010798094}
+--- !u!54 &-4504676542744011041
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5465829734004947527}
   serializedVersion: 5
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -5495902117074765545, guid: f93a89a5b51c1294bbe4a2e0c1b70dcd, type: 3}
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0

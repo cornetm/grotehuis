@@ -429,7 +429,7 @@ MonoBehaviour:
   EndPoint: {fileID: 3042178763528670328}
   RoomLights:
   - {fileID: 6991052277686224565}
-  LightChance: 70
+  LightChance: 80
 --- !u!65 &-2248726763554842046
 BoxCollider:
   m_ObjectHideFlags: 0

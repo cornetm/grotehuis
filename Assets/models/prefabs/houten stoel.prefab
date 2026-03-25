@@ -71,5 +71,64 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 29ab1d79ebfd78a4ea2d9d6c67e485a5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7004921135694103528}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 29ab1d79ebfd78a4ea2d9d6c67e485a5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -1385478317508075478}
   m_SourcePrefab: {fileID: 100100000, guid: 29ab1d79ebfd78a4ea2d9d6c67e485a5, type: 3}
+--- !u!1 &5456956784248223106 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 29ab1d79ebfd78a4ea2d9d6c67e485a5, type: 3}
+  m_PrefabInstance: {fileID: 5150544132670277843}
+  m_PrefabAsset: {fileID: 0}
+--- !u!54 &7004921135694103528
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5456956784248223106}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!65 &-1385478317508075478
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5456956784248223106}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2.016973, y: 3.9999998, z: 1.9999999}
+  m_Center: {x: 0.008486509, y: 1.9999999, z: 0.000000059604645}

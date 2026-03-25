@@ -56,6 +56,30 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 02c1605e073cb4c4b80e9e5807cadaa3, type: 2}
+    - target: {fileID: -2577548232221058511, guid: f57e2649f55f10c45856e7a0076ff89d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -2577548232221058511, guid: f57e2649f55f10c45856e7a0076ff89d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -2577548232221058511, guid: f57e2649f55f10c45856e7a0076ff89d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -2577548232221058511, guid: f57e2649f55f10c45856e7a0076ff89d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -2577548232221058511, guid: f57e2649f55f10c45856e7a0076ff89d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: -2577548232221058511, guid: f57e2649f55f10c45856e7a0076ff89d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 90
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: f57e2649f55f10c45856e7a0076ff89d, type: 3}
       propertyPath: m_Name
       value: hendel
@@ -74,6 +98,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -5568371526223589888, guid: f57e2649f55f10c45856e7a0076ff89d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7591387514452612863}
+    - targetCorrespondingSourceObject: {fileID: -5568371526223589888, guid: f57e2649f55f10c45856e7a0076ff89d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8643858448347282301}
   m_SourcePrefab: {fileID: 100100000, guid: f57e2649f55f10c45856e7a0076ff89d, type: 3}
 --- !u!1 &3889977384557975038 stripped
 GameObject:
@@ -93,7 +120,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Highlight
   glowColor: {r: 1, g: 1, b: 1, a: 1}
-  glowIntensity: 0.005
+  glowIntensity: 0.05
   fadeSpeed: 5
   textY: 1.5
   textScale: 0.1
@@ -117,5 +144,19 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 4.2198815, y: 1.9866576, z: 1.5866575}
+  m_Size: {x: 6, y: 3, z: 2}
   m_Center: {x: 1.3456776, y: 0.0000002086162, z: -0.0013429521}
+--- !u!114 &8643858448347282301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3889977384557975038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b97dea10858c644a8177626c54de47c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  handleType: 0
+  rotateSpeed: 5

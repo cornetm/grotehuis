@@ -29,6 +29,12 @@ public class SplineCarPathFollower : MonoBehaviour
     [Header("Spline")]
     [SerializeField] private float minPointsNeeded = 4;
 
+    [Header("Crash Rotation Assist")]
+    [SerializeField] private bool useRotationAssist = false;
+    [SerializeField] private Transform rotationAssistTarget;
+    [SerializeField] private float rotationAssistBlendDistance = 6f;
+    [SerializeField] private float rotationAssistMaxAnglePerSecond = 180f;
+
     private int i = 0;
     private float t = 0f;
 
@@ -99,10 +105,39 @@ public class SplineCarPathFollower : MonoBehaviour
         transform.position = pos;
 
         Quaternion desiredRot = Quaternion.LookRotation(desiredForward, Vector3.up);
-        transform.rotation = Quaternion.Slerp(transform.rotation, desiredRot, rotationLerp * Time.deltaTime);
 
+        if (useRotationAssist && rotationAssistTarget != null)
+        {
+            float distToAssist = Vector3.Distance(transform.position, rotationAssistTarget.position);
+
+            if (distToAssist <= rotationAssistBlendDistance)
+            {
+                float blend = 1f - Mathf.Clamp01(distToAssist / rotationAssistBlendDistance);
+
+                Quaternion assistRot = rotationAssistTarget.rotation;
+                desiredRot = Quaternion.Slerp(desiredRot, assistRot, blend);
+            }
+        }
+
+        transform.rotation = Quaternion.RotateTowards(
+            transform.rotation,
+            desiredRot,
+            rotationAssistMaxAnglePerSecond * Time.deltaTime
+        );
         // Steering wheel from car yaw rate (smoothed + limited speed)
         UpdateSteeringWheelFromYawRate();
+    }
+    public void SetRotationAssist(Transform target, float blendDistance)
+    {
+        rotationAssistTarget = target;
+        rotationAssistBlendDistance = Mathf.Max(0.01f, blendDistance);
+        useRotationAssist = target != null;
+    }
+
+    public void ClearRotationAssist()
+    {
+        useRotationAssist = false;
+        rotationAssistTarget = null;
     }
 
     private void UpdateSteeringWheelFromYawRate()

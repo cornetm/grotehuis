@@ -1,11 +1,15 @@
+using Unity.Cinemachine;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Playables;
+using UnityEngine.Timeline;
 
 public class RoadTileManager : MonoBehaviour
 {
     [Header("Tile Prefabs")]
-    [SerializeField] private RoadTile loopTilePrefab;          // jouw infinite tile
-    // Later: [SerializeField] private RoadTile crashTilePrefab;
+    [SerializeField] private RoadTile loopTilePrefab;
+    [Header("Crash Tile (existing scene object, no clone)")]
+    [SerializeField] private RoadTile crashTile;
 
     [Header("Setup")]
     [SerializeField] private int initialTiles = 4;
@@ -13,29 +17,56 @@ public class RoadTileManager : MonoBehaviour
 
     [Header("Recycling")]
     [SerializeField] private Transform car;
-    [SerializeField] private float recycleBehindDistance = 60f; // tile exit ver achter car => recycle
+    [SerializeField] private float recycleBehindDistance = 60f;
 
-    // Actieve tiles in volgorde
+    [Header("Crash Sequence")]
+    [SerializeField] private SplineCarPathFollower splineCarPathFollowerToDisable;
+    [SerializeField] private float crashTriggerDistance = 0.01f;
+
+    [Header("Enable On Crash Trigger")]
+    [SerializeField] private Animation animationComponentToEnable;
+    [SerializeField] private PlayableDirector playableDirectorToEnable;
+    [SerializeField] private CinemachineSplineCart cinemachineSplineCartToEnable;
+    [SerializeField] private CinemachineCrashShake cinemachineCrashShakeToEnable;
+    [SerializeField] private SignalReceiver signalReceiverToEnable;
+
+    [Header("Activate On Crash Trigger")]
+    [SerializeField] private GameObject activateOnCrashA;
+    [SerializeField] private GameObject activateOnCrashB;
+
+    [Header("Optional Auto Play")]
+    [SerializeField] private bool playAnimationWhenTriggered = false;
+    [SerializeField] private bool playDirectorWhenTriggered = true;
+
     private readonly List<RoadTile> tiles = new List<RoadTile>();
-
-    // Globale waypoint queue (Transform refs)
     private readonly List<Transform> pathQueue = new List<Transform>();
 
     public IReadOnlyList<Transform> PathQueue => pathQueue;
+
+    private bool carCrashSequenceStarted;
+    private bool recyclingStopped;
+    private bool crashTileSpawned;
+    private bool crashTriggered;
+
+    private RoadTile spawnedCrashTile;
+    private Transform crashActivationPoint;
 
     void Start()
     {
         if (tilesParent == null) tilesParent = this.transform;
 
-        // Spawn eerste tile op zijn huidige plek (zoals jij 'm in scene wil)
+        if (crashTile != null)
+        {
+            crashTile.AutoFind();
+            crashTile.gameObject.SetActive(false);
+        }
+
         RoadTile first = Instantiate(loopTilePrefab, tilesParent);
         first.AutoFind();
         tiles.Add(first);
 
-        // Voeg waypoints van tile toe aan queue
         AppendTileWaypoints(first, skipFirst: false);
 
-        // Spawn extra tiles aan elkaar vast
         for (int i = 1; i < initialTiles; i++)
         {
             SpawnAndAttachLoopTile();
@@ -46,22 +77,54 @@ public class RoadTileManager : MonoBehaviour
     {
         if (car == null || tiles.Count == 0) return;
 
-        // Recycle tiles die ver achter de auto liggen
-        RoadTile oldest = tiles[0];
-        float behind = car.position.z - oldest.exit.position.z;
-        // ^ Let op: dit werkt als "vooruit" ongeveer +Z is. 
-        // Als jouw wereld andere richting is, doen we dit op afstand i.p.v. z.
-
-        if (Vector3.Distance(car.position, oldest.exit.position) > recycleBehindDistance
-            && IsTileBehindCar(oldest))
+        if (!recyclingStopped)
         {
-            RecycleOldestToFront();
+            RoadTile oldest = tiles[0];
+
+            if (Vector3.Distance(car.position, oldest.exit.position) > recycleBehindDistance
+                && IsTileBehindCar(oldest))
+            {
+                RecycleOldestToFront();
+            }
         }
+
+        if (carCrashSequenceStarted && crashTileSpawned && !crashTriggered && crashActivationPoint != null)
+        {
+            Vector3 toCar = car.position - crashActivationPoint.position;
+            float passed = Vector3.Dot(crashActivationPoint.forward, toCar);
+
+            if (passed >= 0f)
+            {
+                TriggerCrashIntroNow();
+            }
+        }
+    }
+
+    public void StartCarCrashSequence()
+    {
+        Debug.Log("[RoadTileManager] StartCarCrashSequence called.");
+
+        if (carCrashSequenceStarted)
+        {
+            Debug.Log("[RoadTileManager] Crash sequence was already started, ignoring.");
+            return;
+        }
+
+        carCrashSequenceStarted = true;
+        recyclingStopped = true;
+
+        if (crashTile == null)
+        {
+            Debug.LogWarning("[RoadTileManager] crashTile is not assigned.");
+            return;
+        }
+
+        Debug.Log("[RoadTileManager] Recycling stopped. Spawning crash tile.");
+        SpawnCrashTileAtEnd();
     }
 
     bool IsTileBehindCar(RoadTile tile)
     {
-        // Algemene check: is exit "achter" de auto gezien auto forward?
         Vector3 toExit = tile.exit.position - car.position;
         return Vector3.Dot(car.forward, toExit) < 0f;
     }
@@ -74,46 +137,128 @@ public class RoadTileManager : MonoBehaviour
         AttachTile(tiles[tiles.Count - 1], newTile);
         tiles.Add(newTile);
 
-        // Bij het aanplakken wil je geen dubbele seam-waypoint (WP_0==Exit van vorige)
         AppendTileWaypoints(newTile, skipFirst: true);
     }
 
     void RecycleOldestToFront()
     {
-        // pak oudste tile, haal 'm uit lijst
         RoadTile tile = tiles[0];
         tiles.RemoveAt(0);
 
-        // attach achter de huidige laatste tile
         RoadTile last = tiles[tiles.Count - 1];
         AttachTile(last, tile);
 
-        // tile weer achteraan zetten
         tiles.Add(tile);
 
-        // add waypoints van deze tile opnieuw aan queue (skip first seam)
         AppendTileWaypoints(tile, skipFirst: true);
+    }
+
+    void SpawnCrashTileAtEnd()
+    {
+        if (crashTileSpawned)
+        {
+            Debug.Log("[RoadTileManager] Crash tile already positioned.");
+            return;
+        }
+
+        spawnedCrashTile = crashTile;
+
+        if (spawnedCrashTile == null)
+        {
+            Debug.LogWarning("[RoadTileManager] crashTile is null.");
+            return;
+        }
+
+        spawnedCrashTile.AutoFind();
+
+        if (spawnedCrashTile.transform.parent != tilesParent)
+            spawnedCrashTile.transform.SetParent(tilesParent, true);
+
+        spawnedCrashTile.gameObject.SetActive(true);
+
+        RoadTile last = tiles[tiles.Count - 1];
+        AttachTile(last, spawnedCrashTile);
+        tiles.Add(spawnedCrashTile);
+
+        // crash tile moet WP_0 WEL meenemen
+        AppendTileWaypoints(spawnedCrashTile, skipFirst: false);
+
+        if (spawnedCrashTile.waypoints != null && spawnedCrashTile.waypoints.Length > 0)
+        {
+            crashActivationPoint = spawnedCrashTile.waypoints[0];
+            Debug.Log($"[RoadTileManager] Existing crash tile positioned. Activation point = waypoint[0] ({crashActivationPoint.name})");
+        }
+        else
+        {
+            crashActivationPoint = spawnedCrashTile.entry;
+            Debug.Log($"[RoadTileManager] Existing crash tile positioned. Activation point fallback = entry ({crashActivationPoint.name})");
+        }
+
+        if (splineCarPathFollowerToDisable != null && crashActivationPoint != null)
+        {
+            splineCarPathFollowerToDisable.SetRotationAssist(crashActivationPoint, 6f);
+        }
+
+        crashTileSpawned = true;
+
+        Debug.Log($"[RoadTileManager] PathQueue count after crash tile append: {pathQueue.Count}");
+    }
+
+    void TriggerCrashIntroNow()
+    {
+        if (crashTriggered)
+            return;
+
+        Debug.Log("[RoadTileManager] Crash activation point reached -> triggering crash intro now.");
+
+        crashTriggered = true;
+
+        if (splineCarPathFollowerToDisable != null)
+            splineCarPathFollowerToDisable.enabled = false;
+
+        if (animationComponentToEnable != null)
+        {
+            animationComponentToEnable.enabled = true;
+
+            if (playAnimationWhenTriggered)
+                animationComponentToEnable.Play();
+        }
+
+        if (signalReceiverToEnable != null)
+            signalReceiverToEnable.enabled = true;
+
+        if (cinemachineSplineCartToEnable != null)
+            cinemachineSplineCartToEnable.enabled = true;
+
+        if (cinemachineCrashShakeToEnable != null)
+            cinemachineCrashShakeToEnable.enabled = true;
+
+        if (playableDirectorToEnable != null)
+        {
+            playableDirectorToEnable.enabled = true;
+
+            if (playDirectorWhenTriggered)
+                playableDirectorToEnable.Play();
+        }
+
+        if (activateOnCrashA != null)
+            activateOnCrashA.SetActive(true);
+
+        if (activateOnCrashB != null)
+            activateOnCrashB.SetActive(true);
     }
 
     void AttachTile(RoadTile prev, RoadTile next)
     {
-        // We willen next.entry exact matchen met prev.exit (positie + rotatie)
-        // 1) bereken delta tussen nextRoot en nextEntry
         Transform nextRoot = next.transform;
         Transform nextEntry = next.entry;
 
-        // offset van root naar entry in lokale/wereld ruimte
         Vector3 entryLocalPos = nextRoot.InverseTransformPoint(nextEntry.position);
 
-        // 2) Zet rotatie zodat entry forward/up matcht met prev.exit forward/up
-        Quaternion rotDelta = Quaternion.FromToRotation(nextEntry.forward, prev.exit.forward);
-        // Voor betere matching ook up-vector:
         Quaternion targetRot = Quaternion.LookRotation(prev.exit.forward, prev.exit.up);
-        // We zetten root rot = targetRot * inverse(entryLocalRot)
         Quaternion entryLocalRot = Quaternion.Inverse(nextRoot.rotation) * nextEntry.rotation;
         nextRoot.rotation = targetRot * Quaternion.Inverse(entryLocalRot);
 
-        // 3) Zet positie zodat entry pos == prev.exit pos
         Vector3 newEntryWorldPosAfterRot = nextRoot.TransformPoint(entryLocalPos);
         nextRoot.position += (prev.exit.position - newEntryWorldPosAfterRot);
     }
@@ -127,11 +272,8 @@ public class RoadTileManager : MonoBehaviour
             pathQueue.Add(tile.waypoints[i]);
     }
 
-    /// CarFollower roept dit aan om te zeggen: "ik heb waypoint index X gehaald"
     public void ConsumeWaypointsUpTo(int globalIndex)
     {
-        // Verwijder alles vóór (en incl) globalIndex, zodat queue niet oneindig groeit
-        // globalIndex is index in de huidige queue.
         int removeCount = Mathf.Clamp(globalIndex, 0, pathQueue.Count);
         if (removeCount > 0)
             pathQueue.RemoveRange(0, removeCount);

@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using Unity.Cinemachine;
+using UnityEngine.SceneManagement;
 
 public class CinemachineCrashShake : MonoBehaviour
 {
@@ -18,6 +19,9 @@ public class CinemachineCrashShake : MonoBehaviour
 
     [Header("Return")]
     [SerializeField] private float returnDuration = 0.6f;
+
+    [Header("Scene Transition")]
+    [SerializeField] private string sceneToLoad;
 
     private CinemachineBasicMultiChannelPerlin noise;
     private Coroutine shakeRoutine;
@@ -94,5 +98,16 @@ public class CinemachineCrashShake : MonoBehaviour
 
         noise.AmplitudeGain = defaultAmplitude;
         noise.FrequencyGain = defaultFrequency;
+    }
+    public void GoToScene()
+    {
+        if (string.IsNullOrEmpty(sceneToLoad))
+        {
+            Debug.LogWarning("Scene name is empty in CinemachineCrashShake.");
+            return;
+        }
+
+        Debug.Log($"Loading scene: {sceneToLoad}");
+        SceneManager.LoadScene(sceneToLoad);
     }
 }

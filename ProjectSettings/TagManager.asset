@@ -10,6 +10,7 @@ TagManager:
   - StartGame
   - Skull
   - Outside
+  - QuitGame
   layers:
   - Default
   - TransparentFX

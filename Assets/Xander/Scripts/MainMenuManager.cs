@@ -5,6 +5,13 @@ using TMPro;
 
 public class MainMenuManager : MonoBehaviour
 {
+    private enum PromptType
+    {
+        None,
+        StartGame,
+        QuitGame
+    }
+
     [Header("UI Panels")]
     [SerializeField] private GameObject mainObject;
     [SerializeField] private GameObject secondaryObject;
@@ -21,79 +28,64 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private float rayDistance = 3f;
     [SerializeField] private LayerMask interactLayers = ~0;
 
-    [Tooltip("Tag that the raycast target collider must have to be interactable (e.g. Screen, Start, Settings).")]
+    [Tooltip("Tag for regular secondary menu interact objects.")]
     [SerializeField] private string interactTag = "Screen";
 
     [SerializeField] private bool allowTriggerColliders = false;
 
     [Header("Anti-flicker")]
-    [Tooltip("Keeps interact crosshair 'on' for a short time after losing the hit.")]
     [SerializeField] private float hoverGraceTime = 0.08f;
 
     [Header("Input")]
-    [SerializeField] private KeyCode openKey = KeyCode.Mouse0; // LMB
+    [SerializeField] private KeyCode openKey = KeyCode.Mouse0;
     [SerializeField] private KeyCode closeKey = KeyCode.Escape;
 
     [Header("Cooldown")]
-    [Tooltip("Cooldown (seconds) after opening/closing where LMB/ESC are ignored.")]
     [SerializeField] private float switchCooldownSeconds = 0.25f;
 
     [Header("Intro")]
     [SerializeField] private bool playIntroOnStart = true;
-
-    [Tooltip("Extra kleine wacht na scene start, bovenop een paar frames, zodat alles visueel rustig geladen is.")]
     [SerializeField] private float introStartDelay = 0.1f;
-
-    [Tooltip("Hoe lang de tekst in-fade + wit->rood kleurverandering duurt.")]
     [SerializeField] private float introFadeInDuration = 2f;
-
-    [Tooltip("Hoe lang gewacht wordt nadat tekst/raw image volledig zichtbaar zijn.")]
     [SerializeField] private float introHoldDuration = 1f;
-
-    [Tooltip("Hoe lang tekst + raw image weer naar alpha 0 faden.")]
     [SerializeField] private float introFadeOutDuration = 1f;
-
-    [Tooltip("Hoe lang de laatste overlay image van alpha 1 naar 0 faden.")]
     [SerializeField] private float finalOverlayFadeDuration = 1f;
-
-    [Tooltip("Tekst die eerst van alpha 0 naar max gaat en tegelijk van wit naar bloedrood kleurt.")]
     [SerializeField] private TextMeshProUGUI introText;
-
-    [Tooltip("RawImage die tegelijk met de tekst van alpha 0 naar max gaat.")]
     [SerializeField] private RawImage introRawImage;
-
-    [Tooltip("Laatste normale UI Image die na de eerste intro wegfade en daarna uitgaat. Meestal je zwarte overlay.")]
     [SerializeField] private Image finalFadeImage;
-
-    [Tooltip("Eindkleur van de introtekst.")]
     [SerializeField] private Color introTextTargetColor = new Color(0.45f, 0f, 0f, 1f);
+
+    [Header("Post Intro Activation")]
+    [SerializeField] private NeckLook neckLookAfterIntro;
+    [SerializeField] private GameObject gameObjectAfterIntro;
 
     [Header("Optional Car Crash Flow")]
     [SerializeField] private bool carCrash = false;
-
-    [Tooltip("Tag voor het object waar de speler op klikt om Start Game prompt te openen.")]
     [SerializeField] private string startGameTag = "StartGame";
-
-    [Tooltip("Volledig start prompt scherm dat in beeld komt.")]
     [SerializeField] private GameObject startGamePromptObject;
-
-    [Tooltip("Optionele LMB icon / visual.")]
     [SerializeField] private GameObject startGameLeftMouseObject;
-
-    [Tooltip("Optionele RMB icon / visual.")]
     [SerializeField] private GameObject startGameRightMouseObject;
-
-    [Tooltip("RoadTileManager die de crash sequence start.")]
     [SerializeField] private RoadTileManager roadTileManager;
+
+    [Header("Optional Quit Game Flow")]
+    [SerializeField] private bool quitGame = false;
+    [SerializeField] private string quitGameTag = "QuitGame";
+    [SerializeField] private GameObject quitGamePromptObject;
+    [SerializeField] private GameObject quitGameLeftMouseObject;
+    [SerializeField] private GameObject quitGameRightMouseObject;
+
+    [Header("Debug")]
+    [SerializeField] private bool enableDebugLogs = false;
 
     private bool isHovering;
     private float lastHoverTime;
     private float nextAllowedSwitchTime = 0f;
 
     private bool introPlaying;
-    private bool startGamePromptOpen;
+    private PromptType currentPrompt = PromptType.None;
 
     private bool SecondaryOpen => secondaryObject != null && secondaryObject.activeSelf;
+    private bool AnyPromptOpen => currentPrompt != PromptType.None;
 
     private void Awake()
     {
@@ -113,19 +105,21 @@ public class MainMenuManager : MonoBehaviour
         nextAllowedSwitchTime = float.MaxValue;
 
         PrepareIntroVisualState();
-        PrepareStartGamePromptVisualState();
+        PreparePromptVisualStates();
+
+        if (neckLookAfterIntro != null)
+            neckLookAfterIntro.enabled = false;
+
+        if (gameObjectAfterIntro != null)
+            gameObjectAfterIntro.SetActive(false);
     }
 
     private void Start()
     {
         if (playIntroOnStart)
-        {
             StartCoroutine(PlayIntroSequence());
-        }
         else
-        {
             FinishIntroAndEnableMenu();
-        }
     }
 
     private void Update()
@@ -135,15 +129,9 @@ public class MainMenuManager : MonoBehaviour
 
         bool inCooldown = Time.unscaledTime < nextAllowedSwitchTime;
 
-        if (startGamePromptOpen)
+        if (AnyPromptOpen)
         {
-            if (Input.GetMouseButtonDown(0))
-                Debug.Log("[MainMenuManager] StartGame prompt open -> LMB pressed (confirm).");
-
-            if (Input.GetMouseButtonDown(1))
-                Debug.Log("[MainMenuManager] StartGame prompt open -> RMB pressed (cancel).");
-
-            HandleStartGamePromptInput(inCooldown);
+            HandlePromptInput(inCooldown);
             return;
         }
 
@@ -151,26 +139,27 @@ public class MainMenuManager : MonoBehaviour
         {
             if (!inCooldown && Input.GetKeyDown(closeKey))
             {
-                Debug.Log("[MainMenuManager] Closing secondary menu.");
+                Log("Closing secondary menu.");
                 CloseSecondary();
             }
 
             return;
         }
 
-        bool hitNow = false;
+        bool hitAnyInteract = false;
         bool hitScreen = false;
         bool hitStartGame = false;
+        bool hitQuitGame = false;
 
         if (!inCooldown)
         {
-            GetLookHitState(out hitNow, out hitScreen, out hitStartGame);
+            GetLookHitState(out hitAnyInteract, out hitScreen, out hitStartGame, out hitQuitGame);
         }
 
-        if (hitNow)
+        if (hitAnyInteract)
             lastHoverTime = Time.unscaledTime;
 
-        bool wantHover = hitNow || (!inCooldown && (Time.unscaledTime - lastHoverTime) <= hoverGraceTime);
+        bool wantHover = hitAnyInteract || (!inCooldown && (Time.unscaledTime - lastHoverTime) <= hoverGraceTime);
 
         if (wantHover != isHovering)
         {
@@ -180,48 +169,58 @@ public class MainMenuManager : MonoBehaviour
 
         if (!inCooldown && Input.GetKeyDown(openKey))
         {
-            Debug.Log($"[MainMenuManager] LMB pressed. hitNow={hitNow}, hitScreen={hitScreen}, hitStartGame={hitStartGame}, carCrash={carCrash}");
+            Log($"LMB pressed. hitAny={hitAnyInteract}, hitScreen={hitScreen}, hitStartGame={hitStartGame}, hitQuitGame={hitQuitGame}, carCrash={carCrash}, quitGame={quitGame}");
 
             if (carCrash && hitStartGame)
             {
-                Debug.Log("[MainMenuManager] StartGame hit detected -> opening start prompt.");
+                Log("StartGame hit detected -> opening start prompt.");
                 OpenStartGamePrompt();
                 return;
             }
 
-            if (isHovering && hitScreen)
+            if (quitGame && hitQuitGame)
             {
-                Debug.Log("[MainMenuManager] Screen hit detected -> opening secondary menu.");
+                Log("QuitGame hit detected -> opening quit prompt.");
+                OpenQuitGamePrompt();
+                return;
+            }
+
+            if (hitScreen)
+            {
+                Log("Screen hit detected -> opening secondary menu.");
                 OpenSecondary();
                 return;
             }
 
-            Debug.Log("[MainMenuManager] LMB pressed but no valid interact target was confirmed.");
+            Log("LMB pressed but no valid interact target was confirmed.");
         }
     }
 
-    private void HandleStartGamePromptInput(bool inCooldown)
+    private void HandlePromptInput(bool inCooldown)
     {
         if (inCooldown)
             return;
 
         if (Input.GetMouseButtonDown(0))
         {
-            ConfirmStartGamePrompt();
+            Log($"{currentPrompt} prompt open -> LMB pressed (confirm).");
+            ConfirmCurrentPrompt();
             return;
         }
 
         if (Input.GetMouseButtonDown(1))
         {
-            CancelStartGamePrompt();
+            Log($"{currentPrompt} prompt open -> RMB pressed (cancel).");
+            CancelCurrentPrompt();
         }
     }
 
-    private void GetLookHitState(out bool anyInteract, out bool hitScreen, out bool hitStartGame)
+    private void GetLookHitState(out bool hitAnyInteract, out bool hitScreen, out bool hitStartGame, out bool hitQuitGame)
     {
-        anyInteract = false;
+        hitAnyInteract = false;
         hitScreen = false;
         hitStartGame = false;
+        hitQuitGame = false;
 
         if (rayCamera == null)
         {
@@ -237,25 +236,29 @@ public class MainMenuManager : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, rayDistance, interactLayers, triggerMode))
         {
             if (hit.collider == null)
-            {
-                Debug.Log("[MainMenuManager] Raycast hit something but collider was null.");
                 return;
-            }
 
-            Debug.Log($"[MainMenuManager] Raycast hit: {hit.collider.name} | tag={hit.collider.tag} | type={hit.collider.GetType().Name}");
+            Log($"Raycast hit: {hit.collider.name} | tag={hit.collider.tag} | type={hit.collider.GetType().Name}");
 
             if (!string.IsNullOrEmpty(interactTag) && hit.collider.CompareTag(interactTag))
             {
-                anyInteract = true;
+                hitAnyInteract = true;
                 hitScreen = true;
-                Debug.Log("[MainMenuManager] Hit interactTag target.");
+                Log("Hit interactTag target.");
             }
 
             if (carCrash && !string.IsNullOrEmpty(startGameTag) && hit.collider.CompareTag(startGameTag))
             {
-                anyInteract = true;
+                hitAnyInteract = true;
                 hitStartGame = true;
-                Debug.Log("[MainMenuManager] Hit StartGame tag target.");
+                Log("Hit StartGame tag target.");
+            }
+
+            if (quitGame && !string.IsNullOrEmpty(quitGameTag) && hit.collider.CompareTag(quitGameTag))
+            {
+                hitAnyInteract = true;
+                hitQuitGame = true;
+                Log("Hit QuitGame tag target.");
             }
         }
     }
@@ -284,9 +287,7 @@ public class MainMenuManager : MonoBehaviour
             }
 
             if (introRawImage != null)
-            {
                 SetGraphicAlpha(introRawImage, Mathf.Lerp(0f, 1f, lerp));
-            }
 
             t += Time.unscaledDeltaTime;
             yield return null;
@@ -300,16 +301,13 @@ public class MainMenuManager : MonoBehaviour
         }
 
         if (introRawImage != null)
-        {
             SetGraphicAlpha(introRawImage, 1f);
-        }
 
         if (introHoldDuration > 0f)
             yield return new WaitForSecondsRealtime(introHoldDuration);
 
         t = 0f;
         float fadeOutDur = Mathf.Max(0.001f, introFadeOutDuration);
-
         Color textColorAtFadeStart = introText != null ? introText.color : introTextTargetColor;
 
         while (t < fadeOutDur)
@@ -325,9 +323,7 @@ public class MainMenuManager : MonoBehaviour
             }
 
             if (introRawImage != null)
-            {
                 SetGraphicAlpha(introRawImage, alpha);
-            }
 
             t += Time.unscaledDeltaTime;
             yield return null;
@@ -341,9 +337,7 @@ public class MainMenuManager : MonoBehaviour
         }
 
         if (introRawImage != null)
-        {
             SetGraphicAlpha(introRawImage, 0f);
-        }
 
         if (finalFadeImage != null)
         {
@@ -377,15 +371,20 @@ public class MainMenuManager : MonoBehaviour
 
         SetCursorLocked(true);
         SetCrosshairsVisible(true);
-        SetCrosshairMode(interactable: false);
+        SetCrosshairMode(false);
 
         if (neckLook != null)
             neckLook.enabled = true;
 
         isHovering = false;
         lastHoverTime = -999f;
-
         nextAllowedSwitchTime = 0f;
+
+        if (neckLookAfterIntro != null)
+            neckLookAfterIntro.enabled = true;
+
+        if (gameObjectAfterIntro != null)
+            gameObjectAfterIntro.SetActive(true);
     }
 
     private void PrepareIntroVisualState()
@@ -398,9 +397,7 @@ public class MainMenuManager : MonoBehaviour
         }
 
         if (introRawImage != null)
-        {
             SetGraphicAlpha(introRawImage, 0f);
-        }
 
         if (finalFadeImage != null)
         {
@@ -411,7 +408,7 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
-    private void PrepareStartGamePromptVisualState()
+    private void PreparePromptVisualStates()
     {
         if (startGamePromptObject != null)
             startGamePromptObject.SetActive(false);
@@ -422,20 +419,29 @@ public class MainMenuManager : MonoBehaviour
         if (startGameRightMouseObject != null)
             startGameRightMouseObject.SetActive(false);
 
-        startGamePromptOpen = false;
+        if (quitGamePromptObject != null)
+            quitGamePromptObject.SetActive(false);
+
+        if (quitGameLeftMouseObject != null)
+            quitGameLeftMouseObject.SetActive(false);
+
+        if (quitGameRightMouseObject != null)
+            quitGameRightMouseObject.SetActive(false);
+
+        currentPrompt = PromptType.None;
     }
 
     private void OpenStartGamePrompt()
     {
         if (!carCrash)
         {
-            Debug.Log("[MainMenuManager] OpenStartGamePrompt called, but carCrash is false.");
+            Log("OpenStartGamePrompt called, but carCrash is false.");
             return;
         }
 
-        Debug.Log("[MainMenuManager] Opening StartGame prompt.");
+        Log("Opening StartGame prompt.");
 
-        startGamePromptOpen = true;
+        currentPrompt = PromptType.StartGame;
         isHovering = false;
         lastHoverTime = -999f;
 
@@ -452,20 +458,38 @@ public class MainMenuManager : MonoBehaviour
         StartCooldown();
     }
 
-    private void CancelStartGamePrompt()
+    private void OpenQuitGamePrompt()
     {
-        Debug.Log("[MainMenuManager] StartGame prompt canceled.");
+        if (!quitGame)
+        {
+            Log("OpenQuitGamePrompt called, but quitGame is false.");
+            return;
+        }
 
-        startGamePromptOpen = false;
+        Log("Opening QuitGame prompt.");
 
-        if (startGamePromptObject != null)
-            startGamePromptObject.SetActive(false);
+        currentPrompt = PromptType.QuitGame;
+        isHovering = false;
+        lastHoverTime = -999f;
 
-        if (startGameLeftMouseObject != null)
-            startGameLeftMouseObject.SetActive(false);
+        if (quitGamePromptObject != null)
+            quitGamePromptObject.SetActive(true);
 
-        if (startGameRightMouseObject != null)
-            startGameRightMouseObject.SetActive(false);
+        if (quitGameLeftMouseObject != null)
+            quitGameLeftMouseObject.SetActive(true);
+
+        if (quitGameRightMouseObject != null)
+            quitGameRightMouseObject.SetActive(true);
+
+        SetCrosshairsVisible(false);
+        StartCooldown();
+    }
+
+    private void CancelCurrentPrompt()
+    {
+        Log($"{currentPrompt} prompt canceled.");
+
+        HideAllPrompts();
 
         SetCrosshairsVisible(true);
         SetCrosshairMode(false);
@@ -476,12 +500,44 @@ public class MainMenuManager : MonoBehaviour
         StartCooldown();
     }
 
-    private void ConfirmStartGamePrompt()
+    private void ConfirmCurrentPrompt()
     {
-        Debug.Log("[MainMenuManager] StartGame prompt confirmed -> calling RoadTileManager.StartCarCrashSequence().");
+        Log($"{currentPrompt} prompt confirmed.");
 
-        startGamePromptOpen = false;
+        PromptType promptToConfirm = currentPrompt;
+        HideAllPrompts();
 
+        SetCrosshairsVisible(false);
+
+        switch (promptToConfirm)
+        {
+            case PromptType.StartGame:
+                if (roadTileManager != null)
+                {
+                    Log("Calling RoadTileManager.StartCarCrashSequence().");
+                    roadTileManager.StartCarCrashSequence();
+                }
+                else
+                {
+                    Debug.LogWarning("[MainMenuManager] roadTileManager is NULL, cannot start crash sequence.");
+                }
+                break;
+
+            case PromptType.QuitGame:
+                Log("Quitting application.");
+#if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+#else
+                Application.Quit();
+#endif
+                break;
+        }
+
+        StartCooldown();
+    }
+
+    private void HideAllPrompts()
+    {
         if (startGamePromptObject != null)
             startGamePromptObject.SetActive(false);
 
@@ -491,18 +547,16 @@ public class MainMenuManager : MonoBehaviour
         if (startGameRightMouseObject != null)
             startGameRightMouseObject.SetActive(false);
 
-        SetCrosshairsVisible(false);
+        if (quitGamePromptObject != null)
+            quitGamePromptObject.SetActive(false);
 
-        if (roadTileManager != null)
-        {
-            roadTileManager.StartCarCrashSequence();
-        }
-        else
-        {
-            Debug.LogWarning("[MainMenuManager] roadTileManager is NULL, cannot start crash sequence.");
-        }
+        if (quitGameLeftMouseObject != null)
+            quitGameLeftMouseObject.SetActive(false);
 
-        StartCooldown();
+        if (quitGameRightMouseObject != null)
+            quitGameRightMouseObject.SetActive(false);
+
+        currentPrompt = PromptType.None;
     }
 
     private void OpenSecondary()
@@ -527,7 +581,7 @@ public class MainMenuManager : MonoBehaviour
         SetPanels(mainActive: true);
 
         SetCrosshairsVisible(true);
-        SetCrosshairMode(interactable: false);
+        SetCrosshairMode(false);
         SetCursorLocked(true);
 
         isHovering = false;
@@ -584,5 +638,11 @@ public class MainMenuManager : MonoBehaviour
         Color c = graphic.color;
         c.a = alpha;
         graphic.color = c;
+    }
+
+    private void Log(string message)
+    {
+        if (enableDebugLogs)
+            Debug.Log($"[MainMenuManager] {message}");
     }
 }

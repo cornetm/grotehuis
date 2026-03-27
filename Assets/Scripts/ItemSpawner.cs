@@ -13,9 +13,25 @@ public class ItemSpawner : MonoBehaviour
     public float yOffset = 0.5f;
     public bool randomRotation = true;
 
+    public enum SpawnType
+    {
+        World,
+        Drawer
+    }
+
+    [Header("Spawn Mode")]
+    public SpawnType spawnType;
+
+    // 🔥 NIEUW
+    [Header("Drawer Settings")]
+    public Transform drawerTransform;
+
+    [Header("Spawn Chances (%)")]
+    [Range(0, 100)] public float chanceOneItem = 60f;
+    [Range(0, 100)] public float chanceTwoItems = 25f;
+
     private Transform itemsParent;
 
-    // 🔹 Max 2 items per spawnpoint
     private int[] spawnCounts;
     private const int maxPerSpawnPoint = 2;
 
@@ -69,7 +85,7 @@ public class ItemSpawner : MonoBehaviour
         {
             int randomIndex = Random.Range(0, spawnPoints.Length);
 
-            if (spawnCounts[randomIndex] < maxPerSpawnPoint)
+            if (spawnCounts[randomIndex] == 0)
             {
                 spawnIndex = randomIndex;
                 break;
@@ -81,47 +97,81 @@ public class ItemSpawner : MonoBehaviour
         if (spawnIndex == -1)
             return false;
 
-        spawnCounts[spawnIndex]++;
-
         Transform spawnPoint = spawnPoints[spawnIndex];
 
-        int prefabIndex = Random.Range(0, itemPrefabs.Length);
-        GameObject prefab = itemPrefabs[prefabIndex];
+        float roll = Random.Range(0f, 100f);
 
-        Vector3 offset = new Vector3(
-            Random.Range(-0.3f, 0.3f),
-            0,
-            Random.Range(-0.3f, 0.3f)
-        );
+        int itemsToSpawn = 0;
 
-        Vector3 pos = spawnPoint.position + new Vector3(0, yOffset, 0) + offset;
+        if (roll <= chanceTwoItems)
+            itemsToSpawn = 2;
+        else if (roll <= chanceTwoItems + chanceOneItem)
+            itemsToSpawn = 1;
+        else
+            itemsToSpawn = 0;
 
-        Quaternion rot = randomRotation
-            ? Quaternion.Euler(
-                Random.Range(0f, 360f),
-                Random.Range(0f, 360f),
-                Random.Range(0f, 360f)
-              )
-            : spawnPoint.rotation;
+        if (itemsToSpawn == 0)
+        {
+            spawnCounts[spawnIndex] = maxPerSpawnPoint;
+            return true;
+        }
 
-        GameObject spawned = Instantiate(prefab, pos, rot, itemsParent);
+        for (int i = 0; i < itemsToSpawn; i++)
+        {
+            spawnCounts[spawnIndex]++;
 
-        PrefabReferenceAuto prefabRef = spawned.GetComponent<PrefabReferenceAuto>();
-        if (prefabRef == null)
-            prefabRef = spawned.AddComponent<PrefabReferenceAuto>();
+            int prefabIndex = Random.Range(0, itemPrefabs.Length);
+            GameObject prefab = itemPrefabs[prefabIndex];
 
-        prefabRef.prefab = prefab;
+            Vector3 offset = new Vector3(
+                Random.Range(-0.3f, 0.3f),
+                0,
+                Random.Range(-0.3f, 0.3f)
+            );
 
-        if (itemIcons.Length > prefabIndex)
-            prefabRef.icon = itemIcons[prefabIndex];
+            Vector3 pos = spawnPoint.position + new Vector3(0, yOffset, 0) + offset;
 
-        if (!spawned.CompareTag("Interaction"))
-            spawned.tag = "Interaction";
+            Quaternion rot = randomRotation
+                ? Quaternion.Euler(
+                    Random.Range(0f, 360f),
+                    Random.Range(0f, 360f),
+                    Random.Range(0f, 360f)
+                  )
+                : spawnPoint.rotation;
+
+            // 🔥 HIER IS DE FIX
+            Transform parentToUse = itemsParent;
+
+            if (spawnType == SpawnType.Drawer)
+            {
+                parentToUse = drawerTransform != null ? drawerTransform : spawnPoint;
+            }
+
+            GameObject spawned = Instantiate(prefab, pos, rot, parentToUse);
+
+            if (spawnType == SpawnType.Drawer)
+            {
+                Rigidbody rb = spawned.GetComponent<Rigidbody>();
+                if (rb != null)
+                    rb.isKinematic = true;
+            }
+
+            PrefabReferenceAuto prefabRef = spawned.GetComponent<PrefabReferenceAuto>();
+            if (prefabRef == null)
+                prefabRef = spawned.AddComponent<PrefabReferenceAuto>();
+
+            prefabRef.prefab = prefab;
+
+            if (itemIcons.Length > prefabIndex)
+                prefabRef.icon = itemIcons[prefabIndex];
+
+            if (!spawned.CompareTag("Interaction"))
+                spawned.tag = "Interaction";
+        }
 
         return true;
     }
 
-    // ================= DROPPED ITEM =================
     public GameObject SpawnDroppedItem(GameObject prefab, Vector3 position, bool randomRotationForDrop = true)
     {
         if (prefab == null) return null;
@@ -142,7 +192,6 @@ public class ItemSpawner : MonoBehaviour
 
         prefabRef.prefab = prefab;
 
-        // 🔥 FIX: gebruik prefab default icon (NIET null maken)
         PrefabReferenceAuto prefabData = prefab.GetComponent<PrefabReferenceAuto>();
         if (prefabData != null)
             prefabRef.icon = prefabData.icon;

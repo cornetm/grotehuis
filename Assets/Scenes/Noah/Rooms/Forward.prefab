@@ -1657,7 +1657,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: kroonluchter (2)
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7926249976550753434, guid: 4d96dbe9c35c91d49bfd5d521bddf130, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -3384,7 +3385,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: kroonluchter (1)
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7926249976550753434, guid: 4d96dbe9c35c91d49bfd5d521bddf130, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

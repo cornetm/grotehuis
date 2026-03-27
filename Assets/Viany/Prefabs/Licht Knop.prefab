@@ -48,7 +48,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EditorLightSwitch
   isOn: 1
-  targets: []
+  targets:
+  - {fileID: 0}
+  - {fileID: 0}
   switchHandle: {fileID: 9064733203202281281}
 --- !u!33 &3282707022712300026
 MeshFilter:

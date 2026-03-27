@@ -143,6 +143,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: magnetron
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 61dcc95bf742c00468d2103a4bf170f6, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 7071182760956848314, guid: 61dcc95bf742c00468d2103a4bf170f6, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

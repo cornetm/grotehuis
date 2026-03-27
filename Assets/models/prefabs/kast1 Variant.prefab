@@ -261,6 +261,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: kast1 Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 8772704746128277340, guid: 16334db38f9f4ba4a9bb80131a88a958, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -289,9 +293,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8772704746128277340, guid: 16334db38f9f4ba4a9bb80131a88a958, type: 3}
       insertIndex: -1
       addedObject: {fileID: -4062264759555391525}
-    - targetCorrespondingSourceObject: {fileID: 8772704746128277340, guid: 16334db38f9f4ba4a9bb80131a88a958, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: -5862853680555135499}
     - targetCorrespondingSourceObject: {fileID: 984584263070482973, guid: 16334db38f9f4ba4a9bb80131a88a958, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4863730072826156965}
@@ -364,11 +365,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cd5a3fdf0b289f4ba65e92e065d9c8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OpenDOor
+  doorStateType: 0
   doorvariant: 2
   isOpen: 0
   openAngle: 90
   openDistance: 0.75
   smoothSpeed: 6
+  handle1: {fileID: 0}
+  handle2: {fileID: 0}
+  handle3: {fileID: 0}
+  lamp1: {fileID: 0}
+  lamp2: {fileID: 0}
+  lamp3: {fileID: 0}
 --- !u!65 &4423969644693205659
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -425,11 +433,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cd5a3fdf0b289f4ba65e92e065d9c8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OpenDOor
+  doorStateType: 0
   doorvariant: 2
   isOpen: 0
   openAngle: 90
   openDistance: 0.75
   smoothSpeed: 6
+  handle1: {fileID: 0}
+  handle2: {fileID: 0}
+  handle3: {fileID: 0}
+  lamp1: {fileID: 0}
+  lamp2: {fileID: 0}
+  lamp3: {fileID: 0}
 --- !u!65 &2952439402975880990
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -561,33 +576,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2, y: 0.1, z: 1.15}
   m_Center: {x: 0, y: 0.79, z: 0.56}
---- !u!54 &-5862853680555135499
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1442321651773632183}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!4 &2256293835860751373 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8283589556610770406, guid: 16334db38f9f4ba4a9bb80131a88a958, type: 3}
@@ -649,11 +637,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cd5a3fdf0b289f4ba65e92e065d9c8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OpenDOor
+  doorStateType: 0
   doorvariant: 0
   isOpen: 0
   openAngle: 90
   openDistance: 0.5
   smoothSpeed: 6
+  handle1: {fileID: 0}
+  handle2: {fileID: 0}
+  handle3: {fileID: 0}
+  lamp1: {fileID: 0}
+  lamp2: {fileID: 0}
+  lamp3: {fileID: 0}
 --- !u!1 &7784987608220537347 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 122471720463631336, guid: 16334db38f9f4ba4a9bb80131a88a958, type: 3}
@@ -710,8 +705,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cd5a3fdf0b289f4ba65e92e065d9c8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OpenDOor
+  doorStateType: 0
   doorvariant: 1
   isOpen: 0
   openAngle: 90
   openDistance: 0.5
   smoothSpeed: 6
+  handle1: {fileID: 0}
+  handle2: {fileID: 0}
+  handle3: {fileID: 0}
+  lamp1: {fileID: 0}
+  lamp2: {fileID: 0}
+  lamp3: {fileID: 0}

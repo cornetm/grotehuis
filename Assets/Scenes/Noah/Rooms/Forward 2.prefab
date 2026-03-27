@@ -1822,6 +1822,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Bank (7)
       objectReference: {fileID: 0}
+    - target: {fileID: 1188789722213778837, guid: d3c8908b039ed394297ea9038a8ffd84, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7768787062812070133, guid: d3c8908b039ed394297ea9038a8ffd84, type: 3}
       propertyPath: m_LocalPosition.x
       value: 13.08
@@ -6014,6 +6018,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Piano
       objectReference: {fileID: 0}
+    - target: {fileID: 1274899412263650676, guid: 0bfdafdf39531654b9fafe91bae1dec5, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5648542401407439349, guid: 0bfdafdf39531654b9fafe91bae1dec5, type: 3}
       propertyPath: m_LocalPosition.x
       value: 12.344254
@@ -6711,6 +6719,10 @@ PrefabInstance:
     - target: {fileID: 6345980883007991215, guid: 329e204ff166c304bbccd1d376708096, type: 3}
       propertyPath: m_Name
       value: Telefoon (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6345980883007991215, guid: 329e204ff166c304bbccd1d376708096, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8783,9 +8795,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 517332857136906175}
     m_Modifications:
+    - target: {fileID: 1802443466718448591, guid: 880644f67db486a4fa88c7fe16deace8, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4373383522733288865, guid: 880644f67db486a4fa88c7fe16deace8, type: 3}
       propertyPath: m_Name
       value: Globe
+      objectReference: {fileID: 0}
+    - target: {fileID: 4373383522733288865, guid: 880644f67db486a4fa88c7fe16deace8, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6766944849939754510, guid: 880644f67db486a4fa88c7fe16deace8, type: 3}
       propertyPath: m_LocalPosition.x
@@ -10124,6 +10144,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Televisie
       objectReference: {fileID: 0}
+    - target: {fileID: 2958429524006714378, guid: 4262cfe58ac79644f8022ce4bc61b101, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10294,6 +10318,10 @@ PrefabInstance:
     - target: {fileID: 5456956784248223106, guid: 49648160d3a588e438ed281977eca78d, type: 3}
       propertyPath: m_Name
       value: houten stoel (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5456956784248223106, guid: 49648160d3a588e438ed281977eca78d, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -11345,11 +11373,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cd5a3fdf0b289f4ba65e92e065d9c8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OpenDOor
+  doorStateType: 0
   doorvariant: 1
   isOpen: 0
   openAngle: -90
   openDistance: 0.5
   smoothSpeed: 6
+  handle1: {fileID: 0}
+  handle2: {fileID: 0}
+  handle3: {fileID: 0}
+  lamp1: {fileID: 0}
+  lamp2: {fileID: 0}
+  lamp3: {fileID: 0}
 --- !u!4 &5764744298764508712 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3710069833261467550, guid: 395ee9820e11d8345a7fd3f5b5bdb48b, type: 3}
@@ -11539,6 +11574,10 @@ PrefabInstance:
     - target: {fileID: 5739377055534882521, guid: 13f6f6ab33bbd2d4fa1c4d14bb9e1538, type: 3}
       propertyPath: m_Name
       value: Verhuis Doos (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5739377055534882521, guid: 13f6f6ab33bbd2d4fa1c4d14bb9e1538, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 6740044771176739912, guid: 13f6f6ab33bbd2d4fa1c4d14bb9e1538, type: 3}
       propertyPath: m_LocalPosition.x
@@ -11736,7 +11775,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1517889968394338080, guid: 1c96cc0412083d649881613f5cbd7ad2, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.49
+      value: 1.134
       objectReference: {fileID: 0}
     - target: {fileID: 1517889968394338080, guid: 1c96cc0412083d649881613f5cbd7ad2, type: 3}
       propertyPath: m_LocalPosition.z
@@ -11897,6 +11936,10 @@ PrefabInstance:
     - target: {fileID: 6345980883007991215, guid: 329e204ff166c304bbccd1d376708096, type: 3}
       propertyPath: m_Name
       value: Telefoon
+      objectReference: {fileID: 0}
+    - target: {fileID: 6345980883007991215, guid: 329e204ff166c304bbccd1d376708096, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -12639,6 +12682,10 @@ PrefabInstance:
     - target: {fileID: 8154454096946144591, guid: 25c1799fd11541e4287a2b102e7c5dad, type: 3}
       propertyPath: m_Name
       value: stoel
+      objectReference: {fileID: 0}
+    - target: {fileID: 8154454096946144591, guid: 25c1799fd11541e4287a2b102e7c5dad, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8818505882011992053, guid: 25c1799fd11541e4287a2b102e7c5dad, type: 3}
       propertyPath: m_LocalScale.x
@@ -13420,6 +13467,10 @@ PrefabInstance:
     - target: {fileID: 1901206093355106296, guid: 1e6e9d8a00ad33347a9e7dbe2b5fbcf3, type: 3}
       propertyPath: m_Name
       value: Piano Kruk
+      objectReference: {fileID: 0}
+    - target: {fileID: 1901206093355106296, guid: 1e6e9d8a00ad33347a9e7dbe2b5fbcf3, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2951003155892752983, guid: 1e6e9d8a00ad33347a9e7dbe2b5fbcf3, type: 3}
       propertyPath: m_LocalPosition.x

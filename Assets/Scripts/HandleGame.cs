@@ -23,8 +23,6 @@ public class HandleGame : MonoBehaviour
     void Start()
     {
         startRotation = transform.localRotation;
-
-        // 180 graden omlaag op X-as
         targetRotation = startRotation * Quaternion.Euler(0f, 180f, 0f);
     }
 
@@ -36,14 +34,12 @@ public class HandleGame : MonoBehaviour
             {
                 isUsed = true;
 
-                // collider uit zodat geen interactie meer mogelijk is
                 Collider col = GetComponent<Collider>();
                 if (col != null)
                     col.enabled = false;
             }
         }
 
-        // Smooth animatie (ook nadat hij geactiveerd is)
         if (isUsed)
         {
             transform.localRotation = Quaternion.Slerp(
@@ -68,5 +64,11 @@ public class HandleGame : MonoBehaviour
         }
 
         return false;
+    }
+
+    // 🔹 Getter voor deur
+    public bool IsUsed()
+    {
+        return isUsed;
     }
 }

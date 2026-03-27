@@ -2,7 +2,16 @@
 
 public class OpenDOor : MonoBehaviour
 {
-    [Header("Door")]
+    [Header("Door Type")]
+    public DoorState doorStateType;
+
+    public enum DoorState
+    {
+        NormalDoor,
+        ClosedDoor
+    }
+
+    [Header("Door Variant")]
     public DoorVariant doorvariant;
 
     public enum DoorVariant
@@ -19,6 +28,16 @@ public class OpenDOor : MonoBehaviour
     public float openAngle = 90f;
     public float openDistance = 0.5f;
     public float smoothSpeed = 6f;
+
+    [Header("Handles (slepen in Inspector)")]
+    public HandleGame handle1;
+    public HandleGame handle2;
+    public HandleGame handle3;
+
+    [Header("Lampjes (slepen in Inspector)")]
+    public Light lamp1;
+    public Light lamp2;
+    public Light lamp3;
 
     private Quaternion closedRot;
     private Quaternion openRot;
@@ -47,32 +66,53 @@ public class OpenDOor : MonoBehaviour
                 break;
 
             case DoorVariant.Lade:
-                // ✅ FIX: alleen Z-as beweging (voor/achter)
                 openPos = closedPos + transform.localRotation * Vector3.forward * openDistance;
                 break;
         }
     }
 
-    public void ToggleDoor()
-    {
-        isOpen = !isOpen;
-    }
-
     void Update()
     {
+        if (doorStateType == DoorState.ClosedDoor)
+        {
+            // Lampjes koppelen aan hendels
+            if (handle1 != null && lamp1 != null)
+                lamp1.enabled = handle1.IsUsed();
+            if (handle2 != null && lamp2 != null)
+                lamp2.enabled = handle2.IsUsed();
+            if (handle3 != null && lamp3 != null)
+                lamp3.enabled = handle3.IsUsed();
+
+            // Alle lampjes aan → deur kan openen
+            if (!isOpen)
+            {
+                bool allOn = true;
+
+                if (lamp1 != null && !lamp1.enabled) allOn = false;
+                if (lamp2 != null && !lamp2.enabled) allOn = false;
+                if (lamp3 != null && !lamp3.enabled) allOn = false;
+
+                if (allOn)
+                    isOpen = true;
+            }
+        }
+
+        // Smooth animatie
         if (doorvariant == DoorVariant.Lade)
         {
             Vector3 targetPos = isOpen ? openPos : closedPos;
-
-            transform.localPosition =
-                Vector3.Lerp(transform.localPosition, targetPos, Time.deltaTime * smoothSpeed);
+            transform.localPosition = Vector3.Lerp(transform.localPosition, targetPos, Time.deltaTime * smoothSpeed);
         }
         else
         {
             Quaternion targetRot = isOpen ? openRot : closedRot;
-
-            transform.localRotation =
-                Quaternion.Slerp(transform.localRotation, targetRot, Time.deltaTime * smoothSpeed);
+            transform.localRotation = Quaternion.Slerp(transform.localRotation, targetRot, Time.deltaTime * smoothSpeed);
         }
+    }
+
+    public void ToggleDoor()
+    {
+        if (doorStateType == DoorState.NormalDoor)
+            isOpen = !isOpen;
     }
 }

@@ -59,7 +59,7 @@ public class StartTrigger : MonoBehaviour
             // 💡 LIGHT AANZETTEN
             if (startLight != null)
             {
-                startLight.intensity = 0.1f;
+                startLight.intensity = 0.2f;
             }
         }
     }

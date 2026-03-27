@@ -12,24 +12,23 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
+  - _DISABLE_SSR
   - _DISABLE_SSR_TRANSPARENT
-  - _ENABLE_FOG_ON_TRANSPARENT
   - _MASKMAP
   - _NORMALMAP
   - _NORMALMAP_TANGENT_SPACE
-  - _SURFACE_TYPE_TRANSPARENT
-  - _TRANSPARENT_WRITES_MOTION_VEC
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
-  stringTagMap:
-    RenderType: Transparent
+  m_CustomRenderQueue: 2225
+  stringTagMap: {}
   disabledShaderPasses:
   - RayTracingPrepass
   - MOTIONVECTORS
   - TransparentDepthPrepass
+  - TransparentDepthPostpass
+  - TransparentBackface
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -39,7 +38,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseColorMap:
-        m_Texture: {fileID: 2800000, guid: ae2ce45f7c928c941bf13578e7566177, type: 3}
+        m_Texture: {fileID: 2800000, guid: 006e5f629139d8f49b001689e0b1c251, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BentNormalMap:
@@ -75,15 +74,15 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: ae2ce45f7c928c941bf13578e7566177, type: 3}
+        m_Texture: {fileID: 2800000, guid: 006e5f629139d8f49b001689e0b1c251, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MaskMap:
-        m_Texture: {fileID: 2800000, guid: bf6f7bcd211dfc04ebb195e1a90a1ce1, type: 3}
+        m_Texture: {fileID: 2800000, guid: 72e64193a305ead4c8649de3961efc60, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: c369ae07ad6f9a744918d3fc4a7b65ef, type: 3}
+        m_Texture: {fileID: 2800000, guid: 478dbdd63dedd434eaabf58af3a1cdeb, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMapOS:
@@ -137,12 +136,12 @@ Material:
     - _ATDistance: 1
     - _AddPrecomputedVelocity: 0
     - _AlbedoAffectEmissive: 0
-    - _AlphaCutoff: 0
+    - _AlphaCutoff: 0.52
     - _AlphaCutoffEnable: 0
-    - _AlphaCutoffPostpass: 1
-    - _AlphaCutoffPrepass: 0.5
-    - _AlphaCutoffShadow: 0.5
-    - _AlphaDstBlend: 10
+    - _AlphaCutoffPostpass: 0
+    - _AlphaCutoffPrepass: 0.807
+    - _AlphaCutoffShadow: 0.821
+    - _AlphaDstBlend: 0
     - _AlphaRemapMax: 1
     - _AlphaRemapMin: 0
     - _AlphaSrcBlend: 1
@@ -151,7 +150,7 @@ Material:
     - _CoatMask: 0
     - _CullMode: 2
     - _CullModeForward: 2
-    - _Cutoff: 0
+    - _Cutoff: 0.52
     - _DepthOffsetEnable: 0
     - _DetailAlbedoScale: 1
     - _DetailNormalScale: 1
@@ -164,8 +163,8 @@ Material:
     - _DoubleSidedEnable: 0
     - _DoubleSidedGIMode: 0
     - _DoubleSidedNormalMode: 1
-    - _DstBlend: 10
-    - _DstBlend2: 10
+    - _DstBlend: 0
+    - _DstBlend2: 0
     - _EmissiveColorMode: 1
     - _EmissiveExposureWeight: 0
     - _EmissiveIntensity: 100
@@ -204,13 +203,13 @@ Material:
     - _PPDPrimitiveWidth: 1
     - _PerPixelSorting: 0
     - _RayTracing: 0
-    - _ReceivesSSR: 1
+    - _ReceivesSSR: 0
     - _ReceivesSSRTransparent: 0
     - _RefractionModel: 0
     - _Smoothness: 0.5
     - _SmoothnessRemapMax: 1
     - _SmoothnessRemapMin: 0
-    - _SpecularAAScreenSpaceVariance: 0.1
+    - _SpecularAAScreenSpaceVariance: 0.875
     - _SpecularAAThreshold: 0.2
     - _SpecularOcclusionMode: 1
     - _SrcBlend: 1
@@ -224,7 +223,7 @@ Material:
     - _StencilWriteMaskMV: 41
     - _SubsurfaceMask: 1
     - _SupportDecals: 1
-    - _SurfaceType: 1
+    - _SurfaceType: 0
     - _TexWorldScale: 1
     - _TexWorldScaleEmissive: 1
     - _Thickness: 1
@@ -233,7 +232,7 @@ Material:
     - _TransparentBackfaceEnable: 1
     - _TransparentCullMode: 2
     - _TransparentDepthPostpassEnable: 1
-    - _TransparentDepthPrepassEnable: 0
+    - _TransparentDepthPrepassEnable: 1
     - _TransparentSortPriority: 0
     - _TransparentWritingMotionVec: 1
     - _TransparentZWrite: 1
@@ -242,7 +241,7 @@ Material:
     - _UVEmissive: 0
     - _UseEmissiveIntensity: 1
     - _UseShadowThreshold: 0
-    - _ZTestDepthEqualForOpaque: 4
+    - _ZTestDepthEqualForOpaque: 3
     - _ZTestGBuffer: 4
     - _ZTestTransparent: 4
     - _ZWrite: 1

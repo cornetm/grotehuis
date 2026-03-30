@@ -23,13 +23,7 @@ public class PortraitMonster : MonoBehaviour
 
     void Start()
     {
-        if (mainCamera == null)
-        {
-            mainCamera = Camera.main;
-
-            if (mainCamera == null)
-                mainCamera = FindFirstObjectByType<Camera>();
-        }
+        FindCamera(); // 🔥 meteen proberen
 
         normalPainting.SetActive(true);
         scaryPainting.SetActive(false);
@@ -37,9 +31,34 @@ public class PortraitMonster : MonoBehaviour
 
     void Update()
     {
-        if (mainCamera == null) return;
+        // 🔥 blijft zoeken als camera nog niet gevonden is
+        if (mainCamera == null)
+        {
+            FindCamera();
+            return;
+        }
 
         HandleLookDetection();
+    }
+
+    // 🔥 NIEUWE METHOD
+    void FindCamera()
+    {
+        if (mainCamera != null) return;
+
+        // 1. Jouw FPS camera (beste optie)
+        if (FirstPersonCamera.Instance != null)
+        {
+            mainCamera = FirstPersonCamera.Instance.GetComponent<Camera>();
+            if (mainCamera != null) return;
+        }
+
+        // 2. MainCamera tag
+        mainCamera = Camera.main;
+        if (mainCamera != null) return;
+
+        // 3. Fallback
+        mainCamera = FindFirstObjectByType<Camera>();
     }
 
     void HandleLookDetection()

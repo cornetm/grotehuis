@@ -53,7 +53,7 @@ MonoBehaviour:
   itemIcons: []
   spawnPoints:
   - {fileID: 2047883232583680490}
-  yOffset: 0.5
+  yOffset: 0
   randomRotation: 1
   spawnType: 1
   drawerTransform: {fileID: 2047883232583680490}
@@ -171,7 +171,7 @@ MonoBehaviour:
   itemIcons: []
   spawnPoints:
   - {fileID: 4213119847309897143}
-  yOffset: 0.5
+  yOffset: 0
   randomRotation: 1
   spawnType: 1
   drawerTransform: {fileID: 4213119847309897143}
@@ -377,6 +377,7 @@ MonoBehaviour:
   lamp1: {fileID: 0}
   lamp2: {fileID: 0}
   lamp3: {fileID: 0}
+  luciferLight: {fileID: 0}
 --- !u!65 &4423969644693205659
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -445,6 +446,7 @@ MonoBehaviour:
   lamp1: {fileID: 0}
   lamp2: {fileID: 0}
   lamp3: {fileID: 0}
+  luciferLight: {fileID: 0}
 --- !u!65 &2952439402975880990
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -649,6 +651,7 @@ MonoBehaviour:
   lamp1: {fileID: 0}
   lamp2: {fileID: 0}
   lamp3: {fileID: 0}
+  luciferLight: {fileID: 0}
 --- !u!1 &7784987608220537347 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 122471720463631336, guid: 16334db38f9f4ba4a9bb80131a88a958, type: 3}
@@ -717,3 +720,4 @@ MonoBehaviour:
   lamp1: {fileID: 0}
   lamp2: {fileID: 0}
   lamp3: {fileID: 0}
+  luciferLight: {fileID: 0}

@@ -399,11 +399,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cd5a3fdf0b289f4ba65e92e065d9c8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OpenDOor
+  doorStateType: 0
   doorvariant: 0
   isOpen: 1
   openAngle: 75
   openDistance: 0.5
   smoothSpeed: 6
+  handle1: {fileID: 0}
+  handle2: {fileID: 0}
+  handle3: {fileID: 0}
+  lamp1: {fileID: 0}
+  lamp2: {fileID: 0}
+  lamp3: {fileID: 0}
+  luciferLight: {fileID: 0}
 --- !u!1 &2197067691195716011 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8416272007918961125, guid: aaa7dfba890dd01419da95470b74a8a8, type: 3}
@@ -421,11 +429,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cd5a3fdf0b289f4ba65e92e065d9c8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OpenDOor
+  doorStateType: 0
   doorvariant: 0
   isOpen: 0
   openAngle: 125
   openDistance: 0.5
   smoothSpeed: 6
+  handle1: {fileID: 0}
+  handle2: {fileID: 0}
+  handle3: {fileID: 0}
+  lamp1: {fileID: 0}
+  lamp2: {fileID: 0}
+  lamp3: {fileID: 0}
+  luciferLight: {fileID: 0}
 --- !u!65 &5686470467708527675
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -526,8 +542,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cd5a3fdf0b289f4ba65e92e065d9c8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OpenDOor
+  doorStateType: 0
   doorvariant: 2
   isOpen: 0
   openAngle: 90
   openDistance: 0.5
   smoothSpeed: 6
+  handle1: {fileID: 0}
+  handle2: {fileID: 0}
+  handle3: {fileID: 0}
+  lamp1: {fileID: 0}
+  lamp2: {fileID: 0}
+  lamp3: {fileID: 0}
+  luciferLight: {fileID: 0}

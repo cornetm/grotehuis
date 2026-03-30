@@ -12,12 +12,13 @@ GameObject:
   - component: {fileID: 2476307864333706828}
   - component: {fileID: 1355212451512637065}
   - component: {fileID: -7829779669573999320}
+  - component: {fileID: -2919701764500351211}
   m_Layer: 0
   m_Name: Televisie
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &2686677705538576810
 Transform:
@@ -112,3 +113,30 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.6, y: 0.4094567, z: 0.48813254}
   m_Center: {x: -0, y: 0.20472835, z: -0.06478724}
+--- !u!54 &-2919701764500351211
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2958429524006714378}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0

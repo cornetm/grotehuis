@@ -2585,7 +2585,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   alertRadius: 30
-  chaseRadius: 12.5
+  chaseRadius: 7.5
   viewHeightOffset: 0
   animator: {fileID: 9078314007705426820}
   alertTrigger: Alert

@@ -648,7 +648,7 @@ MonoBehaviour:
   isCrouching: 0
   isSprinting: 0
   isRunnerMode: 1
-  startDelay: 3
+  startDelay: 0
 --- !u!143 &176199821
 CharacterController:
   m_ObjectHideFlags: 0
@@ -812,6 +812,8 @@ MonoBehaviour:
   playerMovement: {fileID: 176199820}
   characterController: {fileID: 176199821}
   pauseMenuToggle: {fileID: 176199816}
+  firstPersonCamera: {fileID: 1617698980}
+  cameraBobbing: {fileID: 1617698979}
   animatorToDisable: {fileID: 176199826}
   playableDirectorToDisable: {fileID: 176199825}
   signalReceiverToDisable: {fileID: 176199828}
@@ -6177,7 +6179,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1617698972}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fb0338ab99591c64e8e4677d698dcfac, type: 3}
   m_Name: 
@@ -6201,7 +6203,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1617698972}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b0620c6c68e076244810666c1bd3b283, type: 3}
   m_Name: 

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
@@ -8,6 +8,8 @@ public class TimelineToGameplaySwitcher : MonoBehaviour
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private CharacterController characterController;
     [SerializeField] private PauseMenuToggle pauseMenuToggle;
+    [SerializeField] private FirstPersonCamera firstPersonCamera; // ✅ Nieuw
+    [SerializeField] private CameraBobbing cameraBobbing;
 
     [Header("Disable These")]
     [SerializeField] private Animator animatorToDisable;
@@ -35,6 +37,12 @@ public class TimelineToGameplaySwitcher : MonoBehaviour
 
         if (pauseMenuToggle != null)
             pauseMenuToggle.enabled = true;
+
+        if (firstPersonCamera != null)
+            firstPersonCamera.enabled = true; // ✅ FirstPersonCamera aanzetten
+
+        if (cameraBobbing != null)
+            cameraBobbing.enabled = true;
 
         Debug.Log("Switched from timeline/cutscene to gameplay.");
     }

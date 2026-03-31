@@ -28638,6 +28638,7 @@ GameObject:
   - component: {fileID: 670264225}
   - component: {fileID: 670264226}
   - component: {fileID: 670264227}
+  - component: {fileID: 670264228}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -29004,6 +29005,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PauseMenuToggle
   pauseMenu: {fileID: 1005559623}
+--- !u!114 &670264228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 670264215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d175a60714c2a5849a918973c13fcf3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  player: {fileID: 670264219}
+  viewRadius: 35
+  newRadius: 35
 --- !u!4 &670543492 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6243214289522705725, guid: 66838e118a73aa54292455be367a32c4, type: 3}

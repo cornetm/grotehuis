@@ -5,7 +5,7 @@ using System.Collections;
 public class MonsterSpawner : MonoBehaviour
 {
     [Header("Spawn Settings")]
-    public GameObject[] MonsterPrefabs;  // Alle normale monsters
+    public GameObject[] MonsterPrefabs;
     [Range(0, 100)]
     public float SpawnChance = 30f;
 
@@ -13,8 +13,8 @@ public class MonsterSpawner : MonoBehaviour
     public Transform[] SpawnPoints;
 
     [Header("Special Skull Monster")]
-    public GameObject SkullMonsterPrefab;  // Speciaal veld voor doodshoofd
-    public Transform SkullSpawnPoint;      // Speciaal spawnpoint voor doodshoofd
+    public GameObject SkullMonsterPrefab;
+    public Transform SkullSpawnPoint;
 
     [Header("Respawn Boundary (drag your BoxCollider here)")]
     public Collider RoomBoundary;
@@ -25,6 +25,9 @@ public class MonsterSpawner : MonoBehaviour
     private GameObject spawnedMonster;
     private bool hasSpawned = false;
     private Transform monsterParent;
+
+    // ✅ FIX
+    private bool isSkullMonster = false;
 
     void Awake()
     {
@@ -51,6 +54,7 @@ public class MonsterSpawner : MonoBehaviour
         {
             prefabToSpawn = SkullMonsterPrefab;
             spawnPoint = SkullSpawnPoint;
+            isSkullMonster = true; // ✅ FIX
         }
         else if (isForwardRoom && SkullMonsterPrefab != null && SkullSpawnPoint != null && MonsterPrefabs.Length > 0)
         {
@@ -58,23 +62,27 @@ public class MonsterSpawner : MonoBehaviour
             {
                 prefabToSpawn = SkullMonsterPrefab;
                 spawnPoint = SkullSpawnPoint;
+                isSkullMonster = true; // ✅ FIX
             }
             else
             {
                 prefabToSpawn = MonsterPrefabs[Random.Range(0, MonsterPrefabs.Length)];
                 spawnPoint = (SpawnPoints.Length > 0) ? SpawnPoints[Random.Range(0, SpawnPoints.Length)] : transform;
+                isSkullMonster = false; // ✅ FIX
             }
         }
         else if (SkullMonsterPrefab != null && SkullSpawnPoint != null && MonsterPrefabs.Length == 0)
         {
             prefabToSpawn = SkullMonsterPrefab;
             spawnPoint = SkullSpawnPoint;
+            isSkullMonster = true; // ✅ FIX
         }
         else if (MonsterPrefabs.Length > 0)
         {
             if (!force && Random.Range(0f, 100f) > SpawnChance) return;
             prefabToSpawn = MonsterPrefabs[Random.Range(0, MonsterPrefabs.Length)];
             spawnPoint = (SpawnPoints.Length > 0) ? SpawnPoints[Random.Range(0, SpawnPoints.Length)] : transform;
+            isSkullMonster = false; // ✅ FIX
         }
         else
         {
@@ -99,7 +107,19 @@ public class MonsterSpawner : MonoBehaviour
     {
         if (spawnedMonster == null) return;
 
-        Transform chosenPoint = (SpawnPoints.Length > 0) ? SpawnPoints[Random.Range(0, SpawnPoints.Length)] : transform;
+        Transform chosenPoint;
+
+        // ✅ FIX: skull blijft op skull spawnpoint
+        if (isSkullMonster && SkullSpawnPoint != null)
+        {
+            chosenPoint = SkullSpawnPoint;
+        }
+        else
+        {
+            chosenPoint = (SpawnPoints.Length > 0)
+                ? SpawnPoints[Random.Range(0, SpawnPoints.Length)]
+                : transform;
+        }
 
         spawnedMonster.transform.position = chosenPoint.position;
         spawnedMonster.transform.rotation = chosenPoint.rotation;

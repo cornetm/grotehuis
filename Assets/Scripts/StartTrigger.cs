@@ -19,6 +19,9 @@ public class StartTrigger : MonoBehaviour
     [Header("Start Light")]
     public Light startLight;
 
+    // ✅ NIEUW: controleer of het spel gestart is
+    public static bool GameStarted = false;
+
     private bool triggered = false;
 
     void OnTriggerEnter(Collider other)
@@ -61,6 +64,9 @@ public class StartTrigger : MonoBehaviour
             {
                 startLight.intensity = 0.1f;
             }
+
+            // ✅ ZET GAME STARTED → meshrenderer gaat nu werken
+            GameStarted = true;
         }
     }
 }

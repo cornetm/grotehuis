@@ -707,6 +707,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1894530457807390035}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5202146804292150895
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1104573768130397110}
+  m_Layer: 0
+  m_Name: MonsterSpawnpoint (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1104573768130397110
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5202146804292150895}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 2, z: 9.84}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1894530457807390035}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5367124030725268938
 GameObject:
   m_ObjectHideFlags: 0
@@ -1247,6 +1278,7 @@ Transform:
   - {fileID: 7859242553595207315}
   - {fileID: 3835619041641682932}
   - {fileID: 7356769786406149107}
+  - {fileID: 1104573768130397110}
   - {fileID: 7565278134500430007}
   - {fileID: 5256172571015836827}
   - {fileID: 4726754518601899991}
@@ -1366,8 +1398,8 @@ MonoBehaviour:
   SpawnChance: 5
   SpawnPoints:
   - {fileID: 7356769786406149107}
-  SkullMonsterPrefab: {fileID: 0}
-  SkullSpawnPoint: {fileID: 0}
+  SkullMonsterPrefab: {fileID: 4307292652228760917, guid: c1671c7357b252c4783c21eb3cb9697c, type: 3}
+  SkullSpawnPoint: {fileID: 1104573768130397110}
   RoomBoundary: {fileID: 1313073552926942468}
   boundaryActiveTime: 5
   RoomHasMonster: 0

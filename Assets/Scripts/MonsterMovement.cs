@@ -176,20 +176,40 @@ public class MonsterSimpleAI : MonoBehaviour
     {
         if (player == null) return false;
 
+        // ===== NIEUWE LOGICA =====
+        PlayerMovement pm = player.GetComponent<PlayerMovement>();
+        if (pm != null)
+        {
+            // Crouched → nooit detecteren
+            if (pm.isCrouching)
+                return false;
+
+            // Check beweging
+            if (pm.controller != null)
+            {
+                Vector3 velocity = pm.controller.velocity;
+                velocity.y = 0;
+
+                bool isMoving = velocity.magnitude > 0.1f;
+
+                // Niet crouched + stilstaand → niet detecteren
+                if (!isMoving)
+                    return false;
+            }
+        }
+        // =========================
+
         Vector3 eyePos = transform.position + Vector3.up * viewHeightOffset;
 
-        // Automatische spelerhoogte
         float playerHeight = 2f;
         Collider col = player.GetComponent<Collider>();
         if (col != null)
             playerHeight = col.bounds.size.y;
 
-        // Horizontale afstand voor radius check
         Vector3 horizontalDir = player.position - eyePos;
         horizontalDir.y = 0;
         if (horizontalDir.magnitude > chaseRadius) return false;
 
-        // Line-of-sight met meerdere verticale raycasts
         int verticalSteps = 3;
         for (int i = 0; i < verticalSteps; i++)
         {
@@ -199,18 +219,15 @@ public class MonsterSimpleAI : MonoBehaviour
             if (Physics.Linecast(eyePos, target, out RaycastHit hit))
             {
                 if (!hit.collider.isTrigger && hit.collider.CompareTag("Room"))
-                    continue; // muur blokkeert
+                    continue;
             }
 
-            return true; // één ray kan speler raken
+            return true;
         }
 
         return false;
     }
 
-    // -------------------------
-    // Gizmos voor inspectie
-    // -------------------------
     void OnDrawGizmosSelected()
     {
         if (!Application.isPlaying) return;

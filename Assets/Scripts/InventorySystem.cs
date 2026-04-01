@@ -25,7 +25,7 @@ public class InventorySystem : MonoBehaviour
     [Header("Throw Settings")]
     public float chargeSpeed = 1.5f;
     public float maxThrowForce = 20f;
-    public Camera playerCamera; // 📌 Voeg hier je Camera toe in de inspector
+    public Camera playerCamera; // Voeg hier je Camera toe in de inspector
 
     [Header("Spawner")]
     public ItemSpawner itemSpawner;
@@ -198,6 +198,9 @@ public class InventorySystem : MonoBehaviour
         {
             Vector3 throwDir = playerCamera.transform.forward.normalized;
             rb.AddForce(throwDir * force, ForceMode.Impulse);
+
+            // 📌 Voeg tag toe zodat de schedel herkent dat het een gegooid item is
+            obj.tag = "Throwable";
         }
 
         RemoveSlot(index);

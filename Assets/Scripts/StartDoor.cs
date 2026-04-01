@@ -7,12 +7,6 @@ public class StartDoor : MonoBehaviour
     public float openSpeed = 3f;
 
     private bool closeDoor = false;
-    private Quaternion targetRotation;
-
-    void Start()
-    {
-        targetRotation = transform.rotation;
-    }
 
     void Update()
     {
@@ -30,6 +24,12 @@ public class StartDoor : MonoBehaviour
                 Time.deltaTime * openSpeed
             );
         }
+    }
+
+    // ✅ Publieke methode om deur te sluiten
+    public void CloseDoor()
+    {
+        closeDoor = true;
     }
 
     // 👉 trigger door sluiting

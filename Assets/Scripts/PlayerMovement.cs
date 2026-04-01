@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
@@ -42,6 +43,24 @@ public class PlayerMovement : MonoBehaviour
     [Header("Start Object")]
     public GameObject startObject;
 
+    [Header("Delete Object")]
+    public GameObject deleteObject;
+
+    [Header("Objects to Remove on Delete")]
+    public List<GameObject> objectsToDisable = new List<GameObject>();
+
+    [Header("Objects to Enable on Delete")]
+    public List<GameObject> objectsToEnable = new List<GameObject>();
+
+    [Header("Room Generator")]
+    public RoomGenerator roomGenerator;
+
+    [Header("Start Door")]
+    public StartDoor startDoor;
+
+    [Header("Start Light")]
+    public Light startLight;
+
     [HideInInspector] public CharacterController controller;
     [HideInInspector] public bool isCrouching;
     [HideInInspector] public bool isSprinting;
@@ -58,6 +77,12 @@ public class PlayerMovement : MonoBehaviour
     [Header("Start Delay")]
     public float startDelay = 3f;
     private bool canMove = false;
+
+    private bool triggeredDelete = false;
+    private bool triggeredStart = false;
+
+    // ✅ Nieuwe static bool zodat meshrenderer weet wanneer te activeren
+    public static bool GameStarted = false;
 
     void Start()
     {
@@ -97,12 +122,8 @@ public class PlayerMovement : MonoBehaviour
         if (isRunnerMode)
         {
             float xInput = 0f;
-
-            if (Input.GetKey(KeyCode.A))
-                xInput = -1f;
-
-            if (Input.GetKey(KeyCode.D))
-                xInput = 1f;
+            if (Input.GetKey(KeyCode.A)) xInput = -1f;
+            if (Input.GetKey(KeyCode.D)) xInput = 1f;
 
             Vector3 forward = cameraTransform.forward;
             forward.y = 0;
@@ -141,7 +162,6 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // ================= JUMP + GRAVITY =================
-
         if (controller.isGrounded)
         {
             if (verticalVelocity < 0)
@@ -220,10 +240,54 @@ public class PlayerMovement : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (startObject != null && other.gameObject == startObject)
+        // ================= START OBJECT =================
+        if (!triggeredStart && startObject != null && other.gameObject == startObject)
         {
+            triggeredStart = true;
             isRunnerMode = false;
-            startObject = null; // voorkomt meerdere triggers
+            // ❌ geen GameStarted meer hier
         }
+
+        // ================= DELETE OBJECT =================
+        if (!triggeredDelete && deleteObject != null && other.gameObject == deleteObject)
+        {
+            triggeredDelete = true;
+
+            // Eerst deur sluiten
+            if (startDoor != null)
+                startDoor.CloseDoor();
+
+            // ✅ meshrenderer activeren
+            GameStarted = true;
+
+            // Delay om deur te laten sluiten voordat we alles verwijderen
+            float doorCloseDelay = 1.5f;
+            Invoke(nameof(DeleteObjectsAndStartRoom), doorCloseDelay);
+        }
+    }
+
+    void DeleteObjectsAndStartRoom()
+    {
+        // ❌ Objecten verwijderen
+        foreach (GameObject obj in objectsToDisable)
+        {
+            if (obj != null)
+                Destroy(obj);
+        }
+
+        // 🟢 Objecten inschakelen
+        foreach (GameObject obj in objectsToEnable)
+        {
+            if (obj != null)
+                obj.SetActive(true);
+        }
+
+        // 🚀 Room generator starten
+        if (roomGenerator != null)
+            roomGenerator.BeginGeneration();
+
+        // 💡 Light aanzetten
+        if (startLight != null)
+            startLight.intensity = 0.1f;
     }
 }

@@ -2584,8 +2584,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de5b64b5477bb2a4bb0f9fd01dc95285, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  alertRadius: 30
-  chaseRadius: 7.5
+  alertRadius: 25
+  chaseRadius: 10
   viewHeightOffset: 0
   animator: {fileID: 9078314007705426820}
   alertTrigger: Alert

@@ -2649,6 +2649,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8072713586984959495}
     m_Modifications:
+    - target: {fileID: 2940092681221769801, guid: eef1547dfa3b41b409f908d9cdb8945b, type: 3}
+      propertyPath: m_Intensity
+      value: 0.23873241
+      objectReference: {fileID: 0}
     - target: {fileID: 4738041355579688161, guid: eef1547dfa3b41b409f908d9cdb8945b, type: 3}
       propertyPath: m_Name
       value: TafelLamp
@@ -4346,7 +4350,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2256293835860751373, guid: 86a40cbd0578dd74293c18f4d6a433c2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.2190042
+      value: -3.22
       objectReference: {fileID: 0}
     - target: {fileID: 2256293835860751373, guid: 86a40cbd0578dd74293c18f4d6a433c2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4354,7 +4358,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2256293835860751373, guid: 86a40cbd0578dd74293c18f4d6a433c2, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -14.96
+      value: -14.91
       objectReference: {fileID: 0}
     - target: {fileID: 2256293835860751373, guid: 86a40cbd0578dd74293c18f4d6a433c2, type: 3}
       propertyPath: m_LocalRotation.w

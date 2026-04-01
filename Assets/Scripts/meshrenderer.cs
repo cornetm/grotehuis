@@ -21,7 +21,8 @@ public class meshrenderer : MonoBehaviour
 
     void Update()
     {
-        if (!StartTrigger.GameStarted) return;
+        // ✅ Alleen actief wanneer deleteObject is geraakt
+        if (!PlayerMovement.GameStarted) return;
 
         if (playerCapsule != null)
         {
@@ -38,14 +39,12 @@ public class meshrenderer : MonoBehaviour
 
             float distance = Vector3.Distance(player.position, mr.transform.position);
 
-            if (distance <= viewRadius)
-                mr.enabled = true;
-            else
-                mr.enabled = false;
+            // Mesh aan/uit afhankelijk van viewRadius
+            mr.enabled = distance <= viewRadius;
         }
     }
 
-    // 👇 VISUELE RADIUS (EDITOR)
+    // 👇 Visuele radius (editor)
     void OnDrawGizmos()
     {
         if (player == null) return;

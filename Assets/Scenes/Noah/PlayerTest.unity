@@ -46543,7 +46543,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.15
-  far clip plane: 200
+  far clip plane: 100
   field of view: 65
   orthographic: 0
   orthographic size: 5
@@ -68405,7 +68405,6 @@ GameObject:
   - component: {fileID: 1416187536}
   - component: {fileID: 1416187538}
   - component: {fileID: 1416187537}
-  - component: {fileID: 1416187539}
   m_Layer: 0
   m_Name: Start
   m_TagString: Untagged
@@ -68422,7 +68421,7 @@ Transform:
   m_GameObject: {fileID: 1416187535}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -47.36, y: -5.22, z: -30.7}
+  m_LocalPosition: {x: -48.41, y: -5.22, z: -30.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -68498,34 +68497,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &1416187539
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1416187535}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2312ebedde1982b48909b1a655835019, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  objectsToDisable:
-  - {fileID: 2091688842}
-  - {fileID: 2091688842}
-  - {fileID: 2000338830}
-  - {fileID: 2031362184}
-  - {fileID: 0}
-  - {fileID: 930262698}
-  - {fileID: 130025948}
-  - {fileID: 1390530330}
-  - {fileID: 746639827}
-  - {fileID: 0}
-  objectsToEnable:
-  - {fileID: 0}
-  roomGenerator: {fileID: 565346349}
-  startDoor: {fileID: 1805925928}
-  startLight: {fileID: 0}
 --- !u!1001 &1417574824
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -76520,6 +76491,109 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1619994533}
   m_CullTransparentMesh: 1
+--- !u!1 &1620958717
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1620958718}
+  - component: {fileID: 1620958721}
+  - component: {fileID: 1620958720}
+  m_Layer: 0
+  m_Name: Start (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1620958718
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1620958717}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -77.15, y: -5.22, z: -30.7}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 954297145}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1620958720
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1620958717}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 2, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!23 &1620958721
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1620958717}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 73c176f402d2c2f4d929aa5da7585d17, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!4 &1625261969 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6243214289522705725, guid: 66838e118a73aa54292455be367a32c4, type: 3}
@@ -85099,6 +85173,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5356715665625321613, guid: fc1b032afc6ea1e4da7a5b7bdb701890, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1416187536}
+    - targetCorrespondingSourceObject: {fileID: 5356715665625321613, guid: fc1b032afc6ea1e4da7a5b7bdb701890, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1620958718}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1783755347639187501, guid: fc1b032afc6ea1e4da7a5b7bdb701890, type: 3}
       insertIndex: -1
@@ -96674,6 +96751,7 @@ GameObject:
   - component: {fileID: 2077640097}
   - component: {fileID: 2077640096}
   - component: {fileID: 2077640095}
+  - component: {fileID: 2077640108}
   m_Layer: 0
   m_Name: Player (1)
   m_TagString: Player
@@ -97012,7 +97090,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3dcad4d19e9cd14a94f8cc204515102, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  moveSpeed: 2
+  moveSpeed: 2.5
   sprintMultiplier: 2
   crouchMultiplier: 0.5
   jumpHeight: 3.2
@@ -97031,6 +97109,21 @@ MonoBehaviour:
   runnerStrafeSpeedMultiplier: 0.6
   cameraTransform: {fileID: 1004022843}
   startObject: {fileID: 1416187535}
+  deleteObject: {fileID: 1620958717}
+  objectsToDisable:
+  - {fileID: 2091688842}
+  - {fileID: 2031362184}
+  - {fileID: 930262698}
+  - {fileID: 130025948}
+  - {fileID: 1390530330}
+  - {fileID: 746639827}
+  - {fileID: 2000338830}
+  - {fileID: 918786799}
+  - {fileID: 637523147}
+  objectsToEnable: []
+  roomGenerator: {fileID: 565346349}
+  startDoor: {fileID: 1805925928}
+  startLight: {fileID: 0}
   controller: {fileID: 0}
   isCrouching: 0
   isSprinting: 0
@@ -97137,6 +97230,21 @@ Transform:
   - {fileID: 624805997}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2077640108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077640094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d175a60714c2a5849a918973c13fcf3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::meshrenderer
+  player: {fileID: 2077640107}
+  viewRadius: 45
+  newRadius: 45
 --- !u!1001 &2077997374
 PrefabInstance:
   m_ObjectHideFlags: 0

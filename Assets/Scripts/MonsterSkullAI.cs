@@ -31,7 +31,6 @@ public class MonsterSkullAI : MonoBehaviour
 
     private float eyeContactTimer = 0f;
 
-    // ---------------- JUMPSCARE ADDITIONS (UNCHANGED) ----------------
     [Header("Damage Settings")]
     public int damage = 10;
 
@@ -55,13 +54,16 @@ public class MonsterSkullAI : MonoBehaviour
 
     private float tiltTimer = 0f;
 
+    [Header("Hit by Item Settings")]
+    public float fallDestroyDelay = 2f;
+    private bool hitByItem = false;
+
     void Start()
     {
         if (animator == null)
             animator = GetComponent<Animator>();
 
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-
         if (playerObj != null)
             player = playerObj.transform;
 
@@ -77,12 +79,9 @@ public class MonsterSkullAI : MonoBehaviour
     void Update()
     {
         if (player == null || animator == null) return;
-
-        if (fpsCamera == null)
-            ResolveCamera();
+        if (fpsCamera == null) ResolveCamera();
 
         float distance = Vector3.Distance(transform.position, player.position);
-
         HandleChase(distance);
         HandleEyeContact(distance);
 
@@ -90,55 +89,40 @@ public class MonsterSkullAI : MonoBehaviour
             MoveTowardsPlayer();
     }
 
-    // ---------------- CHASE (UNCHANGED) ----------------
     void HandleChase(float distance)
     {
-        if (!attackTriggered)
-            LookAtPlayer();
+        if (!attackTriggered) LookAtPlayer();
 
         if (distance <= chaseRadius && !attackTriggered)
         {
             attackTriggered = true;
             animator.SetBool(attackBool, true);
-
             StartCoroutine(StartAttackWithDelay());
         }
     }
 
-    // ---------------- EYE CONTACT (RESTORED OLD LOGIC ONLY) ----------------
     void HandleEyeContact(float distance)
     {
         if (fpsCamera == null) return;
 
-        bool lookingAtSkull =
-            distance <= alertRadius &&
-            IsPlayerLookingAtSkull();
-
-        // 🔥 OLD BEHAVIOR: ALWAYS UPDATE
+        bool lookingAtSkull = distance <= alertRadius && IsPlayerLookingAtSkull();
         fpsCamera.SetEyeContact(lookingAtSkull);
 
-        if (!alertTriggered)
+        if (!alertTriggered && lookingAtSkull)
         {
-            if (lookingAtSkull)
+            eyeContactTimer += Time.deltaTime;
+            if (eyeContactTimer >= eyeContactTimeThreshold)
             {
-                eyeContactTimer += Time.deltaTime;
-
-                if (eyeContactTimer >= eyeContactTimeThreshold)
-                {
-                    alertTriggered = true;
-
-                    if (animator != null)
-                        animator.SetTrigger(alertTrigger);
-                }
+                alertTriggered = true;
+                if (animator != null) animator.SetTrigger(alertTrigger);
             }
-            else
-            {
-                eyeContactTimer = 0f;
-            }
+        }
+        else if (!lookingAtSkull)
+        {
+            eyeContactTimer = 0f;
         }
     }
 
-    // ---------------- CAMERA ----------------
     void ResolveCamera()
     {
         if (FirstPersonCamera.Instance != null)
@@ -158,37 +142,23 @@ public class MonsterSkullAI : MonoBehaviour
             fpsCamera = playerCamera.GetComponent<FirstPersonCamera>();
     }
 
-    // ---------------- LOOK ----------------
     bool IsPlayerLookingAtSkull()
     {
         if (playerCamera == null) return false;
-
-        Vector3 toSkull =
-            (transform.position - playerCamera.transform.position).normalized;
-
-        float angle =
-            Vector3.Angle(playerCamera.transform.forward, toSkull);
-
+        Vector3 toSkull = (transform.position - playerCamera.transform.position).normalized;
+        float angle = Vector3.Angle(playerCamera.transform.forward, toSkull);
         return angle <= eyeContactAngle;
     }
 
     void LookAtPlayer()
     {
         if (player == null) return;
-
         Vector3 dir = player.position - transform.position;
         dir.y = 0;
-
         if (dir.sqrMagnitude < 0.001f) return;
-
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            Quaternion.LookRotation(dir),
-            5f * Time.deltaTime
-        );
+        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 5f * Time.deltaTime);
     }
 
-    // ---------------- ATTACK + JUMPSCARE (UNCHANGED) ----------------
     IEnumerator StartAttackWithDelay()
     {
         PlayAttackSoundFromTime(0.5f);
@@ -200,9 +170,7 @@ public class MonsterSkullAI : MonoBehaviour
     {
         if (player == null || controller == null) return;
 
-        Vector3 dir = player.position - transform.position;
-        dir.Normalize();
-
+        Vector3 dir = (player.position - transform.position).normalized;
         Vector3 horizontalVelocity = dir * moveSpeed;
 
         if (controller.isGrounded)
@@ -211,35 +179,37 @@ public class MonsterSkullAI : MonoBehaviour
             verticalVelocity.y += Physics.gravity.y * Time.deltaTime;
 
         controller.Move((horizontalVelocity + verticalVelocity) * Time.deltaTime);
-
         CheckHitPlayer();
 
-        Quaternion lookRot =
-            Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z));
-
-        transform.rotation =
-            Quaternion.Slerp(transform.rotation, lookRot, 5f * Time.deltaTime);
+        Quaternion lookRot = Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z));
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRot, 5f * Time.deltaTime);
     }
 
     void CheckHitPlayer()
     {
         if (player == null) return;
-
         float distance = Vector3.Distance(transform.position, player.position);
-        if (distance < 1.5f)
-            TryHitPlayer(player.gameObject);
+        if (distance < 1.5f) TryHitPlayer(player.gameObject);
     }
 
-    void OnTriggerEnter(Collider other) => TryHitPlayer(other.gameObject);
-    void OnCollisionEnter(Collision collision) => TryHitPlayer(collision.gameObject);
+    void OnTriggerEnter(Collider other)
+    {
+        TryHitPlayer(other.gameObject);
+        TryHitByLayer(other.gameObject);
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        TryHitPlayer(collision.gameObject);
+        TryHitByLayer(collision.gameObject);
+    }
 
     void TryHitPlayer(GameObject other)
     {
         if (!other.CompareTag("Player")) return;
 
         PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
-        if (playerHealth != null)
-            playerHealth.TakeDamage(damage);
+        if (playerHealth != null) playerHealth.TakeDamage(damage);
 
         isAttackingNow = false;
         jumpscareActive = true;
@@ -250,6 +220,32 @@ public class MonsterSkullAI : MonoBehaviour
         StartCoroutine(StayBeforeDestroy(lingerTime));
     }
 
+    void TryHitByLayer(GameObject obj)
+    {
+        if (hitByItem) return;
+
+        // 🔥 React only on objects in layer "Throwable"
+        if (obj.layer == LayerMask.NameToLayer("Throwable"))
+        {
+            hitByItem = true;
+
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb == null)
+            {
+                rb = gameObject.AddComponent<Rigidbody>();
+                rb.mass = 1f;
+            }
+
+            if (animator != null) animator.enabled = false;
+
+            // Make the skull fall down
+            rb.AddForce(Vector3.down * 2f, ForceMode.Impulse);
+
+            // Delete after a delay
+            Destroy(gameObject, fallDestroyDelay);
+        }
+    }
+
     IEnumerator JumpscareFollowCamera()
     {
         tiltTimer = 0f;
@@ -258,34 +254,19 @@ public class MonsterSkullAI : MonoBehaviour
         {
             if (playerCamera != null)
             {
-                Vector3 targetPos =
-                    playerCamera.transform.position +
-                    playerCamera.transform.forward * stopOffset;
+                Vector3 targetPos = playerCamera.transform.position + playerCamera.transform.forward * stopOffset;
+                transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * followSpeed);
 
-                transform.position = Vector3.Lerp(
-                    transform.position,
-                    targetPos,
-                    Time.deltaTime * followSpeed
-                );
-
-                Vector3 lookDir =
-                    playerCamera.transform.position - transform.position;
-
+                Vector3 lookDir = playerCamera.transform.position - transform.position;
                 if (lookDir.sqrMagnitude > 0.001f)
                 {
                     Quaternion baseRot = Quaternion.LookRotation(lookDir);
-
                     tiltTimer += Time.deltaTime * tiltSpeed;
                     float tiltZ = Mathf.Sin(tiltTimer) * tiltAngle;
 
-                    transform.rotation = Quaternion.Euler(
-                        baseRot.eulerAngles.x,
-                        baseRot.eulerAngles.y,
-                        tiltZ
-                    );
+                    transform.rotation = Quaternion.Euler(baseRot.eulerAngles.x, baseRot.eulerAngles.y, tiltZ);
                 }
             }
-
             yield return null;
         }
     }

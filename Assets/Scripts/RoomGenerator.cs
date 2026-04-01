@@ -22,6 +22,9 @@ public class RoomGenerator : MonoBehaviour
     [Header("Start Object")]
     public Transform StartObject;
 
+    [Header("Win Screen")]
+    public GameObject winScreen; // 🆕 sleep hier je winscreen in de inspector
+
     private Transform RoomParent;
     private Transform MonsterParent;
     private List<GameObject> placedRooms = new List<GameObject>();
@@ -32,6 +35,9 @@ public class RoomGenerator : MonoBehaviour
     void Start()
     {
         SetupParents();
+
+        if (winScreen != null)
+            winScreen.SetActive(false); // verberg winscreen bij start
     }
 
     void SetupParents()
@@ -84,10 +90,34 @@ public class RoomGenerator : MonoBehaviour
         trigger.RoomGenerator = this;
     }
 
+    // =========================
+    // 🆕 WINSCREEN LOGICA
     public void PlayerReachedEnd()
     {
         Debug.Log("Je hebt de eindkamer bereikt! Je hebt gewonnen!");
+
+        if (winScreen != null)
+        {
+            // Start coroutine die na 5 seconden de winscreen toont en game pauzeert
+            StartCoroutine(ShowWinScreenDelayed(5f));
+        }
     }
+
+    private IEnumerator ShowWinScreenDelayed(float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay); // gebruik realtime zodat Time.timeScale geen effect heeft
+
+        if (winScreen != null)
+            winScreen.SetActive(true);
+
+        // Pauzeer ALLES behalve UI
+        Time.timeScale = 0f;
+
+        // Muis vrijgeven
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+    // =========================
 
     bool GenerateDungeonRecursive(int targetRooms, int currentIndex)
     {
@@ -210,7 +240,6 @@ public class RoomGenerator : MonoBehaviour
         return false;
     }
 
-    // ✅ NIEUW: lighting toepassen
     void ApplyRoomLighting(RoomInfo info)
     {
         if (info == null || info.RoomLights == null) return;

@@ -19,6 +19,10 @@ public class MonsterSimpleAI : MonoBehaviour
     public float chaseRadius = 10f;
     public float viewHeightOffset = 1.5f;
 
+    // 🔥 NIEUW: geluid bij detectie
+    [Header("Audio")]
+    public AudioSource detectPlayerSound;
+
     [Header("Wall Avoidance")]
     public float wallCheckDistance = 1f;
 
@@ -37,6 +41,9 @@ public class MonsterSimpleAI : MonoBehaviour
     private bool isIdling = false;
     private float idleTimer = 0f;
     private float idleDuration = 0f;
+
+    // 🔥 NIEUW: check of geluid al is afgespeeld bij detectie
+    private bool hasPlayedDetectSound = false;
 
     void Start()
     {
@@ -63,10 +70,20 @@ public class MonsterSimpleAI : MonoBehaviour
             isIdling = false;
             targetPosition = player.position;
             currentSpeed = sprintSpeed;
+
+            // 🔥 Speel detectie geluid één keer
+            if (!hasPlayedDetectSound)
+            {
+                if (detectPlayerSound != null)
+                    detectPlayerSound.Play();
+
+                hasPlayedDetectSound = true;
+            }
         }
         else
         {
             chasing = false;
+            hasPlayedDetectSound = false; // reset zodra speler uit radius is
 
             if (isIdling)
             {
@@ -180,11 +197,9 @@ public class MonsterSimpleAI : MonoBehaviour
         PlayerMovement pm = player.GetComponent<PlayerMovement>();
         if (pm != null)
         {
-            // Crouched → nooit detecteren
             if (pm.isCrouching)
                 return false;
 
-            // Check beweging
             if (pm.controller != null)
             {
                 Vector3 velocity = pm.controller.velocity;
@@ -192,7 +207,6 @@ public class MonsterSimpleAI : MonoBehaviour
 
                 bool isMoving = velocity.magnitude > 0.1f;
 
-                // Niet crouched + stilstaand → niet detecteren
                 if (!isMoving)
                     return false;
             }

@@ -22,12 +22,19 @@ public class MonsterChasePlayer : MonoBehaviour
     [Header("Chase Delay")]
     public float chaseDelay = 2f;
 
+    [Header("Audio")]
+    public AudioSource moveSound;        // 🔥 NIEUW: geluid bij bewegen
+    public float moveSoundInterval = 5f; // 🔥 Afspelen om de 5 seconden
+
     private bool canMove = false;
     private bool isIdle = true;
     private bool hasAttacked = false;
     private float timer = 0f;
 
     private BoxCollider stopCollider;
+
+    // 🔥 NIEUW: timer voor geluid
+    private float moveSoundTimer = 0f;
 
     void Start()
     {
@@ -92,6 +99,17 @@ public class MonsterChasePlayer : MonoBehaviour
             transform.position += dir * moveSpeed * Time.deltaTime;
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 5f * Time.deltaTime);
 
+            // 🔥 NIEUW: speel geluid tijdens bewegen om de 5 seconden
+            if (moveSound != null)
+            {
+                moveSoundTimer += Time.deltaTime;
+                if (moveSoundTimer >= moveSoundInterval)
+                {
+                    moveSound.Play();
+                    moveSoundTimer = 0f;
+                }
+            }
+
             // Check aanval
             if (!hasAttacked)
             {
@@ -101,6 +119,11 @@ public class MonsterChasePlayer : MonoBehaviour
                     AttackPlayer();
                 }
             }
+        }
+        else
+        {
+            // Reset geluid timer wanneer monster stil staat
+            moveSoundTimer = moveSoundInterval;
         }
     }
 

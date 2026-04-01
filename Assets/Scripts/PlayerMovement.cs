@@ -91,6 +91,31 @@ public class PlayerMovement : MonoBehaviour
     private bool sprintingRecentlyStopped = false;
     // =========================
 
+    // =========================
+    // Footstep Sound
+    [Header("Footstep Sound")]
+    public AudioSource footstepSource;
+    public AudioClip footstepClip;
+
+    // Speeds per movement type (seconden tussen voetstappen)
+    public float walkStepInterval = 0.5f;
+    public float sprintStepInterval = 0.2f;
+    public float crouchStepInterval = 0.7f;
+
+    // Volume per movement type
+    [Range(0f, 1f)]
+    public float walkVolume = 1f;
+    [Range(0f, 1f)]
+    public float sprintVolume = 1f;
+    [Range(0f, 1f)]
+    public float crouchVolume = 0.3f;
+
+    // Hoelang het geluid afspeelt
+    public float footstepPlayDuration = 0.5f;
+
+    private float footstepTimer = 0f;
+    // =========================
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -117,6 +142,7 @@ public class PlayerMovement : MonoBehaviour
         HandleMovement();
         HandleSprint();
         UpdateUI();
+        HandleFootsteps(); // 🆕 Voeg deze regel toe
 
         justUncrouched = false;
     }
@@ -312,5 +338,55 @@ public class PlayerMovement : MonoBehaviour
 
         if (startLight != null)
             startLight.intensity = 0.1f;
+    }
+
+    // ========================= FOOTSTEPS =========================
+    void HandleFootsteps()
+    {
+        // ✅ Pas pas geluid af als startObject is geraakt
+        if (!triggeredStart) return;
+        if (!controller.isGrounded) return;
+
+        Vector3 horizontalVelocity = new Vector3(controller.velocity.x, 0, controller.velocity.z);
+        float speed = horizontalVelocity.magnitude;
+
+        if (speed > 0.1f)
+        {
+            float interval = walkStepInterval;
+            float volume = walkVolume;
+
+            if (isSprinting)
+            {
+                interval = sprintStepInterval;
+                volume = sprintVolume;
+            }
+            else if (isCrouching)
+            {
+                interval = crouchStepInterval;
+                volume = crouchVolume;
+            }
+
+            footstepTimer += Time.deltaTime;
+
+            if (footstepTimer >= interval)
+            {
+                footstepTimer = 0f;
+
+                if (footstepSource != null && footstepClip != null)
+                {
+                    footstepSource.Stop();
+                    footstepSource.clip = footstepClip;
+                    footstepSource.volume = volume;
+                    footstepSource.Play();
+                    Invoke(nameof(StopFootstep), footstepPlayDuration);
+                }
+            }
+        }
+    }
+
+    void StopFootstep()
+    {
+        if (footstepSource != null)
+            footstepSource.Stop();
     }
 }

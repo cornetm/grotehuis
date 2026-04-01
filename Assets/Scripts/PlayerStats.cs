@@ -10,10 +10,16 @@ public class PlayerHealth : MonoBehaviour
     [Header("UI Elements")]
     public Slider healthSlider; // sleep hier de slider in de inspector
 
+    [Header("Lose Screen")]
+    public GameObject loseScreen; // sleep hier je lose screen object in de inspector
+
     void Start()
     {
         currentHealth = maxHealth;
         UpdateHealthUI();
+
+        if (loseScreen != null)
+            loseScreen.SetActive(false); // verberg lose screen bij start
     }
 
     public void TakeDamage(int damage)
@@ -46,6 +52,18 @@ public class PlayerHealth : MonoBehaviour
     private void Die()
     {
         Debug.Log("Player is dead!");
-        // Hier kun je toevoegen wat er gebeurt als de speler doodgaat
+
+        // ✅ Activeer het lose screen
+        if (loseScreen != null)
+        {
+            loseScreen.SetActive(true);
+        }
+
+        // ✅ Pauzeer ALLES behalve UI
+        Time.timeScale = 0f;
+
+        // ✅ Muis vrijgeven
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 }

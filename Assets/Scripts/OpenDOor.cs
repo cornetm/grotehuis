@@ -44,6 +44,10 @@ public class OpenDOor : MonoBehaviour
     [Header("Lucifer Light")]
     public Light luciferLight;
 
+    // 🔥 NIEUW: Audio voor deur openen
+    [Header("Door Audio")]
+    public AudioSource openDoorSound;
+
     private Quaternion closedRot;
     private Quaternion openRot;
 
@@ -136,6 +140,7 @@ public class OpenDOor : MonoBehaviour
             {
                 // Open lade
                 isOpen = true;
+                PlayDoorSound();
             }
             else if (luciferState == 2)
             {
@@ -159,6 +164,17 @@ public class OpenDOor : MonoBehaviour
 
         // 🔹 OUDE LOGICA (NIET AANGEPAST)
         if (doorStateType == DoorState.NormalDoor)
+        {
             isOpen = !isOpen;
+            if (isOpen)
+                PlayDoorSound();
+        }
+    }
+
+    // 🔥 NIEUW: speel het geluid
+    private void PlayDoorSound()
+    {
+        if (openDoorSound != null)
+            openDoorSound.Play();
     }
 }

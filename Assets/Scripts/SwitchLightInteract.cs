@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class SwitchLightInteract : MonoBehaviour
 {
@@ -8,6 +8,10 @@ public class SwitchLightInteract : MonoBehaviour
 
     private Quaternion offRotation;
     private Quaternion onRotation;
+
+    // 🔥 NIEUW: Audio voor switch
+    [Header("Switch Audio")]
+    public AudioSource switchSound;
 
     void Start()
     {
@@ -30,6 +34,10 @@ public class SwitchLightInteract : MonoBehaviour
 
         // Draai onmiddellijk
         transform.localRotation = isOn ? onRotation : offRotation;
+
+        // 🔥 Speel geluid bij schakelen
+        if (switchSound != null)
+            switchSound.Play();
     }
 
     bool IsPlayerLookingAtSwitch()

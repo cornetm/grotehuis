@@ -27,6 +27,7 @@ public class PlayerMovement : MonoBehaviour
     public float maxSprint = 5f;
     public float sprintDrain = 1f;
     public float sprintRegen = 1f;
+    public float sprintRegenDelay = 1f; // 1 seconde cooldown voor regen
 
     public Slider sprintSlider1;
     public Slider sprintSlider2;
@@ -83,6 +84,12 @@ public class PlayerMovement : MonoBehaviour
 
     // ✅ Nieuwe static bool zodat meshrenderer weet wanneer te activeren
     public static bool GameStarted = false;
+
+    // =========================
+    // Sprint cooldown variables
+    private float sprintCooldownTimer = 0f;
+    private bool sprintingRecentlyStopped = false;
+    // =========================
 
     void Start()
     {
@@ -222,21 +229,45 @@ public class PlayerMovement : MonoBehaviour
     {
         bool holdingShift = Input.GetKey(KeyCode.LeftShift);
 
+        // Als sprint actief is
         if (holdingShift && currentSprint > 0 && !isCrouching)
         {
             isSprinting = true;
             currentSprint -= sprintDrain * Time.deltaTime;
+            sprintingRecentlyStopped = false; // reset cooldown
         }
         else
         {
             isSprinting = false;
-            currentSprint += sprintRegen * Time.deltaTime;
+
+            if (!sprintingRecentlyStopped)
+            {
+                sprintCooldownTimer = sprintRegenDelay; // start cooldown
+                sprintingRecentlyStopped = true;
+            }
+
+            // cooldown aftellen
+            if (sprintCooldownTimer > 0f)
+            {
+                sprintCooldownTimer -= Time.deltaTime;
+            }
+            else
+            {
+                currentSprint += sprintRegen * Time.deltaTime;
+            }
         }
 
         currentSprint = Mathf.Clamp(currentSprint, 0, maxSprint);
     }
 
-    void UpdateUI() { }
+    void UpdateUI()
+    {
+        if (sprintSlider1 != null)
+            sprintSlider1.value = currentSprint / maxSprint;
+
+        if (sprintSlider2 != null)
+            sprintSlider2.value = currentSprint / maxSprint;
+    }
 
     void OnTriggerEnter(Collider other)
     {
@@ -245,7 +276,6 @@ public class PlayerMovement : MonoBehaviour
         {
             triggeredStart = true;
             isRunnerMode = false;
-            // ❌ geen GameStarted meer hier
         }
 
         // ================= DELETE OBJECT =================
@@ -253,14 +283,11 @@ public class PlayerMovement : MonoBehaviour
         {
             triggeredDelete = true;
 
-            // Eerst deur sluiten
             if (startDoor != null)
                 startDoor.CloseDoor();
 
-            // ✅ meshrenderer activeren
             GameStarted = true;
 
-            // Delay om deur te laten sluiten voordat we alles verwijderen
             float doorCloseDelay = 1.5f;
             Invoke(nameof(DeleteObjectsAndStartRoom), doorCloseDelay);
         }
@@ -268,25 +295,21 @@ public class PlayerMovement : MonoBehaviour
 
     void DeleteObjectsAndStartRoom()
     {
-        // ❌ Objecten verwijderen
         foreach (GameObject obj in objectsToDisable)
         {
             if (obj != null)
                 Destroy(obj);
         }
 
-        // 🟢 Objecten inschakelen
         foreach (GameObject obj in objectsToEnable)
         {
             if (obj != null)
                 obj.SetActive(true);
         }
 
-        // 🚀 Room generator starten
         if (roomGenerator != null)
             roomGenerator.BeginGeneration();
 
-        // 💡 Light aanzetten
         if (startLight != null)
             startLight.intensity = 0.1f;
     }

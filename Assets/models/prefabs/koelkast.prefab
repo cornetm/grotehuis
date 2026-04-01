@@ -401,7 +401,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OpenDOor
   doorStateType: 0
   doorvariant: 0
-  isOpen: 1
+  isOpen: 0
   openAngle: 75
   openDistance: 0.5
   smoothSpeed: 6

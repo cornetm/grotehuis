@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7090827769336614142}
   - component: {fileID: 1973982635092880874}
   m_Layer: 0
-  m_Name: Schilderij
+  m_Name: Schilderij 1
   m_TagString: Interaction
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
